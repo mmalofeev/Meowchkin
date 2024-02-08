@@ -42,24 +42,7 @@ if (NOT raylib_cpp_FOUND)
         GIT_REPOSITORY https://github.com/RobLoach/raylib-cpp.git
         GIT_TAG v5.0.1
     )
-
-    get_property(
-        compile_options
-        DIRECTORY
-        PROPERTY COMPILE_OPTIONS
-    )
-
-    set_property(
-        DIRECTORY
-        APPEND
-        PROPERTY COMPILE_OPTIONS
-    )
-
     FetchContent_MakeAvailable(raylib_cpp) 
-    set_property(
-        DIRECTORY
-        PROPERTY COMPILE_OPTIONS ${compile_options}
-    )
 endif()
 
 add_library(mainmenu-scene SHARED src/scenes/main_menu_scene.cpp src/scenes/scene.cpp)
