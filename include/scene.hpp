@@ -18,16 +18,20 @@ protected:
     // NOLINTBEGIN cppcoreguidelines-non-private-member-variables-in-classes
     raylib::Window *m_window = nullptr;
     SceneManager *m_scene_manager = nullptr;
-    // will be removed
-    bool m_running = true;
+    bool m_running = true;  // will be removed
+
     // NOLINTEND
+
+    virtual void on_window_attach() {
+    }
 
 public:
     explicit Scene() = default;
     virtual void draw() = 0;
 
-    void set_window(raylib::Window *window) noexcept {
+    void attach_window(raylib::Window *window) noexcept {
         m_window = window;
+        on_window_attach();
     }
 
     [[nodiscard]] bool running() const noexcept {

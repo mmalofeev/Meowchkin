@@ -31,7 +31,7 @@ public:
     }
 
     EnumArray(const std::initializer_list<std::pair<Enum, T>> &values) {
-        for (auto &[key, value] : values) {
+        for (const auto &[key, value] : values) {
             m_data.at(static_cast<std::size_t>(key)) = value;
         }
     }
