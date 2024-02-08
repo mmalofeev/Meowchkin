@@ -13,17 +13,45 @@ set(CMAKE_CXX_FLAGS_RELEASE_INIT "-O2")
 include_directories("include/"
         "third_party/")
 
-FILE(GLOB SRCFILES src/*.cpp include/*.h)
+# boost
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)  # Recommended by Boost.DLL's manual
+include_directories(src)
+        
+find_package(Boost 1.71 REQUIRED filesystem)  # Required by Boost.DLL
+include_directories(${Boost_INCLUDE_DIRS})
+link_directories(${Boost_LIBRARY_DIRS})
 
-include(FetchContent)
+# raylib
+find_package(raylib QUIET)
+if (NOT raylib_FOUND)
+    include(FetchContent)
+    FetchContent_Declare(
+        raylib
+        GIT_REPOSITORY https://github.com/raysan5/raylib.git
+        GIT_TAG 5.0
+        GIT_SHALLOW 1
+    )
+    FetchContent_MakeAvailable(raylib)
+endif()
 
-FetchContent_Declare(
-    raylib_external
-    GIT_REPOSITORY https://github.com/raysan5/raylib.git
-)
+# raylib-cpp
+find_package(raylib_cpp QUIET)
+if (NOT raylib_cpp_FOUND)
+    include(FetchContent)
+    FetchContent_Declare(
+        raylib_cpp
+        GIT_REPOSITORY https://github.com/RobLoach/raylib-cpp.git
+        GIT_TAG v5.0.1
+    )
+    FetchContent_MakeAvailable(raylib_cpp) 
+endif()
 
-FetchContent_MakeAvailable(raylib_external)
+add_library(mainmenu-scene SHARED src/scenes/main_menu_scene.cpp src/scenes/scene.cpp)
+target_link_libraries(mainmenu-scene ${Boost_LIBRARIES} ${CMAKE_DL_LIBS} raylib raylib_cpp)
 
+add_library(game-scene SHARED src/scenes/game_view.cpp src/scenes/scene.cpp)
+target_link_libraries(game-scene ${Boost_LIBRARIES} ${CMAKE_DL_LIBS} raylib raylib_cpp)
+
+FILE(GLOB SRCFILES src/main.cpp src/scenes/scene.cpp)
 add_executable(meowchkin ${SRCFILES})
-
-target_link_libraries(meowchkin raylib)
+target_link_libraries(meowchkin ${Boost_LIBRARIES} ${CMAKE_DL_LIBS} raylib raylib_cpp)
