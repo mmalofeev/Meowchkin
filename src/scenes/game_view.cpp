@@ -1,4 +1,9 @@
+#include <algorithm>
+#include <boost/dll/alias.hpp>
 #include <cassert>
+#include <memory>
+#include <optional>
+#include <string_view>
 #include "enum_array.hpp"
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
@@ -6,20 +11,108 @@
 #include "scene.hpp"
 
 namespace meow {
+
+struct GuiCard {
+    static constexpr const int width = 230;
+    static constexpr const int height = 350;
+    raylib::Vector2 target_position;
+    raylib::Rectangle border;
+    raylib::Texture texture;
+};
+
+class GuiHand {
+private:
+    int m_card_count = 0;
+    int m_card_gap = 50;
+    bool m_card_held = false;
+    std::vector<GuiCard> m_cards;
+
+public:
+    explicit GuiHand() : m_cards(m_card_count) {
+    }
+
+    void recalculate_card_rects(int window_width, int window_height, int new_card_number = -1) {
+        const int offset =
+            (window_width - m_card_count * (GuiCard::width + m_card_gap) + m_card_gap) / 2;
+        for (std::size_t i = 0; i < m_cards.size(); i++) {
+            if (new_card_number == i) {
+                m_cards[i].border.x = window_width;
+            }
+            m_cards[i].target_position.x = offset + i * (GuiCard::width + m_card_gap);
+            m_cards[i].border.y = m_cards[i].target_position.y =
+                window_height - (GuiCard::height + 30);
+            m_cards[i].border.width = GuiCard::width;
+            m_cards[i].border.height = GuiCard::height;
+        }
+    }
+
+    void add_card(int window_width, int window_height, std::string_view path_to_texture = "") {
+        m_card_count++;
+        raylib::Image img;
+        try {
+            img.Load(path_to_texture.data());
+            img.Resize(GuiCard::width, GuiCard::height);
+        } catch (const raylib::RaylibException &) {
+            img = raylib::Image::Color(GuiCard::width, GuiCard::height, raylib::Color::Green());
+        }
+        m_cards.emplace_back(0, 0, raylib::Texture(img));
+        m_card_gap -= 10;
+        recalculate_card_rects(window_width, window_height, m_card_count - 1);
+    }
+
+    void remove_card(int window_width, int window_height) {
+        m_card_count--;
+        m_cards.pop_back();
+        m_card_gap += 10;
+        recalculate_card_rects(window_width, window_height);
+    }
+
+    void draw_cards(float frame_time) {
+        bool holding_card = false;
+        for (std::size_t i = 0; i < m_cards.size(); i++) {
+            bool card_is_red = false;
+            auto &card = m_cards[i];
+            if (!holding_card && card.border.CheckCollision(raylib::Mouse::GetPosition())) {
+                if (raylib::Mouse::IsButtonDown(MOUSE_BUTTON_LEFT)) {
+                    holding_card = card_is_red = true;
+                    card.border.SetPosition(card.border.GetPosition() + raylib::Mouse::GetDelta());
+                }
+            }
+            if (!holding_card) {
+                card.border.SetPosition(
+                    Vector2Lerp(card.border.GetPosition(), card.target_position, frame_time * 4)
+                );
+            }
+            if (card_is_red) {
+                card.border.DrawRounded(0.1f, 4, raylib::Color(0xFF0000FF));
+            } else {
+                card.border.DrawRounded(0.1f, 4, raylib::Color(0x004400FF));
+            }
+            card.texture.Draw(card.border.GetPosition(), raylib::Color(255, 255, 255, 200));
+            card.border.DrawRoundedLines(0.1f, 4, 3, raylib::Color::White());
+        }
+    }
+};
+
 class GameView : public Scene {
 private:
-    static constexpr int card_width = 200;
-    static constexpr int card_height = 330;
-    static constexpr int card_offset = 50;
-    static constexpr int button_width = 300;
-    static constexpr int button_height = 40;
-    static constexpr const char *background_image_path = "bin/imgs/kitik.png";
+    static constexpr const int button_width = 300;
+    static constexpr const int button_height = 40;
+    static constexpr const int board_width = 1200;
+    static constexpr const int board_height = 700;
+    static constexpr const char *background_image_path = "";
+    static constexpr const char *board_image_path = "";
     const raylib::Color background_color = raylib::Color(77, 120, 204, 255);
+    int m_cards_amount = 0;
 
+    GuiHand m_player_hand;
+    /* background */
     raylib::Texture m_background;
     raylib::Texture m_blur;
-    std::vector<raylib::Rectangle> m_cards;
-    std::vector<raylib::Vector2> source_positions;
+    /* board */
+    raylib::Rectangle m_board_rect;
+    raylib::Texture m_board_texture;
+    /* pause menu */
     enum class PauseButton { CONTINUE, BACK_TO_LOBBY, QUIT, COUNT };  // TODO: settings
     EnumArray<PauseButton, const char *> m_pause_button_labels = {
         {PauseButton::CONTINUE, "Continue"},
@@ -29,22 +122,24 @@ private:
     EnumArray<PauseButton, raylib::Rectangle> m_pause_button_rects;
     EnumArray<PauseButton, bool> m_pause_button_pressed;
     bool should_draw_pause = false;
+    /* misc */
+    /* ... */
 
 public:
-    explicit GameView() : m_cards(5), source_positions(m_cards.size()) {
-        GuiLoadStyle("bin/gui_styles/meow.rgs");
-        GuiSetFont(LoadFont("bin/fonts/mono.ttf"));
-        GuiSetStyle(DEFAULT, TEXT_SIZE, 16);
-    }
-
     void on_window_attach() override {
-        const int offset = (m_window->GetWidth() - m_cards.size() * (card_width + card_offset)) / 2;
-        for (int i = 0; i < m_cards.size(); i++) {
-            source_positions[i].x = m_cards[i].x = offset + i * (card_width + card_offset);
-            source_positions[i].y = m_cards[i].y = m_window->GetHeight() - (card_height + 80);
-            m_cards[i].width = card_width;
-            m_cards[i].height = card_height;
+        m_player_hand.recalculate_card_rects(m_window->GetWidth(), m_window->GetHeight());
+        const raylib::Vector2 board_offset = {(m_window->GetWidth() - board_width) / 2.0f, 10.0f};
+        m_board_rect = raylib::Rectangle(board_offset.x, board_offset.y, board_width, board_height);
+        raylib::Image board_image;
+        try {
+            board_image.Load(board_image_path);
+            board_image.Resize(m_board_rect.GetSize().x, m_board_rect.GetSize().y);
+        } catch (const raylib::RaylibException &) {
+            board_image = raylib::Image::Color(
+                m_board_rect.GetSize().x, m_board_rect.GetSize().y, raylib::Color::RayWhite()
+            );
         }
+        m_board_texture.Load(board_image);
 
         raylib::Image background_image;
         try {
@@ -55,40 +150,46 @@ public:
                 raylib::Image::Color(m_window->GetWidth(), m_window->GetHeight(), background_color);
         }
         m_background.Load(background_image);
+
         for (std::size_t i = 0; i < m_pause_button_rects.size(); i++) {
             m_pause_button_rects[i].width = button_width;
             m_pause_button_rects[i].height = button_height;
             m_pause_button_rects[i].x = m_window->GetWidth() / 2 - button_width / 2;
             m_pause_button_rects[i].y = m_window->GetHeight() / 2 + i * button_height;
         }
+
         raylib::Image blur = raylib::Image::GradientRadial(
             m_window->GetWidth(), m_window->GetHeight(), 0, raylib::Color::Blank(), {0, 0, 0, 100}
         );
         m_blur.Load(blur);
     }
 
+    explicit GameView() {
+        GuiLoadStyle("bin/gui_styles/meow.rgs");
+        GuiSetFont(LoadFont("bin/fonts/mono.ttf"));
+        GuiSetStyle(DEFAULT, TEXT_SIZE, 16);
+    }
+
     void draw() override {
         assert(m_window);
         m_background.Draw();
-        bool card_held = false;
-        for (std::size_t i = 0; i < m_cards.size(); i++) {
-            auto &card = m_cards[i];
-            if (!should_draw_pause && !card_held &&
-                card.CheckCollision(raylib::Mouse::GetPosition())) {
-                if (raylib::Mouse::IsButtonDown(MOUSE_BUTTON_LEFT)) {
-                    card_held = true;
-                    card.SetPosition(card.GetPosition() + raylib::Mouse::GetDelta());
-                }
-                card.DrawRounded(0.3f, 4, raylib::Color::Red());
-            } else {
-                card.DrawRounded(0.3f, 4, raylib::Color::Green());
-            }
-            if (!card_held) {
-                card.SetPosition(Vector2Lerp(
-                    card.GetPosition(), source_positions[i], m_window->GetFrameTime() * 4
-                ));
-            }
+        // m_board_rect.Draw(RAYWHITE);
+        m_board_texture.Draw(m_board_rect, m_board_rect.GetPosition());
+        m_player_hand.draw_cards(m_window->GetFrameTime());
+
+        if (GuiButton({0, 0, 40, 40}, "+") && m_cards_amount < 10) {
+            m_player_hand.add_card(
+                m_window->GetWidth(), m_window->GetHeight(), "bin/imgs/cards/original/door.png"
+            );
+            m_cards_amount++;
         }
+        if (GuiButton({40, 0, 40, 40}, "-") && m_cards_amount > 0) {
+            m_player_hand.remove_card(m_window->GetWidth(), m_window->GetHeight());
+            m_cards_amount--;
+        }
+        GuiStatusBar(
+            {0, (float)m_window->GetHeight() - 30, 100, 30}, TextFormat("%d", m_cards_amount)
+        );
 
         if (!should_draw_pause) {
             should_draw_pause = IsKeyPressed(KEY_ESCAPE);
@@ -98,6 +199,7 @@ public:
         }
     }
 
+private:
     void draw_pause_menu() {
         for (std::size_t i = 0; i < m_pause_button_labels.size(); i++) {
             m_pause_button_pressed[i] =

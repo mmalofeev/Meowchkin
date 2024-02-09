@@ -17,7 +17,7 @@ private:
 public:
     explicit plugin() = default;
 
-    explicit plugin(const std::string_view &name, const std::string_view &import_item) {
+    explicit plugin(std::string_view name, std::string_view import_item) {
         reload(name, import_item);
     }
 
