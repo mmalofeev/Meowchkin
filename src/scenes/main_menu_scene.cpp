@@ -1,7 +1,5 @@
-#include <cassert>
 #include <iostream>
 #include "enum_array.hpp"
-#include "raylib.h"
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 #include "raylib-cpp.hpp"
@@ -30,13 +28,15 @@ public:
             m_button_rects[i].x = 0;
             m_button_rects[i].y = h;
         }
-        GuiLoadStyle("bin/gui_styles/meow.rgs");
+        // GuiLoadStyle("bin/gui_styles/meow.rgs");
         GuiSetFont(LoadFont("bin/fonts/mono.ttf"));
         GuiSetStyle(DEFAULT, TEXT_SIZE, 16);
     }
 
     void on_window_attach() override {
-        assert(m_window);
+        if (m_window == nullptr) {
+            throw std::runtime_error("invalid attached window ptr!");
+        }
         raylib::Image background_image;
         try {
             background_image.Load("bin/imgs/kitiky.png");
@@ -54,11 +54,13 @@ public:
     }
 
     void draw() override {
-        assert(m_window);
+        if (m_window == nullptr) {
+            throw std::runtime_error("invalid attached window ptr!");
+        }
         m_background.Draw();
         const int w = m_window->GetWidth();
         const int h = m_window->GetHeight();
-        GuiStatusBar(Rectangle{w - 300.0f, h - 40.0f, 300, 40}, "status bar.....");
+        static std::string status_bar_text = "status bar....";
         for (std::size_t i = 0; i < m_button_rects.size(); i++) {
             m_button_pressed[i] =
                 static_cast<bool>(GuiButton(m_button_rects[i], m_button_labels[i]));
@@ -67,9 +69,26 @@ public:
             m_running = false;
         }
         if (m_button_pressed[Button::CREATE_LOBBY]) {
-            assert(m_scene_manager);
+            if (m_scene_manager == nullptr) {
+                throw std::runtime_error("invalid attached scene manager!");
+            }
             m_scene_manager->switch_scene(SceneType::GAME);
         }
+        static bool draw_textbox = false;
+        if (draw_textbox) {
+            GuiSetStyle(
+                GuiControl::TEXTBOX, GuiControlProperty::TEXT_ALIGNMENT,
+                GuiTextAlignment::TEXT_ALIGN_LEFT
+            );
+            static char a[100] = "Text Box";
+            if (GuiTextBox(m_button_rects[Button::CONNECT], a, 100, draw_textbox)) {
+                status_bar_text = a;
+                draw_textbox = false;
+            }
+        } else if (m_button_pressed[Button::CONNECT]) {
+            draw_textbox = true;
+        }
+        GuiStatusBar(Rectangle{w - 300.0f, h - 40.0f, 300, 40}, status_bar_text.c_str());
     }
 };
 

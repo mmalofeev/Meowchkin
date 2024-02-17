@@ -3,13 +3,13 @@
 #ifndef NONCOPYABLE_HPP_
 #define NONCOPYABLE_HPP_
 
-struct noncopyable {
-    noncopyable() = default;
-    virtual ~noncopyable() = default;
-    noncopyable(const noncopyable &) = delete;
-    noncopyable(noncopyable &&) = delete;
-    noncopyable &operator=(const noncopyable &) = delete;
-    noncopyable &operator=(noncopyable &&) = delete;
+struct Noncopyable {
+    Noncopyable() = default;
+    virtual ~Noncopyable() = default;
+    Noncopyable(const Noncopyable &) = delete;
+    Noncopyable(Noncopyable &&) = delete;
+    Noncopyable &operator=(const Noncopyable &) = delete;
+    Noncopyable &operator=(Noncopyable &&) = delete;
 };
 
 #endif  // NONCOPYABLE_HPP_

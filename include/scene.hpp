@@ -3,6 +3,7 @@
 
 #include <boost/config.hpp>
 #include <memory>
+#include <iostream>
 #include "enum_array.hpp"
 #include "noncopyable.hpp"
 #include "raylib-cpp.hpp"
@@ -11,7 +12,7 @@ namespace meow {
 
 class SceneManager;
 
-class BOOST_SYMBOL_VISIBLE Scene : noncopyable {
+class BOOST_SYMBOL_VISIBLE Scene : Noncopyable {
     friend class SceneManager;
 
 protected:
@@ -41,7 +42,7 @@ public:
 
 enum class SceneType { MAIN_MENU, GAME, COUNT };
 
-class SceneManager : noncopyable {
+class SceneManager : Noncopyable {
 private:
     EnumArray<SceneType, Scene *> m_scenes;
     SceneType m_active_scene = SceneType::MAIN_MENU;

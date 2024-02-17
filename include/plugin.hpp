@@ -9,34 +9,36 @@
 namespace meow {
 
 template <class T>
-class plugin : noncopyable {
+class Plugin : Noncopyable {
 private:
     T *m_ptr = nullptr;
     boost::dll::shared_library m_library;
 
 public:
-    explicit plugin() = default;
+    explicit Plugin() = default;
 
-    explicit plugin(std::string_view name, std::string_view import_item) {
-        reload(name, import_item);
+    explicit Plugin(std::string_view name, std::string_view import_item) {
+        reload(name.data(), import_item.data());
     }
 
-    explicit plugin(const std::pair<const char *, const char *> &name_item) {
-        reload(name_item.first, name_item.second);
+    explicit Plugin(const std::pair<std::string_view, std::string_view> &name_item) {
+        reload(name_item.first.data(), name_item.second.data());
     }
 
-    void reload(const std::pair<const char *, const char *> &name_item) {
-        reload(name_item.first, name_item.second);
+    void reload(const std::pair<std::string_view, std::string_view> &name_item) {
+        reload(name_item.first.data(), name_item.second.data());
     }
 
     void reload(std::string_view name, std::string_view import_item) {
-        // std::cerr << "reloading " << name << '\n';
         m_library.unload();
-        m_library.load(name, boost::dll::load_mode::append_decorations);
+        m_ptr = nullptr;
+        m_library.load(name.data(), boost::dll::load_mode::append_decorations);
         if (!m_library.has(import_item.data())) {
-            throw std::runtime_error("library doesn't have import items.");
+            throw std::runtime_error("DSo doesn't have import items!");
         }
-        assert(m_ptr = &m_library.get<T>(import_item.data()));
+        if (m_ptr = &m_library.get<T>(import_item.data()); !m_ptr) {
+            throw std::runtime_error("invalid object in DSo!");
+        }
     }
 
     [[nodiscard]] T *operator->() noexcept {

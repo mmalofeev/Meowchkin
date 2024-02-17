@@ -1,5 +1,5 @@
 /*
- * motivation: std::map and std::unordered map are huge for storage of
+ * motivation: std::map and std::unordered_map are huge for storage of
  *             simple enum-value pairs(often there are just a few enumeration
  *             `keys`). and enums are just like numbers, but in vector/array
  *             still need static cast, actually too much of them
@@ -75,8 +75,8 @@ public:
         return *this;
     }
 
-    EnumArray(const EnumArray &) = default;
-    EnumArray &operator=(const EnumArray &) = default;
+    EnumArray(const EnumArray &) noexcept = default;
+    EnumArray &operator=(const EnumArray &) noexcept = default;
     ~EnumArray() = default;
 
 private:
