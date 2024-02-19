@@ -3,7 +3,9 @@
 
 #include <list>
 #include <optional>
+#include "enum_array.hpp"
 #include "gui_card.hpp"
+#include "raygui.h"
 #include "raylib-cpp.hpp"
 
 namespace meow {
@@ -54,7 +56,7 @@ public:
         if (m_selected == m_cards.end()) {
             throw std::runtime_error("invalid pop selected from hand!");
         }
-        auto ret = std::move(*m_selected);  // card texture is move-only
+        GuiCard ret = std::move(*m_selected);  // card texture is move-only
         m_cards.erase(m_selected);
         m_selected = m_cards.end();
         m_card_gap += 10;
@@ -66,8 +68,10 @@ public:
     void add_card(std::string_view path_to_texture = "");
     void add_card(GuiCard &&card);
     void remove_card();
+    void remove_card(std::list<GuiCard>::iterator card_iter);
     void draw_cards(float frame_time, bool is_pause);
 };
+
 }  // namespace meow
 
 #endif  // GUI_CARD_SPAN_HPP_
