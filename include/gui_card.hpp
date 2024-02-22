@@ -10,6 +10,8 @@ struct GuiCard {
     raylib::Rectangle border;
     raylib::Vector2 target_position;
     raylib::Texture texture;
+    // raylib::Rectangle full_sized_border;
+    // raylib::Texture full_sized_texture;
 };
 }  // namespace meow
 

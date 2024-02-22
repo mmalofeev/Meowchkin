@@ -24,17 +24,25 @@ void GuiCardSpan::recalculate_card_rects() noexcept {
 }
 
 void GuiCardSpan::add_card(std::string_view path_to_texture) {
+    // raylib::Image orig_img;
     raylib::Image img;
     try {
         img.Load(path_to_texture.data());
-        img.Mipmaps();
+        // orig_img = img;
         img.Resize(GuiCard::width, GuiCard::height);
+        img.Mipmaps();
     } catch (const raylib::RaylibException &) {
         img = raylib::Image::Color(GuiCard::width, GuiCard::height, raylib::Color::Green());
     }
     raylib::Texture tex = raylib::Texture(img);
     tex.GenMipmaps();
-    add_card({raylib::Rectangle(m_window->GetWidth(), 0, 0, 0), raylib::Vector2(0), std::move(tex)}
+    // raylib::Rectangle orig_rec = raylib::Rectangle(
+    //     (m_window->GetWidth() - orig_img.width) / 2, (m_window->GetHeight() - orig_img.height) / 2,
+    //     orig_img.width, orig_img.height
+    // );
+    add_card(
+        {raylib::Rectangle(m_window->GetWidth(), 0, 0, 0), raylib::Vector2(0), std::move(tex),
+         /*orig_rec, raylib::Texture(orig_img)*/}
     );
 }
 
@@ -109,6 +117,7 @@ void GuiCardSpan::draw_cards(float frame_time, bool is_pause) {
             Vector2Lerp(card_it->border.GetPosition(), card_it->target_position, frame_time * 4)
         );
     }
+
     if (m_selected != m_cards.end()) {
         m_selected->border.SetPosition(
             m_selected->border.GetPosition() + raylib::Mouse::GetDelta()

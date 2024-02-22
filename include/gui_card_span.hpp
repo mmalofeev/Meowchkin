@@ -21,11 +21,75 @@ private:
     raylib::Rectangle m_span_borders;
     raylib::Vector2 m_offset;
 
+<<<<<<< HEAD
     struct RemovedGuiCard {
         GuiCard card;
         double fading_coeff;
     };
 
+=======
+    class DropDownMenu {
+    private:
+        static constexpr int button_width = 150.0f;
+        static constexpr int button_height = 33.0f;
+        GuiCardSpan &m_parental_span;
+        std::list<GuiCard> &m_cards = m_parental_span.m_cards;
+        std::list<GuiCard>::iterator m_card_iter = m_cards.end();
+        enum class Button { INSPECT, REMOVE, COUNT };
+        const EnumArray<Button, Rectangle> m_origin_button_rects{
+            {Button::INSPECT, {0, 0, button_width, button_height}},
+            {Button::REMOVE, {0, button_height, button_width, button_height}},
+        };
+        EnumArray<Button, Rectangle> m_button_rects = m_origin_button_rects;
+        const EnumArray<Button, const char *> m_button_labels{
+            {Button::INSPECT, "Inspect"},
+            {Button::REMOVE, "Remove"}};
+        raylib::Shader m_transparency_shader = raylib::Shader(0, "bin/shaders/card_ddm.fs");
+
+    public:
+        explicit DropDownMenu(GuiCardSpan &parental_span) : m_parental_span(parental_span) {
+        }
+
+        [[nodiscard]] bool mouse_in_menu() const noexcept {
+            auto arr = m_button_rects.data();
+            raylib::Rectangle rec = {
+                arr[0].x, arr[0].y, arr.back().x + button_width, arr.back().y + button_height};
+            return rec.CheckCollision(raylib::Mouse::GetPosition());
+        }
+
+        void draw() {
+            if (m_card_iter == m_cards.end()) {
+                return;
+            }
+
+            EnumArray<Button, bool> pressed;
+            GuiSetAlpha(0.85f);
+            for (std::size_t i = 0; i < m_button_rects.size(); i++) {
+                pressed[i] = GuiButton(m_button_rects[i], m_button_labels[i]);
+            }
+            GuiSetAlpha(1.0f);
+            if (pressed[Button::REMOVE]) {
+                m_parental_span.remove_card(m_card_iter);
+                m_card_iter = m_cards.end();
+            }
+        }
+
+        void detach_card() noexcept {
+            m_card_iter = m_cards.end();
+        }
+
+        void attach_card(std::list<GuiCard>::iterator card_iter, const raylib::Vector2 &mouse) {
+            m_card_iter = card_iter;
+            for (std::size_t i = 0; i < m_origin_button_rects.size(); i++) {
+                m_button_rects[i].x = m_origin_button_rects[i].x + mouse.x;
+                m_button_rects[i].y = m_origin_button_rects[i].y + mouse.y;
+            }
+        }
+    };
+
+    DropDownMenu m_dropdown_menu = DropDownMenu(*this);
+
+>>>>>>> 6c7a2fc (drop down menu)
 public:
     explicit GuiCardSpan() noexcept = default;
 
