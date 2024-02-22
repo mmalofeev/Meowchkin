@@ -1,6 +1,7 @@
 #include <iostream>
 #include "enum_array.hpp"
 #define RAYGUI_IMPLEMENTATION
+#include "paths_to_binaries.hpp"
 #include "raygui.h"
 #include "raylib-cpp.hpp"
 #include "scene.hpp"
@@ -28,8 +29,8 @@ public:
             m_button_rects[i].x = 0;
             m_button_rects[i].y = h;
         }
-        // GuiLoadStyle("bin/gui_styles/meow.rgs");
-        GuiSetFont(LoadFont("bin/fonts/mono.ttf"));
+        GuiLoadStyle(gui_style_path);
+        GuiSetFont(LoadFont(gui_font_path));
         GuiSetStyle(DEFAULT, TEXT_SIZE, 16);
     }
 
@@ -39,7 +40,7 @@ public:
         }
         raylib::Image background_image;
         try {
-            background_image.Load("bin/imgs/kitiky.png");
+            background_image.Load(mainmenu_background_image_path);
         } catch (const raylib::RaylibException &) {
             background_image = raylib::Image::Color(
                 m_window->GetWidth(), m_window->GetHeight(), raylib::Color::SkyBlue()

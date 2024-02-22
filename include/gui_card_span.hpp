@@ -8,14 +8,21 @@
 
 namespace meow {
 class GuiCardSpan {
+    struct RemovedGuiCard;
+
 private:
     int m_card_gap = 50;
     raylib::Window *m_window = nullptr;
     std::list<GuiCard> m_cards;
-    std::list<std::pair<GuiCard, double>> m_removed_cards;
+    std::list<RemovedGuiCard> m_removed_cards;
     std::list<GuiCard>::iterator m_selected = m_cards.end();
     raylib::Rectangle m_span_borders;
     raylib::Vector2 m_offset;
+
+    struct RemovedGuiCard {
+        GuiCard card;
+        double fading_coeff;
+    };
 
 public:
     explicit GuiCardSpan() noexcept = default;

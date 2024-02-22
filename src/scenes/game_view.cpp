@@ -4,6 +4,7 @@
 #include "gui_board.hpp"
 #include "gui_card_span.hpp"
 #define RAYGUI_IMPLEMENTATION
+#include "paths_to_binaries.hpp"
 #include "raygui.h"
 #include "raylib-cpp.hpp"
 #include "scene.hpp"
@@ -14,8 +15,6 @@ class GameView : public Scene {
 private:
     static constexpr int button_width = 300;
     static constexpr int button_height = 40;
-    static constexpr const char *background_image_path = "";
-    static constexpr const char *board_image_path = "bin/imgs/kitik3.png";
     const raylib::Color background_color = raylib::Color(77, 120, 204, 255);
 
     GuiBoard m_board;
@@ -49,10 +48,10 @@ protected:
 
 public:
     explicit GameView() {
-        GuiLoadStyle("bin/gui_styles/meow.rgs");
-        GuiSetFont(LoadFont("bin/fonts/mono.ttf"));
+        GuiLoadStyle(gui_style_path);
+        GuiSetFont(LoadFont(gui_font_path));
         GuiSetStyle(DEFAULT, TEXT_SIZE, 16);
-        for (const auto &entry : std::filesystem::directory_iterator("bin/imgs/cards/original/")) {
+        for (const auto &entry : std::filesystem::directory_iterator(cards_directory_path)) {
             if (entry.path().extension() == ".png") {
                 m_card_image_paths.emplace_back(entry);
             }
@@ -68,10 +67,12 @@ public:
         m_board.draw(m_window->GetFrameTime(), m_should_draw_pause);
         m_player_hand.draw_cards(m_window->GetFrameTime(), m_should_draw_pause);
 
-        if (!m_should_draw_pause && GuiButton({0, 0, 40, 40}, "-") && m_player_hand.card_count() > 0) {
+        if (!m_should_draw_pause && GuiButton({0, 0, 40, 40}, "-") &&
+            m_player_hand.card_count() > 0) {
             m_player_hand.remove_card();
         }
-        if (!m_should_draw_pause && GuiButton({40, 0, 40, 40}, "+") && m_player_hand.card_count() < 10) {
+        if (!m_should_draw_pause && GuiButton({40, 0, 40, 40}, "+") &&
+            m_player_hand.card_count() < 10) {
             std::random_device rd;
             std::mt19937 gen(rd());
             std::uniform_int_distribution<> distrib(0, m_card_image_paths.size() - 1);
@@ -92,7 +93,7 @@ private:
     void setup_background() {
         raylib::Image background_image;
         try {
-            background_image.Load(background_image_path);
+            background_image.Load(gameview_background_image_path);
             background_image.Resize(m_window->GetWidth(), m_window->GetHeight());
         } catch (const raylib::RaylibException &) {
             background_image =

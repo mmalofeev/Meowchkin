@@ -3,7 +3,6 @@
 
 #include <boost/config.hpp>
 #include <memory>
-#include <iostream>
 #include "enum_array.hpp"
 #include "noncopyable.hpp"
 #include "raylib-cpp.hpp"

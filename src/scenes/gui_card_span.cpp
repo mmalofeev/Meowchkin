@@ -46,11 +46,11 @@ void GuiCardSpan::add_card(GuiCard &&card) {
 
 void GuiCardSpan::remove_card() {
     m_removed_cards.push_back({std::move(m_cards.back()), 0});
-    m_removed_cards.back().first.target_position =
+    m_removed_cards.back().card.target_position =
         raylib::Vector2(-GuiCard::width, -GuiCard::height);
-    m_removed_cards.back().second = (m_removed_cards.back().first.border.GetPosition() -
-                                     m_removed_cards.back().first.target_position)
-                                        .LengthSqr();
+    m_removed_cards.back().fading_coeff = (m_removed_cards.back().card.border.GetPosition() -
+                                           m_removed_cards.back().card.target_position)
+                                              .LengthSqr();
     m_cards.pop_back();
     m_card_gap += 10;
     recalculate_card_rects();
@@ -106,14 +106,14 @@ void GuiCardSpan::draw_cards(float frame_time, bool is_pause) {
         auto &card = *card_it;
         raylib::Color c(
             255, 255, 255,
-            (unsigned char)((card.first.border.GetPosition() - card.first.target_position)
+            (unsigned char)((card.card.border.GetPosition() - card.card.target_position)
                                 .LengthSqr() /
-                            card.second * 255)
+                            card.fading_coeff * 255)
         );
-        card.first.border.SetPosition(
-            Vector2Lerp(card.first.border.GetPosition(), card.first.target_position, frame_time * 4)
+        card.card.border.SetPosition(
+            Vector2Lerp(card.card.border.GetPosition(), card.card.target_position, frame_time * 4)
         );
-        card.first.texture.Draw(card.first.border.GetPosition(), c);
+        card.card.texture.Draw(card.card.border.GetPosition(), c);
         if (c.a == 0) {
             card_it = m_removed_cards.erase(card_it);
         }
