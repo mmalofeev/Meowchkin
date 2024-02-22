@@ -48,7 +48,7 @@ private:
         }
 
         [[nodiscard]] bool mouse_in_menu() const noexcept {
-            auto arr = m_button_rects.data();
+            const auto &arr = m_button_rects.data();
             raylib::Rectangle rec = {
                 arr[0].x, arr[0].y, arr.back().x + button_width, arr.back().y + button_height};
             return rec.CheckCollision(raylib::Mouse::GetPosition());
@@ -69,6 +69,10 @@ private:
                 m_parental_span.remove_card(m_card_iter);
                 m_card_iter = m_cards.end();
             }
+            // if (pressed[Button::INSPECT]) {
+            //     std::swap(m_card_iter->full_sized_texture, m_card_iter->texture);
+            //     std::swap(m_card_iter->full_sized_border, m_card_iter->border);
+            // }
         }
 
         void detach_card() noexcept {
