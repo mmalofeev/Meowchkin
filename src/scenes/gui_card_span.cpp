@@ -3,7 +3,7 @@
 namespace meow {
 
 void GuiCardSpan::recalculate_card_rects() noexcept {
-    // some magic for proper aligment
+    // some magic for proper alignment
     // scaling ratio
     const double ratio = std::sqrt(m_span_borders.height / m_window->GetHeight());
     m_card_gap *= ratio * ratio;
