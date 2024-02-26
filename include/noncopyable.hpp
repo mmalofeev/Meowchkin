@@ -22,8 +22,8 @@ struct MoveOnly {
 struct CopyOnly {
     CopyOnly() = default;
     virtual ~CopyOnly() = default;
-    CopyOnly(const Noncopyable &) = delete;
-    CopyOnly &operator=(const Noncopyable &) = delete;
+    CopyOnly(CopyOnly &&) = delete;
+    CopyOnly &operator=(CopyOnly &&) = delete;
 };
 
 #endif  // NONCOPYABLE_HPP_
