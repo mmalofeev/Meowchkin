@@ -12,4 +12,18 @@ struct Noncopyable {
     Noncopyable &operator=(Noncopyable &&) = delete;
 };
 
+struct MoveOnly {
+    MoveOnly() = default;
+    virtual ~MoveOnly() = default;
+    MoveOnly(const MoveOnly &) = delete;
+    MoveOnly &operator=(const MoveOnly &) = delete;
+};
+
+struct CopyOnly {
+    CopyOnly() = default;
+    virtual ~CopyOnly() = default;
+    CopyOnly(const Noncopyable &) = delete;
+    CopyOnly &operator=(const Noncopyable &) = delete;
+};
+
 #endif  // NONCOPYABLE_HPP_
