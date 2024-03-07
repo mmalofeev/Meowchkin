@@ -14,14 +14,16 @@ using boost::asio::ip::tcp;
 
 namespace meow {
 class Server {
+  int count_of_handled_clients{0};
   boost::asio::io_context io_context;
   tcp::acceptor acceptor;
   mutable std::mutex mtx;
   std::queue<Action> received_actions;
   std::vector<std::thread> client_threads;
-  std::map<std::size_t, std::shared_ptr<tcp::iostream>> client_streams;
-  std::vector<std::pair<std::size_t, std::string>> client_ids_and_names;
+  std::map<std::size_t, tcp::iostream*> client_streams;
+  std::vector<PlayerInfo> players_info;
   void handle_client(tcp::socket&);
+  void send_players_info(std::size_t);
 
  public:
   Server();
