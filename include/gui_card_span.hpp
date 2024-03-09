@@ -21,13 +21,11 @@ private:
     raylib::Rectangle m_span_borders;
     raylib::Vector2 m_offset;
 
-<<<<<<< HEAD
     struct RemovedGuiCard {
         GuiCard card;
         double fading_coeff;
     };
 
-=======
     class DropDownMenu {
     private:
         static constexpr int button_width = 150.0f;
@@ -89,7 +87,6 @@ private:
 
     DropDownMenu m_dropdown_menu = DropDownMenu(*this);
 
->>>>>>> 6c7a2fc (drop down menu)
 public:
     explicit GuiCardSpan() noexcept = default;
 

@@ -37,8 +37,8 @@ void GuiCardSpan::add_card(std::string_view path_to_texture) {
     raylib::Texture tex = raylib::Texture(img);
     tex.GenMipmaps();
     // raylib::Rectangle orig_rec = raylib::Rectangle(
-    //     (m_window->GetWidth() - orig_img.width) / 2, (m_window->GetHeight() - orig_img.height) / 2,
-    //     orig_img.width, orig_img.height
+    //     (m_window->GetWidth() - orig_img.width) / 2, (m_window->GetHeight() - orig_img.height) /
+    //     2, orig_img.width, orig_img.height
     // );
     add_card(
         {raylib::Rectangle(m_window->GetWidth(), 0, 0, 0), raylib::Vector2(0), std::move(tex),
@@ -54,11 +54,11 @@ void GuiCardSpan::add_card(GuiCard &&card) {
 
 void GuiCardSpan::remove_card(std::list<GuiCard>::iterator card_iter) {
     m_removed_cards.push_back({std::move(*card_iter), 0});
-    m_removed_cards.back().first.target_position =
+    m_removed_cards.back().card.target_position =
         raylib::Vector2(-GuiCard::width, -GuiCard::height);
-    m_removed_cards.back().second = (m_removed_cards.back().first.border.GetPosition() -
-                                     m_removed_cards.back().first.target_position)
-                                        .LengthSqr();
+    m_removed_cards.back().fading_coeff = (m_removed_cards.back().card.border.GetPosition() -
+                                           m_removed_cards.back().card.target_position)
+                                              .LengthSqr();
     m_cards.erase(card_iter);
     m_card_gap += 10;
     recalculate_card_rects();
