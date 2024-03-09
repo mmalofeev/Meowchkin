@@ -7,11 +7,11 @@
 #include "gui_card.hpp"
 #include "raygui.h"
 #include "raylib-cpp.hpp"
+#include <gui_window_dependable.hpp>
 
 namespace meow {
-class GuiCardSpan {
-    struct RemovedGuiCard;
 
+class GuiCardSpan : WindowDependable<GuiCardSpan> {
 private:
     int m_card_gap = 50;
     raylib::Window *m_window = nullptr;
@@ -133,7 +133,7 @@ public:
     void add_card(GuiCard &&card);
     void remove_card();
     void remove_card(std::list<GuiCard>::iterator card_iter);
-    void draw_cards(float frame_time, bool is_pause);
+    void draw_cards(float frame_time, bool can_be_dragged);
 };
 
 }  // namespace meow

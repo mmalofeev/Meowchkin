@@ -3,9 +3,10 @@
 #include "plugin.hpp"
 #include "raylib-cpp.hpp"
 #include "scene.hpp"
+#include "gui_dice_roller.hpp"
 
 int main() {
-    SetTraceLogLevel(LOG_ERROR);
+    SetTraceLogLevel(LOG_WARNING);
     static constexpr int window_width = 1920;
     static constexpr int window_height = 1080;
     static constexpr const char *window_title = "meow";
@@ -32,9 +33,9 @@ int main() {
     scene_manager->set_scene(meow::SceneType::GAME, game_view.get());
 
     while (!window.ShouldClose() && scene_manager->active_scene()->running()) {
-        // applicatoin response
+        // application response
         {
-            if (IsKeyPressed(KEY_R)) {
+            if (IsKeyDown(KEY_LEFT_SHIFT) && IsKeyPressed(KEY_R)) {
                 main_menu.reload(plugin_names[meow::SceneType::MAIN_MENU]);
                 main_menu->attach_window(&window);
                 scene_manager->set_scene(meow::SceneType::MAIN_MENU, main_menu.get());
@@ -46,7 +47,10 @@ int main() {
         // application render
         window.BeginDrawing();
         {
-            window.ClearBackground(RAYWHITE);
+            // if (IsKeyPressed(KEY_R)) {
+            //     meow::play_dice_animation(&window, -4, 8);
+            // }
+            window.ClearBackground(raylib::Color::RayWhite());
             scene_manager->draw_scene();
         }
         window.EndDrawing();
