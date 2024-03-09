@@ -6,7 +6,7 @@
 
 using boost::asio::ip::tcp;
 
-namespace meow {
+namespace meow::network {
 Client::Client() : io_context() {}
 
 Client::~Client() = default;
@@ -14,7 +14,7 @@ Client::~Client() = default;
 void Client::accept_info_about_players() {
   std::size_t count_of_players;
   connection >> count_of_players;
-  connection >> my_id;
+  connection >> id_of_client;
 
   for (std::size_t i = 0; i < count_of_players; ++i) {
     std::string input_msg;
@@ -35,7 +35,7 @@ void Client::connect(const std::string& host) {
   boost::asio::connect(s, tcp::resolver(io_context).resolve(ip, port));
   connection = tcp::iostream(std::move(s));
 
-  connection << my_name + "\n" << std::flush;
+  connection << name_of_client + "\n" << std::flush;
   accept_info_about_players();
 
   std::thread([this]() mutable {
@@ -48,7 +48,7 @@ void Client::connect(const std::string& host) {
       auto json = json::parse(received_msg);
       std::unique_lock l(mtx);
       if (json.contains("validness")) {
-        received_feedbacks.emplace(json);
+        received_action_results.emplace(json);
       } else {
         received_actions.emplace(json);
       }
@@ -58,13 +58,19 @@ void Client::connect(const std::string& host) {
 
 void Client::disconnect() { connection.close(); }
 
-[[nodiscard]] std::size_t Client::get_my_id() const { return my_id; }
+[[nodiscard]] std::size_t Client::get_id_of_client() const {
+  return id_of_client;
+}
 
-[[nodiscard]] std::string Client::get_my_name() const { return my_name; }
+[[nodiscard]] std::string Client::get_name_of_client() const {
+  return name_of_client;
+}
 
-void Client::set_my_name(const std::string& name) { my_name = name; }
+void Client::set_name_of_client(const std::string& name) {
+  name_of_client = name;
+}
 
-[[nodiscard]] std::vector<PlayerInfo> Client::get_players_info() const {
+[[nodiscard]] const std::vector<PlayerInfo>& Client::get_players_info() const {
   return players_info;
 }
 
@@ -86,13 +92,13 @@ std::optional<Action> Client::receive_action() {
   return action;
 }
 
-std::optional<Feedback> Client::receive_feedback() {
+std::optional<ActionResult> Client::receive_action_result() {
   std::unique_lock l(mtx);
-  if (received_feedbacks.empty()) {
+  if (received_action_results.empty()) {
     return std::nullopt;
   }
-  Feedback feedback = received_feedbacks.front();
-  received_feedbacks.pop();
-  return feedback;
+  ActionResult action_result = received_action_results.front();
+  received_action_results.pop();
+  return action_result;
 }
-}  // namespace meow
+}  // namespace meow::network

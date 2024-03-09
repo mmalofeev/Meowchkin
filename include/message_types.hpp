@@ -1,11 +1,11 @@
-#ifndef MEOWCHKIN_SENDED_CLASSES_HPP
-#define MEOWCHKIN_SENDED_CLASSES_HPP
+#ifndef MEOWCHKIN_MESSAGE_TYPES_HPP
+#define MEOWCHKIN_MESSAGE_TYPES_HPP
 
 #include <nlohmann/json.hpp>
 
 using json = ::nlohmann::json;
 
-namespace meow {
+namespace meow::network {
 class Action {
  public:
   int card_id{};
@@ -33,15 +33,15 @@ class Action {
   }
 };
 
-class Feedback {
+class ActionResult {
  public:
   int card_id{};
   bool validness{};
 
-  explicit Feedback(int card_id, bool validness)
+  explicit ActionResult(int card_id, bool validness)
       : card_id(card_id), validness(validness) {}
 
-  explicit Feedback(const json& json) { parse_from_json(json); }
+  explicit ActionResult(const json& json) { parse_from_json(json); }
 
   void parse_from_json(const json& json) {
     json.at("card_id").get_to(card_id);
@@ -72,6 +72,6 @@ class PlayerInfo {
     return json{{"id", id}, {"name", name}};
   }
 };
-}  // namespace meow
+}  // namespace meow::network
 
-#endif  // MEOWCHKIN_SENDED_CLASSES_HPP
+#endif  // MEOWCHKIN_MESSAGE_TYPES_HPP

@@ -6,7 +6,7 @@
 
 using boost::asio::ip::tcp;
 
-namespace meow {
+namespace meow::network {
 Server::Server()
     : io_context(), acceptor(io_context, tcp::endpoint(tcp::v4(), 0)) {}
 
@@ -35,8 +35,8 @@ void Server::handle_client(tcp::socket& socket) {
   mtx.lock();
   players_info.emplace_back(client_id, client_name);
   client_streams[client_id] = &client;
-  ++count_of_handled_clients;
   mtx.unlock();
+  got_players_info.notify_one();
 
   while (client) {
     std::string received_msg;
@@ -58,7 +58,7 @@ void Server::send_players_info(std::size_t client_id) {
     msg += "\n";
     messages.push_back(msg);
   }
-  auto stream = client_streams[client_id];
+  auto* stream = client_streams[client_id];
   *stream << messages.size() << '\n' << std::flush;
   *stream << client_id << '\n' << std::flush;
   for (std::string& msg : messages) {
@@ -66,8 +66,8 @@ void Server::send_players_info(std::size_t client_id) {
   }
 }
 
-void Server::start_listening(int num_of_clients) {
-  int count_of_accepted_clients = 0;
+void Server::start_listening(std::size_t num_of_clients) {
+  std::size_t count_of_accepted_clients = 0;
   while (count_of_accepted_clients < num_of_clients) {
     tcp::socket socket = acceptor.accept();
     std::thread new_thread = std::thread(
@@ -76,9 +76,10 @@ void Server::start_listening(int num_of_clients) {
     client_threads.push_back(std::move(new_thread));
     ++count_of_accepted_clients;
   }
-  while (count_of_handled_clients < num_of_clients) {
-    sleep(1);
-  }
+  std::unique_lock l(mtx);
+  got_players_info.wait(l, [this, &num_of_clients]() {
+    return players_info.size() == num_of_clients;
+  });
   for (std::size_t id : get_clients_id()) {
     send_players_info(id);
   }
@@ -89,7 +90,7 @@ void Server::send_action(std::size_t client_id, const Action& action) {
   std::string message_to_send;
   message_to_send = json.dump();
   message_to_send += "\n";
-  auto stream = client_streams[client_id];
+  auto* stream = client_streams[client_id];
   *stream << message_to_send << std::flush;
 }
 
@@ -103,8 +104,9 @@ std::optional<Action> Server::receive_action() {
   return action;
 }
 
-void Server::send_feedback(std::size_t client_id, const Feedback& feedback) {
-  auto json = feedback.to_json();
+void Server::send_action_result(std::size_t client_id,
+                                const ActionResult& action_result) {
+  auto json = action_result.to_json();
   std::string message_to_send;
   message_to_send = json.dump();
   message_to_send += '\n';
@@ -117,4 +119,4 @@ void Server::send_action_to_all_clients(const Action& action) {
     send_action(id, action);
   }
 }
-}  // namespace meow
+}  // namespace meow::network
