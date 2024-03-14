@@ -23,11 +23,16 @@ class Server {
     std::condition_variable got_players_info;
     void handle_client(tcp::socket &);
     void send_players_info(std::size_t);
+    Server();
+    ~Server();
 
 public:
-    Server();
+    Server(const Server &) = delete;
+    const Server &operator=(const Server &) = delete;
+    Server(Server &&) = delete;
+    Server &operator=(Server &&) = delete;
 
-    ~Server();
+    static Server &get_instance();
 
     // return port number for connection, get_id now is unresolved problem
     [[nodiscard]] std::string get_port() const;
@@ -54,10 +59,5 @@ public:
 
     void send_chat_message_to_all_clients(const ChatMessage &chat_message);
 };
-
-Server& server_instance() {
-    static Server instance;
-    return instance;
-}
 }  // namespace meow::network
 #endif  // MEOWCHKIN_SERVER_HPP

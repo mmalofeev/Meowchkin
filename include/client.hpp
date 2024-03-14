@@ -19,11 +19,16 @@ class Client {
     std::queue<ActionResult> received_action_results;
     std::queue<ChatMessage> received_chat_messages;
     void accept_info_about_players();
+    Client();
+    ~Client();
 
 public:
-    Client();
+    Client(const Client &) = delete;
+    const Client &operator=(const Client &) = delete;
+    Client(Client &&) = delete;
+    Client &operator=(Client &&) = delete;
 
-    ~Client();
+    static Client &get_instance();
 
     // connect to host with input id and port in format: <id:port>
     void connect(const std::string &host);
@@ -54,9 +59,5 @@ public:
     std::optional<ActionResult> receive_action_result();
 };
 
-Client& client_instance() {
-    static Client instance;
-    return instance;
-}
 }  // namespace meow::network
 #endif  // MEOWCHKIN_CLIENT_HPP

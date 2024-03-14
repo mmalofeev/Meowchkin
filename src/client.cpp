@@ -11,13 +11,18 @@ Client::Client() : io_context() {
 
 Client::~Client() = default;
 
+Client &Client::get_instance() {
+    static Client instance;
+    return instance;
+}
+
 void Client::accept_info_about_players() {
     std::size_t count_of_players;
     connection >> count_of_players;
     connection >> id_of_client;
 
+    std::string input_msg;
     for (std::size_t i = 0; i < count_of_players; ++i) {
-        std::string input_msg;
         while (input_msg.empty()) {
             std::getline(connection, input_msg);
         }

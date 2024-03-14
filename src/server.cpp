@@ -11,6 +11,11 @@ Server::Server() : io_context(), acceptor(io_context, tcp::endpoint(tcp::v4(), 0
 
 Server::~Server() = default;
 
+Server &Server::get_instance() {
+    static Server instance;
+    return instance;
+}
+
 [[nodiscard]] std::string Server::get_port() const {
     return std::to_string(acceptor.local_endpoint().port());
 }
