@@ -83,8 +83,8 @@ public:
         }
 
         m_background.Draw();
-        m_board.draw(m_window->GetFrameTime(), m_should_draw_pause);
-        m_player_hand.draw_cards(m_window->GetFrameTime(), m_should_draw_pause);
+        m_board.draw(m_window->GetFrameTime(), !m_should_draw_pause);
+        m_player_hand.draw_cards(m_window->GetFrameTime(), !m_should_draw_pause);
 
         if (!m_should_draw_pause && GuiButton({0, 0, 40, 40}, "-") &&
             m_player_hand.card_count() > 0) {
@@ -102,9 +102,6 @@ public:
 
         m_usernames_box.draw();
         if (m_show_chat) {
-            // if (IsKeyPressed(KEY_ENTER)) {
-            //     m_text_chat.receive({"beeeeebra", "sender bebrik"});
-            // }
             if (m_text_chat.get_border().CheckCollision(raylib::Mouse::GetPosition()) &&
                 raylib::Mouse::IsButtonDown(MOUSE_BUTTON_LEFT)) {
                 m_text_chat.position += raylib::Mouse::GetDelta();
