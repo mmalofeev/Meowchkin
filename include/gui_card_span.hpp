@@ -28,8 +28,8 @@ private:
 
     class DropDownMenu {
     private:
-        static constexpr int button_width = 150.0f;
-        static constexpr int button_height = 33.0f;
+        static constexpr int button_width = 150;
+        static constexpr int button_height = 33;
         GuiCardSpan &m_parental_span;
         std::list<GuiCard> &m_cards = m_parental_span.m_cards;
         std::list<GuiCard>::iterator m_card_iter = m_cards.end();
@@ -42,7 +42,6 @@ private:
         const EnumArray<Button, const char *> m_button_labels{
             {Button::INSPECT, "Inspect"},
             {Button::REMOVE, "Remove"}};
-        raylib::Shader m_transparency_shader = raylib::Shader(0, "bin/shaders/card_ddm.fs");
 
     public:
         explicit DropDownMenu(GuiCardSpan &parental_span) : m_parental_span(parental_span) {

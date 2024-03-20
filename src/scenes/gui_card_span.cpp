@@ -24,11 +24,9 @@ void GuiCardSpan::recalculate_card_rects() noexcept {
 }
 
 void GuiCardSpan::add_card(std::string_view path_to_texture) {
-    // raylib::Image orig_img;
     raylib::Image img;
     try {
         img.Load(path_to_texture.data());
-        // orig_img = img;
         img.Resize(GuiCard::width, GuiCard::height);
         img.Mipmaps();
     } catch (const raylib::RaylibException &) {
@@ -36,14 +34,11 @@ void GuiCardSpan::add_card(std::string_view path_to_texture) {
     }
     raylib::Texture tex = raylib::Texture(img);
     tex.GenMipmaps();
-    // raylib::Rectangle orig_rec = raylib::Rectangle(
-    //     (m_window->GetWidth() - orig_img.width) / 2, (m_window->GetHeight() - orig_img.height) /
-    //     2, orig_img.width, orig_img.height
-    // );
-    add_card(
-        {raylib::Rectangle(m_window->GetWidth(), 0, 0, 0), raylib::Vector2(0), std::move(tex),
-         /*orig_rec, raylib::Texture(orig_img)*/}
-    );
+    add_card({
+        raylib::Rectangle(m_window->GetWidth(), 0, 0, 0),
+        raylib::Vector2(0),
+        std::move(tex),
+    });
 }
 
 void GuiCardSpan::add_card(GuiCard &&card) {
