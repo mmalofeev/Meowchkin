@@ -4,6 +4,7 @@
 #include "raylib-cpp.hpp"
 
 namespace meow {
+
 struct GuiCard {
     static constexpr const int width = 230;
     static constexpr const int height = 350;
@@ -11,6 +12,7 @@ struct GuiCard {
     raylib::Vector2 target_position;
     raylib::Texture texture;
 };
+
 }  // namespace meow
 
 #endif  // GUI_CARD_HPP_

@@ -27,20 +27,35 @@ void GuiCardSpan::add_card(std::string_view path_to_texture) {
     raylib::Image img;
     try {
         img.Load(path_to_texture.data());
-        img.Mipmaps();
         img.Resize(GuiCard::width, GuiCard::height);
+        img.Mipmaps();
     } catch (const raylib::RaylibException &) {
         img = raylib::Image::Color(GuiCard::width, GuiCard::height, raylib::Color::Green());
     }
     raylib::Texture tex = raylib::Texture(img);
     tex.GenMipmaps();
-    add_card({raylib::Rectangle(m_window->GetWidth(), 0, 0, 0), raylib::Vector2(0), std::move(tex)}
-    );
+    add_card({
+        raylib::Rectangle(m_window->GetWidth(), 0, 0, 0),
+        raylib::Vector2(0),
+        std::move(tex),
+    });
 }
 
 void GuiCardSpan::add_card(GuiCard &&card) {
     m_cards.push_back(std::move(card));
     m_card_gap -= 10;
+    recalculate_card_rects();
+}
+
+void GuiCardSpan::remove_card(std::list<GuiCard>::iterator card_iter) {
+    m_removed_cards.push_back({std::move(*card_iter), 0});
+    m_removed_cards.back().card.target_position =
+        raylib::Vector2(-GuiCard::width, -GuiCard::height);
+    m_removed_cards.back().fading_coeff = (m_removed_cards.back().card.border.GetPosition() -
+                                           m_removed_cards.back().card.target_position)
+                                              .LengthSqr();
+    m_cards.erase(card_iter);
+    m_card_gap += 10;
     recalculate_card_rects();
 }
 
@@ -57,16 +72,23 @@ void GuiCardSpan::remove_card() {
 }
 
 void GuiCardSpan::draw_cards(float frame_time, bool is_pause) {
-    m_span_borders.DrawLines(raylib::Color::Red(), 3);
-    if (is_pause ||
-        m_selected != m_cards.end() && raylib::Mouse::IsButtonReleased(MOUSE_BUTTON_LEFT)) {
+    if (is_pause || raylib::Mouse::IsButtonReleased(MOUSE_BUTTON_LEFT)) {
         m_selected = m_cards.end();
+    }
+    if (is_pause || ((raylib::Mouse::IsButtonPressed(MOUSE_BUTTON_LEFT) ||
+                      raylib::Mouse::IsButtonPressed(MOUSE_BUTTON_RIGHT)) &&
+                     !m_dropdown_menu.mouse_in_menu())) {
+        m_dropdown_menu.detach_card();
     }
     for (auto card_it = m_cards.begin(); card_it != m_cards.end(); card_it++) {
         if (card_it->border.CheckCollision(raylib::Mouse::GetPosition())) {
             if (!is_pause && m_selected == m_cards.end() &&
-                raylib::Mouse::IsButtonDown(MOUSE_BUTTON_LEFT)) {
+                raylib::Mouse::IsButtonDown(MOUSE_BUTTON_LEFT) &&
+                !m_dropdown_menu.mouse_in_menu()) {
                 m_selected = card_it;
+                m_dropdown_menu.detach_card();
+            } else if (!is_pause && m_selected == m_cards.end() && raylib::Mouse::IsButtonPressed(MOUSE_RIGHT_BUTTON)) {
+                m_dropdown_menu.attach_card(card_it, raylib::Mouse::GetPosition());
             }
         }
     }
@@ -90,16 +112,18 @@ void GuiCardSpan::draw_cards(float frame_time, bool is_pause) {
             Vector2Lerp(card_it->border.GetPosition(), card_it->target_position, frame_time * 4)
         );
     }
+
     if (m_selected != m_cards.end()) {
         m_selected->border.SetPosition(
             m_selected->border.GetPosition() + raylib::Mouse::GetDelta()
         );
-        m_selected->border.SetSize(m_selected->border.GetSize() * 5.0 / 4);
+        const double selected_scale = 5.0 / 4;
+        m_selected->border.SetSize(m_selected->border.GetSize() * selected_scale);
         m_selected->border.y -= m_selected->border.height * 1.0 / 5;
-        m_selected->texture.Draw(m_selected->border.GetPosition(), 0, 5.0 / 4 * ratio);
+        m_selected->texture.Draw(m_selected->border.GetPosition(), 0, selected_scale * ratio);
         m_selected->border.DrawRoundedLines(0.1f, 4, 3, raylib::Color::Red());
         m_selected->border.y += m_selected->border.height * 1.0 / 5;
-        m_selected->border.SetSize(m_selected->border.GetSize() * 4.0 / 5);
+        m_selected->border.SetSize(m_selected->border.GetSize() / selected_scale);
     }
 
     for (auto card_it = m_removed_cards.begin(); card_it != m_removed_cards.end(); card_it++) {
@@ -118,6 +142,7 @@ void GuiCardSpan::draw_cards(float frame_time, bool is_pause) {
             card_it = m_removed_cards.erase(card_it);
         }
     }
+    m_dropdown_menu.draw();
 }
 
 }  // namespace meow
