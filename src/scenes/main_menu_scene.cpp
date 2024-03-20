@@ -103,7 +103,7 @@ public:
             draw_textbox = true;
         }
 
-        float t = GetTime();
+        const float t = m_window->GetTime();
         m_loading_wheel_shader.SetValue(
             m_loading_wheel_shader.GetLocation("iTime"), &t, SHADER_UNIFORM_FLOAT
         );
