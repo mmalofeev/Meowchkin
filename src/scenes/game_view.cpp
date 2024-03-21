@@ -1,8 +1,11 @@
+#include <bitset>
 #include <filesystem>
 #include <random>
 #include "enum_array.hpp"
 #include "gui_board.hpp"
 #include "gui_card_span.hpp"
+#include "gui_text_chat.hpp"
+#include "gui_usernames_box.hpp"
 #define RAYGUI_IMPLEMENTATION
 #include "paths_to_binaries.hpp"
 #include "raygui.h"
@@ -19,6 +22,8 @@ private:
 
     GuiBoard m_board;
     GuiCardSpan m_player_hand;
+    GuiUsernamesBox m_usernames_box;
+    GuiTextChat m_text_chat;
 
     /* background */
     raylib::Texture m_background;
@@ -35,8 +40,14 @@ private:
     EnumArray<PauseButton, bool> m_pause_button_pressed;
     bool m_should_draw_pause = false;
 
+    /* draggable items */
+    static constexpr std::size_t draggable_items_count = 3;
+    std::bitset<draggable_items_count> m_being_dragged;
+
     /* misc */
     std::vector<std::filesystem::path> m_card_image_paths;
+    bool m_show_chat = false;
+    bool m_something_dragged = false;
 
 protected:
     void on_window_attach() override {
@@ -44,6 +55,11 @@ protected:
         setup_pause_menu();
         setup_hand();
         m_board.setup(m_window, &m_player_hand);
+        m_usernames_box.set_window(m_window);
+        for (int i = 1; i <= 4; i++) {
+            m_usernames_box.add_username(std::string("bebrik #") + std::to_string(i));
+        }
+        m_text_chat.set_window(m_window);
     }
 
 public:
@@ -59,13 +75,16 @@ public:
     }
 
     void draw() override {
-        if (!m_window) {
+        if (m_window == nullptr) {
             throw std::runtime_error("invalid attached window!");
         }
-        m_background.Draw();
+        if (IsKeyDown(KEY_LEFT_SHIFT) && IsKeyPressed(KEY_ENTER)) {
+            m_show_chat = !m_show_chat;
+        }
 
-        m_board.draw(m_window->GetFrameTime(), m_should_draw_pause);
-        m_player_hand.draw_cards(m_window->GetFrameTime(), m_should_draw_pause);
+        m_background.Draw();
+        m_board.draw(m_window->GetFrameTime(), !m_should_draw_pause);
+        m_player_hand.draw_cards(m_window->GetFrameTime(), !m_should_draw_pause);
 
         if (!m_should_draw_pause && GuiButton({0, 0, 40, 40}, "-") &&
             m_player_hand.card_count() > 0) {
@@ -81,6 +100,14 @@ public:
         }
         GuiStatusBar({0, (float)m_window->GetHeight() - 30, 100, 30}, "status bar....");
 
+        m_usernames_box.draw();
+        if (m_show_chat) {
+            if (m_text_chat.get_border().CheckCollision(raylib::Mouse::GetPosition()) &&
+                raylib::Mouse::IsButtonDown(MOUSE_BUTTON_LEFT)) {
+                m_text_chat.position += raylib::Mouse::GetDelta();
+            }
+            m_text_chat.draw();
+        }
         if (!m_should_draw_pause) {
             m_should_draw_pause = IsKeyPressed(KEY_ESCAPE);
         } else if (m_should_draw_pause) {

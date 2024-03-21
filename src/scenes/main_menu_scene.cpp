@@ -1,3 +1,4 @@
+#include <cstring>
 #include <iostream>
 #include "enum_array.hpp"
 #define RAYGUI_IMPLEMENTATION
@@ -20,9 +21,12 @@ private:
     EnumArray<Button, Rectangle> m_button_rects;
     EnumArray<Button, bool> m_button_pressed;
     raylib::Texture m_background;
+    raylib::Texture m_loading_wheel_texture;
+    raylib::Shader m_loading_wheel_shader;
+    bool m_connecting = false;
 
 public:
-    explicit MainMenu() {
+    explicit MainMenu() : m_loading_wheel_shader("", "bin/shaders/loading_wheel.fs") {
         for (std::size_t i = 0, h = 0; i < m_button_rects.size(); i++, h += button_height) {
             m_button_rects[i].height = button_height;
             m_button_rects[i].width = button_width;
@@ -38,6 +42,7 @@ public:
         if (m_window == nullptr) {
             throw std::runtime_error("invalid attached window ptr!");
         }
+
         raylib::Image background_image;
         try {
             background_image.Load(mainmenu_background_image_path);
@@ -47,7 +52,13 @@ public:
             );
         }
         background_image.Resize(m_window->GetWidth(), m_window->GetHeight());
+
         m_background = raylib::Texture(background_image);
+        raylib::Image img = raylib::Image::Color(
+            m_window->GetWidth(), m_window->GetHeight(), raylib::Color::Blank()
+        );
+        m_loading_wheel_texture.Load(img);
+
         for (std::size_t i = 0; i < m_button_rects.size(); i++) {
             m_button_rects[i].x = m_window->GetWidth() / 2 - button_width / 2;
             m_button_rects[i].y = m_window->GetHeight() / 2 + i * button_height;
@@ -55,9 +66,11 @@ public:
     }
 
     void draw() override {
+        static char a[100] = "Text Box";
         if (m_window == nullptr) {
             throw std::runtime_error("invalid attached window ptr!");
         }
+        m_connecting = IsKeyDown(KEY_L);
         m_background.Draw();
         const int w = m_window->GetWidth();
         const int h = m_window->GetHeight();
@@ -81,13 +94,28 @@ public:
                 GuiControl::TEXTBOX, GuiControlProperty::TEXT_ALIGNMENT,
                 GuiTextAlignment::TEXT_ALIGN_LEFT
             );
-            static char a[100] = "Text Box";
             if (GuiTextBox(m_button_rects[Button::CONNECT], a, 100, draw_textbox)) {
                 status_bar_text = a;
+                a[0] = 0;
                 draw_textbox = false;
             }
         } else if (m_button_pressed[Button::CONNECT]) {
             draw_textbox = true;
+        }
+
+        const float t = m_window->GetTime();
+        m_loading_wheel_shader.SetValue(
+            m_loading_wheel_shader.GetLocation("iTime"), &t, SHADER_UNIFORM_FLOAT
+        );
+        if (m_connecting) {
+            m_loading_wheel_shader.BeginMode();
+            m_loading_wheel_texture.Draw();
+            m_loading_wheel_shader.EndMode();
+            status_bar_text = "connecting!!!";
+        } else if (std::strlen(a) > 0) {
+            status_bar_text = a;
+        } else {
+            status_bar_text = "status bar...";
         }
         GuiStatusBar(Rectangle{w - 300.0f, h - 40.0f, 300, 40}, status_bar_text.c_str());
     }

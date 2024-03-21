@@ -3,12 +3,17 @@
 namespace meow {
 
 void GuiBoard::setup(raylib::Window *window, GuiCardSpan *hand) {
+    if (window == nullptr || hand == nullptr) {
+        throw std::invalid_argument("invalid pointer setted in gui board!");
+    }
     m_player_hand = hand;
     m_window = window;
     const raylib::Vector2 offset = {(m_window->GetWidth() - width) / 2.0f, 10.0f};
     m_rect = raylib::Rectangle(offset.x, offset.y, width, height);
+    const float rect_side = 10;
     m_drop_card_rect = raylib::Rectangle(
-        offset.x + m_rect.width / 2 - 25, offset.y + m_rect.height / 2 - 25, 50, 50
+        offset.x + (m_rect.width - rect_side) / 2, offset.y + (m_rect.height - rect_side) / 2,
+        rect_side, rect_side
     );
     raylib::Image image;
     try {

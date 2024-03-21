@@ -1,6 +1,7 @@
 #ifndef GUI_CARD_SPAN_HPP_
 #define GUI_CARD_SPAN_HPP_
 
+#include <gui_window_dependable.hpp>
 #include <list>
 #include <optional>
 #include "enum_array.hpp"
@@ -9,10 +10,14 @@
 #include "raylib-cpp.hpp"
 
 namespace meow {
-class GuiCardSpan {
-    struct RemovedGuiCard;
 
+class GuiCardSpan : WindowDependable<GuiCardSpan> {
 private:
+    struct RemovedGuiCard {
+        GuiCard card;
+        double fading_coeff;
+    };
+
     int m_card_gap = 50;
     raylib::Window *m_window = nullptr;
     std::list<GuiCard> m_cards;
@@ -20,11 +25,6 @@ private:
     std::list<GuiCard>::iterator m_selected = m_cards.end();
     raylib::Rectangle m_span_borders;
     raylib::Vector2 m_offset;
-
-    struct RemovedGuiCard {
-        GuiCard card;
-        double fading_coeff;
-    };
 
     class DropDownMenu {
     private:
@@ -133,7 +133,7 @@ public:
     void add_card(GuiCard &&card);
     void remove_card();
     void remove_card(std::list<GuiCard>::iterator card_iter);
-    void draw_cards(float frame_time, bool is_pause);
+    void draw_cards(float frame_time, bool can_be_dragged);
 };
 
 }  // namespace meow
