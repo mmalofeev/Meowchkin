@@ -1,16 +1,24 @@
+#include <fstream>
+#include <iostream>
 #include <memory>
+#include <stdexcept>
+#include <string>
+#include "client.hpp"
 #include "enum_array.hpp"
 #include "gui_dice_roller.hpp"
 #include "plugin.hpp"
 #include "raylib-cpp.hpp"
 #include "scene.hpp"
+#include "server.hpp"
 
 namespace meow {
 
-class Application {
-public:
-    enum Type { CLIENT, SERVER };
+namespace network {
+constexpr const char *port_file = "port.txt";
+constexpr std::size_t players_count = 2;
+}  // namespace network
 
+class Application {
 private:
     static constexpr int window_width = 1920;
     static constexpr int window_height = 1080;
@@ -26,9 +34,10 @@ private:
     meow::Plugin<meow::Scene> m_main_menu;
     meow::Plugin<meow::Scene> m_game_view;
     std::unique_ptr<meow::SceneManager> m_scene_manager;
+    network::Client &m_client = network::Client::get_instance();
 
 public:
-    explicit Application([[maybe_unused]] Type t)
+    explicit Application()
         : m_window(
               window_width,
               window_height,
@@ -46,12 +55,45 @@ public:
 
         SetExitKey(0);
         m_window.SetTargetFPS(60);
+
+        const std::string client_name = "bebrik" + std::to_string(meow::random_integer(1, 1'000));
+        m_client.set_name_of_client(client_name);
+        std::cout << "your name is " << client_name << '\n';
+
+        std::ifstream f(network::port_file);
+        std::string port_number;
+        f >> port_number;
+        f.close();
+        m_client.connect(std::string("localhost:") + port_number);
+
+        std::cout << "lobby:\n";
+        for (const auto &inf : m_client.get_players_info()) {
+            std::cout << '\t' << inf.name << '\n';
+        }
     }
 
+    // as client
     void run() {
         while (!m_window.ShouldClose() && m_scene_manager->active_scene()->running()) {
             response();
             render();
+        }
+    }
+
+    static void run_server() {
+        auto &server = meow::network::Server::get_instance();
+
+        // running on single machine for now, so no hand typing port number
+        // for clients hehehehhehehehehe
+        std::ofstream f(network::port_file);
+        f << server.get_port();
+        f.close();
+
+        server.start_listening(network::players_count);
+        for (std::optional<meow::network::Action> action;; action = server.receive_action()) {
+            if (action) {
+                server.send_action_to_all_clients(*action);
+            }
         }
     }
 
@@ -77,8 +119,28 @@ private:
 
 }  // namespace meow
 
-int main() {
-    SetTraceLogLevel(LOG_WARNING);
-    auto app = std::make_unique<meow::Application>(meow::Application::CLIENT);
-    app->run();
+int main(int argc, char **argv) {
+    // for now, parsing argv and deducing server/client `application type`.
+    // in future, will run server in separate thread once player created
+    // lobby in main menu
+
+    try {
+        if (argc < 2) {
+            throw std::runtime_error("not enough args. can't deduce application type:(");
+        }
+
+        if (std::string(argv[1]) == "host") {
+            meow::Application::run_server();
+        } else if (std::string(argv[1]) == "client") {
+            SetTraceLogLevel(LOG_WARNING);
+            auto app = std::make_unique<meow::Application>();
+            app->run();
+        } else {
+            throw std::runtime_error("can't deduce application type:(");
+        };
+
+    } catch (const std::exception &e) {
+        std::cerr << e.what() << '\n';
+        return 1;
+    }
 }
