@@ -1,0 +1,22 @@
+{
+    "cards": [
+      {
+        "type": "SPELL",
+        "image": "",
+        "openable": true,
+        "storable": false,
+        "is_one_time": false,
+        "verification": [
+          "IS_DESK",
+          "RETURN"
+        ],
+        "action": [
+          "STACK_POP",
+          "STACK_LOAD",
+          "1",
+          "INCREASE_LEVEL_FORCE"
+        ],
+        "unwind": []
+      }
+    ]
+  }

@@ -31,8 +31,7 @@ public:
             {"type", "Action"},
             {"card_id", card_id},
             {"targeted_player", targeted_player},
-            {"sender_player", sender_player}
-        };
+            {"sender_player", sender_player}};
     }
 };
 
@@ -100,8 +99,7 @@ public:
 
     [[nodiscard]] json to_json() const {
         return json{
-            {"type", "ChatMessage"}, {"message", message}, {"sender_player", sender_player}
-        };
+            {"type", "ChatMessage"}, {"message", message}, {"sender_player", sender_player}};
     }
 };
 }  // namespace meow::network

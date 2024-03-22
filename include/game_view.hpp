@@ -18,6 +18,7 @@ namespace meow {
 
 class GameView : public Scene {
     friend class GameSession;
+
 private:
     network::Client &m_client = network::Client::get();
     static constexpr int button_width = 300;
