@@ -47,9 +47,6 @@ public:
           m_main_menu(plugin_names[meow::SceneType::MAIN_MENU]),
           m_game_view(plugin_names[meow::SceneType::GAME]),
           m_scene_manager(std::make_unique<meow::SceneManager>()) {
-        m_main_menu->attach_window(&m_window);
-        m_game_view->attach_window(&m_window);
-
         m_scene_manager->set_scene(meow::SceneType::MAIN_MENU, m_main_menu.get());
         m_scene_manager->set_scene(meow::SceneType::GAME, m_game_view.get());
 
@@ -61,15 +58,21 @@ public:
         std::cout << "your name is " << client_name << '\n';
 
         std::ifstream f(network::port_file);
-        std::string port_number;
-        f >> port_number;
+        std::string port;
+        f >> port;
         f.close();
-        m_client.connect(std::string("localhost:") + port_number);
+        m_client.connect(std::string("localhost:") + port);
 
         std::cout << "lobby:\n";
-        for (const auto &inf : m_client.get_players_info()) {
-            std::cout << '\t' << inf.name << '\n';
+        for (const auto &info : m_client.get_players_info()) {
+            std::cout << '\t' << info.name << '\n';
         }
+
+        m_main_menu->attach_client(&m_client);
+        m_game_view->attach_client(&m_client);
+
+        m_main_menu->attach_window(&m_window);
+        m_game_view->attach_window(&m_window);
     }
 
     // as client
@@ -92,7 +95,7 @@ public:
         server.start_listening(network::players_count);
         for (std::optional<meow::network::Action> action;; action = server.receive_action()) {
             if (action) {
-                server.send_action_to_all_clients(*action);
+                server.send_action(action->targeted_player, *action);
             }
         }
     }

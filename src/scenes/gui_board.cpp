@@ -1,13 +1,16 @@
 #include "gui_board.hpp"
+#include <iostream>
+#include "message_types.hpp"
 
 namespace meow {
 
-void GuiBoard::setup(raylib::Window *window, GuiCardSpan *hand) {
-    if (window == nullptr || hand == nullptr) {
+void GuiBoard::setup(raylib::Window *window, GuiCardSpan *hand, network::Client *client) {
+    if (window == nullptr || hand == nullptr || client == nullptr) {
         throw std::invalid_argument("invalid pointer setted in gui board!");
     }
     m_player_hand = hand;
     m_window = window;
+    m_client = client;
     const raylib::Vector2 offset = {(m_window->GetWidth() - width) / 2.0f, 10.0f};
     m_rect = raylib::Rectangle(offset.x, offset.y, width, height);
     const float rect_side = 10;
@@ -56,9 +59,20 @@ void GuiBoard::draw(float frame_time, bool is_pause) {
     m_drop_card_rect.DrawLines(raylib::Color::Green());
     if (m_player_hand->selected().has_value() &&
         m_drop_card_rect.CheckCollision(m_player_hand->selected().value()->border)) {
-        m_active_cards.add_card(m_player_hand->pop_selected());
+        // m_active_cards.add_card(m_player_hand->pop_selected());
+        add_card(m_player_hand->pop_selected().filename);
     }
     m_active_cards.draw_cards(frame_time, is_pause);
+}
+
+void GuiBoard::add_card(std::string_view card_filename) {
+    // m_active_cards.add_card(card_filename);
+    for (auto &info : m_client->get_players_info()) {
+        std::cout << "send to " << info.name << '\n';
+        m_client->send_action(
+            network::Action(card_filename.data(), info.id, m_client->get_id_of_client())
+        );
+    }
 }
 
 }  // namespace meow

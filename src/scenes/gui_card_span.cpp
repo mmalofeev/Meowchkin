@@ -38,6 +38,7 @@ void GuiCardSpan::add_card(std::string_view path_to_texture) {
         raylib::Rectangle(m_window->GetWidth(), 0, 0, 0),
         raylib::Vector2(0),
         std::move(tex),
+        path_to_texture.data()
     });
 }
 
