@@ -14,6 +14,8 @@ public:
     int card_id{};
     std::size_t target_player{};
     std::size_t sender_player{};
+    // TODO: remove once we will be able to have card by card_id!
+    std::string card_filename;
 
     explicit Action(
         bool is_played,
@@ -31,6 +33,16 @@ public:
           sender_player(sender_player) {
     }
 
+    explicit Action(
+        std::string card_filename_,
+        std::size_t target_player,
+        std::size_t sender_player
+    )
+        : card_filename(std::move(card_filename_)),
+          targeted_player(target_player),
+          sender_player(sender_player) {
+    }
+
     explicit Action(const json &json) {
         parse_from_json(json);
     }
@@ -42,6 +54,7 @@ public:
         json.at("card_id").get_to(card_id);
         json.at("target_player").get_to(target_player);
         json.at("sender_player").get_to(sender_player);
+        json.at("card_filename").get_to(card_filename);
     }
 
     [[nodiscard]] json to_json() const {
@@ -51,9 +64,9 @@ public:
             {"is_drowed", is_drowed},
             {"is_threw", is_threw},
             {"card_id", card_id},
-            {"target_player", target_player},
-            {"sender_player", sender_player}
-        };
+            {"targeted_player", targeted_player},
+            {"sender_player", sender_player},
+            {"card_filename", card_filename}};
     }
 };
 
