@@ -1,9 +1,9 @@
 #include <memory>
 #include "enum_array.hpp"
+#include "gui_dice_roller.hpp"
 #include "plugin.hpp"
 #include "raylib-cpp.hpp"
 #include "scene.hpp"
-#include "gui_dice_roller.hpp"
 
 int main() {
     SetTraceLogLevel(LOG_WARNING);
