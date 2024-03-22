@@ -11,9 +11,21 @@ public:
     int card_id{};
     std::size_t targeted_player{};
     std::size_t sender_player{};
+    // TODO: remove once we will be able to have card by card_id!
+    std::string card_filename;
 
     explicit Action(int card_id, std::size_t targeted_player, std::size_t sender_player)
         : card_id(card_id), targeted_player(targeted_player), sender_player(sender_player) {
+    }
+
+    explicit Action(
+        std::string card_filename_,
+        std::size_t target_player,
+        std::size_t sender_player
+    )
+        : card_filename(std::move(card_filename_)),
+          targeted_player(target_player),
+          sender_player(sender_player) {
     }
 
     explicit Action(const json &json) {
@@ -24,6 +36,7 @@ public:
         json.at("card_id").get_to(card_id);
         json.at("targeted_player").get_to(targeted_player);
         json.at("sender_player").get_to(sender_player);
+        json.at("card_filename").get_to(card_filename);
     }
 
     [[nodiscard]] json to_json() const {
@@ -31,8 +44,8 @@ public:
             {"type", "Action"},
             {"card_id", card_id},
             {"targeted_player", targeted_player},
-            {"sender_player", sender_player}
-        };
+            {"sender_player", sender_player},
+            {"card_filename", card_filename}};
     }
 };
 
@@ -100,8 +113,7 @@ public:
 
     [[nodiscard]] json to_json() const {
         return json{
-            {"type", "ChatMessage"}, {"message", message}, {"sender_player", sender_player}
-        };
+            {"type", "ChatMessage"}, {"message", message}, {"sender_player", sender_player}};
     }
 };
 }  // namespace meow::network
