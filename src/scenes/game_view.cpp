@@ -32,7 +32,7 @@ private:
 
     /* pause menu */
     enum class PauseButton { CONTINUE, BACK_TO_LOBBY, QUIT, COUNT };  // TODO: settings
-    EnumArray<PauseButton, const char *> m_pause_button_labels = {
+    static constexpr EnumArray<PauseButton, const char *> m_pause_button_labels = {
         {PauseButton::CONTINUE, "Continue"},
         {PauseButton::BACK_TO_LOBBY, "Back to lobby"},
         {PauseButton::QUIT, "Quit"},

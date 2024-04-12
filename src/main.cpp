@@ -24,7 +24,7 @@ private:
     static constexpr int window_height = 1080;
     static constexpr const char *window_title = "meow";
 
-    inline static const meow::EnumArray<meow::SceneType, std::pair<const char *, const char *>>
+    static constexpr meow::EnumArray<meow::SceneType, std::pair<const char *, const char *>>
         plugin_names{
             {meow::SceneType::MAIN_MENU, {"mainmenu-scene", "main_menu"}},
             {meow::SceneType::GAME, {"game-scene", "game_view"}},

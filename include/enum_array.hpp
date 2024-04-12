@@ -22,15 +22,15 @@ namespace meow {
 template <typename Enum, typename T>
 class EnumArray {
 public:
-    EnumArray() = default;
+    constexpr EnumArray() = default;
 
-    EnumArray(std::initializer_list<std::pair<Enum, T>> &&values) {
+    constexpr EnumArray(std::initializer_list<std::pair<Enum, T>> &&values) {
         for (auto &[key, value] : values) {
             m_data.at(static_cast<std::size_t>(key)) = std::move(value);
         }
     }
 
-    EnumArray(const std::initializer_list<std::pair<Enum, T>> &values) {
+    constexpr EnumArray(const std::initializer_list<std::pair<Enum, T>> &values) {
         for (const auto &[key, value] : values) {
             m_data.at(static_cast<std::size_t>(key)) = value;
         }
@@ -56,27 +56,27 @@ public:
         return m_data;
     }
 
-    [[nodiscard]] const auto &data() const {
+    [[nodiscard]] constexpr auto &data() const {
         return m_data;
     }
 
-    [[nodiscard]] std::size_t size() const {
+    [[nodiscard]] constexpr std::size_t size() const {
         return N;
     }
 
-    EnumArray(EnumArray &&other) noexcept {
+    constexpr EnumArray(EnumArray &&other) noexcept {
         *this = other;
     }
 
-    EnumArray &operator=(EnumArray &&other) noexcept {
+    constexpr EnumArray &operator=(EnumArray &&other) noexcept {
         if (this != &other) {
             m_data = std::move(other.m_data);
         }
         return *this;
     }
 
-    EnumArray(const EnumArray &) noexcept = default;
-    EnumArray &operator=(const EnumArray &) noexcept = default;
+    constexpr EnumArray(const EnumArray &) noexcept = default;
+    constexpr EnumArray &operator=(const EnumArray &) noexcept = default;
     ~EnumArray() = default;
 
 private:

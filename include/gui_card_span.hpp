@@ -34,12 +34,12 @@ private:
         std::list<GuiCard> &m_cards = m_parental_span.m_cards;
         std::list<GuiCard>::iterator m_card_iter = m_cards.end();
         enum class Button { INSPECT, REMOVE, COUNT };
-        const EnumArray<Button, Rectangle> m_origin_button_rects{
+        static constexpr EnumArray<Button, Rectangle> m_origin_button_rects{
             {Button::INSPECT, {0, 0, button_width, button_height}},
             {Button::REMOVE, {0, button_height, button_width, button_height}},
         };
         EnumArray<Button, Rectangle> m_button_rects = m_origin_button_rects;
-        const EnumArray<Button, const char *> m_button_labels{
+        static constexpr EnumArray<Button, const char *> m_button_labels{
             {Button::INSPECT, "Inspect"},
             {Button::REMOVE, "Remove"}};
 
