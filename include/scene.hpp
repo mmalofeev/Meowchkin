@@ -3,6 +3,9 @@
 
 #include <boost/config.hpp>
 #include <memory>
+#include <optional>
+#include <string>
+#include <string_view>
 #include "client.hpp"
 #include "enum_array.hpp"
 #include "noncopyable.hpp"
@@ -24,7 +27,7 @@ protected:
 
     // NOLINTEND
 
-    virtual void on_window_attach() {
+    virtual void on_instances_attach() {
     }
 
 public:
@@ -32,13 +35,10 @@ public:
     virtual void draw() = 0;
 
     // need to pass this to shared object
-    void attach_client(network::Client *client) noexcept {
+    void attach_instances(network::Client *client, raylib::Window *window) {
         m_client = client;
-    }
-
-    void attach_window(raylib::Window *window) {
         m_window = window;
-        on_window_attach();
+        on_instances_attach();
     }
 
     [[nodiscard]] bool running() const noexcept {
@@ -52,6 +52,7 @@ class SceneManager : Noncopyable {
 private:
     EnumArray<SceneType, Scene *> m_scenes;
     SceneType m_active_scene = SceneType::MAIN_MENU;
+    std::optional<std::string> m_message_from_active_scene = std::nullopt;
 
 public:
     explicit SceneManager() = default;
@@ -59,6 +60,17 @@ public:
     void switch_scene(SceneType scene_type);
     void set_scene(SceneType scene_type, Scene *scene);
     [[nodiscard]] Scene *active_scene();
+
+    void set_message(std::string_view msg) {
+        m_message_from_active_scene = msg.data();
+    }
+
+    [[nodiscard]] std::optional<std::string> read_message() {
+        if (m_message_from_active_scene) {
+            return std::move(*m_message_from_active_scene);
+        }
+        return std::nullopt;
+    }
 };
 
 }  // namespace meow

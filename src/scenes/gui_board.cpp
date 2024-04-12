@@ -1,6 +1,7 @@
 #include "gui_board.hpp"
 #include <iostream>
 #include "message_types.hpp"
+#include "paths_to_binaries.hpp"
 
 namespace meow {
 
@@ -20,7 +21,7 @@ void GuiBoard::setup(raylib::Window *window, GuiCardSpan *hand, network::Client 
     );
     raylib::Image image;
     try {
-        image.Load(image_path);
+        image.Load(board_image_path);
         image.Resize(m_rect.GetSize().x, m_rect.GetSize().y);
     } catch (const raylib::RaylibException &) {
         image =

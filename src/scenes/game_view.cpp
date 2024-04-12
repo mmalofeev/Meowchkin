@@ -47,16 +47,17 @@ private:
     bool m_something_dragged = false;
 
 protected:
-    void on_window_attach() override {
+    void on_instances_attach() override {
         setup_background();
         setup_pause_menu();
         setup_hand();
         m_board.setup(m_window, &m_player_hand, m_client);
+        m_text_chat.set_window(m_window);
         m_usernames_box.set_window(m_window);
+
         for (const auto &info : m_client->get_players_info()) {
             m_usernames_box.add_username(info.name);
         }
-        m_text_chat.set_window(m_window);
     }
 
 public:
@@ -74,11 +75,18 @@ public:
     void draw() override {
         if (m_window == nullptr) {
             throw std::runtime_error("invalid attached window!");
+        } else if (m_client == nullptr) {
+            throw std::runtime_error("invalid attached client!");
         }
 
         if (auto action = m_client->receive_action(); action) {
-            std::cout << "received " << action->card_filename << '\n';
+            // std::cout << "received " << action->card_filename << '\n';
             m_board.m_active_cards.add_card(action->card_filename);
+        }
+        if (auto chat_message = m_client->receive_chat_message(); chat_message) {
+            std::cout << "received from " << chat_message->sender_player << ": "
+                      << chat_message->message << '\n';
+            m_text_chat.receive(*chat_message);
         }
 
         if (IsKeyDown(KEY_LEFT_SHIFT) && IsKeyPressed(KEY_ENTER)) {
@@ -106,7 +114,7 @@ public:
                 raylib::Mouse::IsButtonDown(MOUSE_BUTTON_LEFT)) {
                 m_text_chat.position += raylib::Mouse::GetDelta();
             }
-            m_text_chat.draw();
+            m_text_chat.draw(*m_client);
         }
         if (!m_should_draw_pause) {
             m_should_draw_pause = IsKeyPressed(KEY_ESCAPE);
