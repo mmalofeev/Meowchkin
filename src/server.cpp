@@ -57,8 +57,15 @@ void Server::handle_client(tcp::socket &socket) {
             received_actions.emplace(json);
         }
         if (received_type == "ChatMessage") {
-            ChatMessage chat_message(json);
-            send_chat_message_to_all_clients(chat_message);
+            bool general_of_msg;
+            json.at("general").get_to(general_of_msg);
+            if (general_of_msg) {
+                ChatMessage chat_message(json);
+                send_chat_message_to_all_clients(chat_message);
+            } else {
+                ChatMessage chat_message(json);
+                send_chat_message(chat_message.target_player, chat_message);
+            }
         }
     }
 }
@@ -82,6 +89,7 @@ void Server::send_players_info(std::size_t client_id) {
 void Server::start_listening(std::size_t num_of_clients) {
     std::size_t count_of_accepted_clients = 0;
     listen_is_started = true;
+    start_of_listening.notify_all();
     while (count_of_accepted_clients < num_of_clients) {
         tcp::socket socket = acceptor.accept();
         std::thread new_thread =

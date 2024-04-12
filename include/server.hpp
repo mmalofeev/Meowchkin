@@ -27,6 +27,8 @@ class Server {
     void send_players_info(std::size_t);
     Server();
     ~Server();
+    void send_chat_message(std::size_t client_id, const ChatMessage &chat_message);
+    void send_chat_message_to_all_clients(const ChatMessage &chat_message);
 
 public:
     Server(const Server &) = delete;
@@ -56,10 +58,6 @@ public:
     void send_action_result(std::size_t client_id, const ActionResult &action_result);
 
     void send_action_to_all_clients(const Action &action);
-
-    void send_chat_message(std::size_t client_id, const ChatMessage &chat_message);
-
-    void send_chat_message_to_all_clients(const ChatMessage &chat_message);
 
     void wait_for_listening();
 };
