@@ -81,6 +81,7 @@ void Server::send_players_info(std::size_t client_id) {
 
 void Server::start_listening(std::size_t num_of_clients) {
     std::size_t count_of_accepted_clients = 0;
+    listen_is_started = true;
     while (count_of_accepted_clients < num_of_clients) {
         tcp::socket socket = acceptor.accept();
         std::thread new_thread =
@@ -145,5 +146,10 @@ void Server::send_chat_message_to_all_clients(const ChatMessage &chat_message) {
     for (std::size_t id : get_clients_id()) {
         send_chat_message(id, chat_message);
     }
+}
+
+void Server::wait_for_listening() {
+    std::unique_lock l(mtx);
+    start_of_listening.wait(l, [this]() { return listen_is_started; });
 }
 }  // namespace meow::network

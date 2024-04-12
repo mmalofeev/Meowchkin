@@ -8,12 +8,15 @@ using json = ::nlohmann::json;
 namespace meow::network {
 class Action {
 public:
+    bool is_played;
+    bool is_drowed;
+    bool is_threw;
     int card_id{};
     std::size_t targeted_player{};
     std::size_t sender_player{};
 
-    explicit Action(int card_id, std::size_t targeted_player, std::size_t sender_player)
-        : card_id(card_id), targeted_player(targeted_player), sender_player(sender_player) {
+    explicit Action(bool is_played, bool is_drowed, bool is_threw, int card_id, std::size_t targeted_player, std::size_t sender_player)
+        : is_played(is_played), is_drowed(is_drowed), is_threw(is_threw), card_id(card_id), targeted_player(targeted_player), sender_player(sender_player) {
     }
 
     explicit Action(const json &json) {
@@ -21,6 +24,9 @@ public:
     }
 
     void parse_from_json(const json &json) {
+        json.at("is_played").get_to(is_played);
+        json.at("is_drowed").get_to(is_drowed);
+        json.at("is_threw").get_to(is_threw);
         json.at("card_id").get_to(card_id);
         json.at("targeted_player").get_to(targeted_player);
         json.at("sender_player").get_to(sender_player);
@@ -29,6 +35,9 @@ public:
     [[nodiscard]] json to_json() const {
         return json{
             {"type", "Action"},
+            {"is_played", is_played},
+            {"is_drowed", is_drowed},
+            {"is_threw", is_threw},
             {"card_id", card_id},
             {"targeted_player", targeted_player},
             {"sender_player", sender_player}

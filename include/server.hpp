@@ -21,6 +21,8 @@ class Server {
     std::map<std::size_t, tcp::iostream *> client_streams;
     std::vector<PlayerInfo> players_info;
     std::condition_variable got_players_info;
+    std::condition_variable start_of_listening;
+    bool listen_is_started;
     void handle_client(tcp::socket &);
     void send_players_info(std::size_t);
     Server();
@@ -58,6 +60,8 @@ public:
     void send_chat_message(std::size_t client_id, const ChatMessage &chat_message);
 
     void send_chat_message_to_all_clients(const ChatMessage &chat_message);
+
+    void wait_for_listening();
 };
 }  // namespace meow::network
 #endif  // MEOWCHKIN_SERVER_HPP

@@ -81,6 +81,14 @@ void Client::disconnect() {
     return name_of_client;
 }
 
+[[nodiscard]] std::string Client::get_name_by_id(std::size_t id) const {
+    for (const PlayerInfo &info : players_info) {
+        if (info.id == id) {
+            return info.name;
+        }
+    }
+}
+
 void Client::set_name_of_client(const std::string &name) {
     name_of_client = name;
 }
