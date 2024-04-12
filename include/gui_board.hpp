@@ -13,7 +13,6 @@ class GuiBoard {
 private:
     static constexpr const int width = 1200;
     static constexpr const int height = 700;
-    static constexpr const char *image_path = "bin/imgs/kitik3.png";
     GuiCardSpan *m_player_hand = nullptr;
     raylib::Window *m_window = nullptr;
     network::Client *m_client = nullptr;
