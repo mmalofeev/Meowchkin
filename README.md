@@ -1,6 +1,6 @@
 # Meowchkin
 
-!!! Build in `build` directory:
+!!!! Build in `build` directory:
 ```bash
 cd build
 cmake -DBUILD_SHARED_LIBS=ON ..  # i think this is important
