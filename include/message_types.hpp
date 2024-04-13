@@ -8,12 +8,27 @@ using json = ::nlohmann::json;
 namespace meow::network {
 class Action {
 public:
+    bool is_played;
+    bool is_drowed;
+    bool is_threw;
     int card_id{};
-    std::size_t targeted_player{};
+    std::size_t target_player{};
     std::size_t sender_player{};
 
-    explicit Action(int card_id, std::size_t targeted_player, std::size_t sender_player)
-        : card_id(card_id), targeted_player(targeted_player), sender_player(sender_player) {
+    explicit Action(
+        bool is_played,
+        bool is_drowed,
+        bool is_threw,
+        int card_id,
+        std::size_t target_player,
+        std::size_t sender_player
+    )
+        : is_played(is_played),
+          is_drowed(is_drowed),
+          is_threw(is_threw),
+          card_id(card_id),
+          target_player(target_player),
+          sender_player(sender_player) {
     }
 
     explicit Action(const json &json) {
@@ -21,16 +36,22 @@ public:
     }
 
     void parse_from_json(const json &json) {
+        json.at("is_played").get_to(is_played);
+        json.at("is_drowed").get_to(is_drowed);
+        json.at("is_threw").get_to(is_threw);
         json.at("card_id").get_to(card_id);
-        json.at("targeted_player").get_to(targeted_player);
+        json.at("target_player").get_to(target_player);
         json.at("sender_player").get_to(sender_player);
     }
 
     [[nodiscard]] json to_json() const {
         return json{
             {"type", "Action"},
+            {"is_played", is_played},
+            {"is_drowed", is_drowed},
+            {"is_threw", is_threw},
             {"card_id", card_id},
-            {"targeted_player", targeted_player},
+            {"target_player", target_player},
             {"sender_player", sender_player}
         };
     }
@@ -84,9 +105,18 @@ class ChatMessage {
 public:
     std::string message;
     std::size_t sender_player{};
+    bool general{};
+    std::size_t target_player{};
 
     explicit ChatMessage(std::string message, std::size_t sender_player)
-        : message(std::move(message)), sender_player(sender_player) {
+        : message(std::move(message)), sender_player(sender_player), general(true) {
+    }
+
+    explicit ChatMessage(std::string message, std::size_t sender_player, std::size_t target_player)
+        : message(std::move(message)),
+          sender_player(sender_player),
+          general(false),
+          target_player(target_player) {
     }
 
     explicit ChatMessage(const json &json) {
@@ -96,11 +126,17 @@ public:
     void parse_from_json(const json &json) {
         json.at("message").get_to(message);
         json.at("sender_player").get_to(sender_player);
+        json.at("general").get_to(general);
+        json.at("target_player").get_to(target_player);
     }
 
     [[nodiscard]] json to_json() const {
         return json{
-            {"type", "ChatMessage"}, {"message", message}, {"sender_player", sender_player}
+            {"type", "ChatMessage"},
+            {"message", message},
+            {"sender_player", sender_player},
+            {"general", general},
+            {"target_player", target_player}
         };
     }
 };
