@@ -7,7 +7,6 @@
 #include <vector>
 #include "model_card.hpp"
 #include "model_object.hpp"
-#include "virtual_machine.hpp"
 
 namespace meow::model {
 
@@ -56,50 +55,15 @@ public:
         }
     }
 
-    std::unique_ptr<Card> drop_card_from_hand_by_id(std::size_t obj_id) {
-        std::unique_ptr<Card> card;
+    std::unique_ptr<Card> drop_card_from_hand_by_id(std::size_t obj_id);
 
-        for (auto it = hand.begin(); it != hand.end(); ++it) {
-            if ((*it)->obj_id == obj_id) {
-                card = std::move(*it);
-                hand.erase(it);
-                break;
-            }
-        }
-
-        return card;
-    }
-
-    const Card *get_card_from_hand_by_id(std::size_t obj_id) const {
-        for (size_t i = 0; i < hand.size(); i++) {
-            if (hand[i]->obj_id == obj_id) {
-                return hand[i].get();
-            }
-        }
-    }
+    const Card *get_card_from_hand_by_id(std::size_t obj_id) const;
 
     const std::vector<std::unique_ptr<Card>> &get_hand() const {
         return hand;
     }
 
-    bool play_card_by_id(std::size_t card_obj_id, std::size_t target_id) {
-        VirtualMachine::get_instance().set_args(obj_id, target_id);
-        if (!(*VirtualMachine::get_instance().execute(
-                get_card_from_hand_by_id(card_obj_id)->info->verification
-            ))) {
-            return false;
-        }
-
-        auto card = drop_card_from_hand_by_id(card_obj_id);
-        card->apply(obj_id, target_id);
-        if (card->info->type == CardType::SPELL) {
-            if (dynamic_cast<const SpellCardInfo *>(card->info)->storable) {
-                add_card_to_storage(std::move(card));
-            }
-        }
-
-        return true;
-    }
+    bool play_card_by_id(std::size_t card_obj_id, std::size_t target_id);
 };
 
 }  // namespace meow::model

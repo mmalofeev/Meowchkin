@@ -56,6 +56,6 @@ add_library(game-scene SHARED src/scenes/game_view.cpp
                               src/scenes/gui_text_chat.cpp)
 target_link_libraries(game-scene ${Boost_LIBRARIES} ${CMAKE_DL_LIBS} raylib raylib_cpp)
 
-FILE(GLOB SRCFILES src/main.cpp src/scenes/scene.cpp)
+FILE(GLOB SRCFILES src/*.cpp src/scenes/scene.cpp)
 add_executable(meowchkin ${SRCFILES})
 target_link_libraries(meowchkin ${Boost_LIBRARIES} ${CMAKE_DL_LIBS} raylib raylib_cpp)

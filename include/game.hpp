@@ -2,10 +2,9 @@
 #define GAME_HPP_
 #include <vector>
 #include "model_object.hpp"
+#include "model_player.hpp"
 
 namespace meow::model {
-
-struct Player;
 
 enum class StateType { INIT, PREPARATION, BROWL, LOOKTROUBLE, COMPLETION };
 
@@ -16,7 +15,7 @@ private:
     std::vector<Player> players;
     std::size_t cur_turn = 0;
     StateType state = StateType::INIT;
-    const Object desk{};
+    const Object desk;
     std::vector<std::size_t> deck;
 
     const std::size_t init_hand_size = 4;

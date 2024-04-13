@@ -3,7 +3,7 @@
 
 #include <vector>
 #include "game.hpp"
-#include "game_view.hpp"
+// #include "game_view.hpp"
 #include "message_types.hpp"
 #include "virtual_machine.hpp"
 
@@ -21,12 +21,14 @@ public:
         model::VirtualMachine::get_instance().set_game_reference(&game);
     }
 
-    GameView *observed;
+    // GameView *observed;
     std::vector<const char *> cards_on_board;
 
+    /*
     void notify_gameview(const network::Action &) {
         observed->on_new_card_on_board();
     }
+    */
 };
 
 }  // namespace meow

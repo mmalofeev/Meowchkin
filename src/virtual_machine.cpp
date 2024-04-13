@@ -1,6 +1,7 @@
 #include "virtual_machine.hpp"
 #include <optional>
 #include <vector>
+#include "game.hpp"
 #include "model_command.hpp"
 #include "model_player.hpp"
 
@@ -26,6 +27,7 @@ void VirtualMachine::increse_level(bool force = false) {
 }
 
 std::optional<int> VirtualMachine::execute(const std::vector<Command> &code) {
+    assert(game != nullptr);
     std::optional<int> res{};
 
     for (std::size_t i = 0; i < code.size(); i++) {

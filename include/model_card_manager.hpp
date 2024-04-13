@@ -16,7 +16,7 @@ private:
 
 public:
     static CardManager &get_instance() {
-        static CardManager instance;
+        thread_local static CardManager instance;
         return instance;
     }
 

@@ -17,9 +17,7 @@ CardManager::CardManager() {
         {"CLASS", model::CardType::CLASS},
         {"ITEM", model::CardType::ITEM}};
 
-    std::filesystem::path full_path(
-        std::filesystem::current_path() / "build" / "bin" / "jsons" / filename
-    );
+    std::filesystem::path full_path(std::filesystem::current_path() / "bin" / "jsons" / filename);
     std::ifstream f(full_path.string());
     ::nlohmann::json data = ::nlohmann::json::parse(f);
     f.close();
@@ -64,5 +62,7 @@ std::unique_ptr<model::Card> CardManager::get_card(std::size_t card_id) const {
         default:
             break;
     }
+    assert(false);
+    return nullptr;
 }
 }  // namespace meow

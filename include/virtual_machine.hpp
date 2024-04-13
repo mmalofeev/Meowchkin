@@ -3,10 +3,11 @@
 #include <optional>
 #include <stack>
 #include <vector>
-#include "game.hpp"
 #include "model_command.hpp"
 
 namespace meow::model {
+
+struct Game;
 
 struct VirtualMachine {
 private:
