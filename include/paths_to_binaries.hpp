@@ -7,5 +7,6 @@ static constexpr const char *board_image_path = "bin/imgs/kitik3.png";
 static constexpr const char *gui_style_path = "bin/gui_styles/meow.rgs";
 static constexpr const char *gui_font_path = "bin/fonts/mono.ttf";
 static constexpr const char *cards_directory_path = "bin/imgs/cards/original/";
+static constexpr const char *json_info_path = "bin/jsons/info.json";
 
 #endif  // PATHS_TO_BINARIES_HPP_

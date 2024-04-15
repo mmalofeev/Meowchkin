@@ -9,9 +9,7 @@ namespace meow {
 
 struct CardManager {
 private:
-    static inline const std::string filename = "info.json";
     std::vector<std::unique_ptr<model::CardInfo>> cards_instances;
-    bool is_loaded = false;
     CardManager();
 
 public:

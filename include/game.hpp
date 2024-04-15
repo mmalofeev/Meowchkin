@@ -27,7 +27,7 @@ public:
 
     void add_card_id_to_deck(std::size_t card_id);
 
-    std::size_t get_card_id_from_desk();
+    std::size_t get_card_id_from_deck();
 
     std::size_t get_desk_id() const;
 
@@ -39,7 +39,7 @@ public:
 
     bool end_turn(std::size_t user_id);
 
-    bool is_end();
+    bool is_end() const;
 };
 
 }  // namespace meow::model

@@ -3,9 +3,9 @@
 
 #include <vector>
 #include "game.hpp"
+#include "virtual_machine.hpp"
 // #include "game_view.hpp"
 #include "message_types.hpp"
-#include "virtual_machine.hpp"
 
 namespace meow {
 

@@ -26,7 +26,7 @@ public:
     }
 
     static VirtualMachine &get_instance() {
-        static VirtualMachine instance;
+        thread_local static VirtualMachine instance;
         return instance;
     }
 };

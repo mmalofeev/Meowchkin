@@ -1,15 +1,15 @@
 #include "model_card_manager.hpp"
+#include "paths_to_binaries.hpp"
+#include "model_card.hpp"
+
+#include <nlohmann/json.hpp>
 #include <cassert>
-#include <filesystem>
 #include <fstream>
 #include <memory>
-#include <nlohmann/json.hpp>
 #include <vector>
-#include "model_card.hpp"
 
 namespace meow {
 CardManager::CardManager() {
-    assert(!is_loaded);
     std::map<std::string, model::CardType> str_to_type{
         {"SPELL", model::CardType::SPELL},
         {"MONSTER", model::CardType::MONSTER},
@@ -17,8 +17,7 @@ CardManager::CardManager() {
         {"CLASS", model::CardType::CLASS},
         {"ITEM", model::CardType::ITEM}};
 
-    std::filesystem::path full_path(std::filesystem::current_path() / "bin" / "jsons" / filename);
-    std::ifstream f(full_path.string());
+    std::ifstream f(json_info_path);
     ::nlohmann::json data = ::nlohmann::json::parse(f);
     f.close();
 
@@ -43,15 +42,13 @@ CardManager::CardManager() {
                 bool is_one_time = card["is_one_time"].get<bool>();
 
                 cards_instances.emplace_back(std::make_unique<model::SpellCardInfo>(
-                    info, storable, is_one_time, action, unwind
+                    std::move(info), storable, is_one_time, action, unwind
                 ));
             } break;
             default:
                 break;
         }
     }
-
-    is_loaded = true;
 }
 
 std::unique_ptr<model::Card> CardManager::get_card(std::size_t card_id) const {

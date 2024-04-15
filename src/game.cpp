@@ -10,7 +10,7 @@ void Game::start() {
     for (auto &player : players) {
         for (std::size_t i = 0; i < init_hand_size; i++) {
             player.add_card_to_hand(
-                std::move(CardManager::get_instance().get_card(get_card_id_from_desk()))
+                std::move(CardManager::get_instance().get_card(get_card_id_from_deck()))
             );
         }
     }
@@ -26,7 +26,7 @@ void Game::add_card_id_to_deck(std::size_t card_id) {
     deck.push_back(card_id);
 }
 
-std::size_t Game::get_card_id_from_desk() {
+std::size_t Game::get_card_id_from_deck() {
     std::size_t res = deck.back();
     deck.pop_back();
     return res;
@@ -89,7 +89,7 @@ bool Game::end_turn(std::size_t user_id) {
     return true;
 }
 
-bool Game::is_end() {
+bool Game::is_end() const {
     for (std::size_t i = 0; i < players.size(); i++) {
         if (players[i].level() == 10) {
             return true;

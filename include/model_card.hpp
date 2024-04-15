@@ -11,9 +11,9 @@ enum class CardType { SPELL, MONSTER, RACE, CLASS, ITEM };
 
 struct CardInfo {
     const std::string image;
-    const std::size_t card_id{};
-    const CardType type{};
-    const bool openable{};
+    const std::size_t card_id;
+    const CardType type;
+    const bool openable;
     const std::vector<Command> verification;
 
     CardInfo(
@@ -36,9 +36,9 @@ struct CardInfo {
 struct SpellCardInfo : CardInfo {
 public:
     const std::vector<Command> action;
-    const std::vector<Command> unwind;
-    const bool storable{};
-    const bool is_one_time{};
+    const std::vector<Command> unwind; // will be called when the action needs to be canceled
+    const bool storable;
+    const bool is_one_time;
 
     SpellCardInfo(
         CardInfo base,
