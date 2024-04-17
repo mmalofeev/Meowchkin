@@ -40,6 +40,8 @@ public:
 
     [[nodiscard]] std::string get_name_of_client() const;  // get name of this client
 
+    [[nodiscard]] std::string get_name_by_id(std::size_t id) const;
+
     void set_name_of_client(const std::string &name);
 
     [[nodiscard]] const std::vector<PlayerInfo> &get_players_info() const;

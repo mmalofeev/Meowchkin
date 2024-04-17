@@ -21,8 +21,8 @@ void Client::accept_info_about_players() {
     connection >> count_of_players;
     connection >> id_of_client;
 
-    std::string input_msg;
     for (std::size_t i = 0; i < count_of_players; ++i) {
+        std::string input_msg;
         while (input_msg.empty()) {
             std::getline(connection, input_msg);
         }
@@ -79,6 +79,14 @@ void Client::disconnect() {
 
 [[nodiscard]] std::string Client::get_name_of_client() const {
     return name_of_client;
+}
+
+[[nodiscard]] std::string Client::get_name_by_id(std::size_t id) const {
+    for (const PlayerInfo &info : players_info) {
+        if (info.id == id) {
+            return info.name;
+        }
+    }
 }
 
 void Client::set_name_of_client(const std::string &name) {
