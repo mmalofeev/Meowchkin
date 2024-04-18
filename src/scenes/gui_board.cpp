@@ -1,5 +1,4 @@
 #include "gui_board.hpp"
-#include <iostream>
 #include "message_types.hpp"
 #include "paths_to_binaries.hpp"
 

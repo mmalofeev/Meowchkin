@@ -17,7 +17,7 @@ public:
     // TODO: remove once we will be able to have card by card_id!
     std::string card_filename;
 
-    explicit Action(
+    Action(
         bool is_played,
         bool is_drowed,
         bool is_threw,
@@ -33,14 +33,8 @@ public:
           sender_player(sender_player) {
     }
 
-    explicit Action(
-        std::string card_filename_,
-        std::size_t target_player,
-        std::size_t sender_player
-    )
-        : card_filename(std::move(card_filename_)),
-          targeted_player(target_player),
-          sender_player(sender_player) {
+    Action(std::string_view card_filename, std::size_t target, std::size_t sender)
+        : card_filename(card_filename.data()), target_player(target), sender_player(sender) {
     }
 
     explicit Action(const json &json) {
@@ -64,9 +58,10 @@ public:
             {"is_drowed", is_drowed},
             {"is_threw", is_threw},
             {"card_id", card_id},
-            {"targeted_player", targeted_player},
+            {"target_player", target_player},
             {"sender_player", sender_player},
-            {"card_filename", card_filename}};
+            {"card_filename", card_filename}
+        };
     }
 };
 
