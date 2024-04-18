@@ -11,7 +11,7 @@ public:
     bool is_played;
     bool is_drowed;
     bool is_threw;
-    int card_id{};
+    std::size_t card_id{};
     std::size_t target_player{};
     std::size_t sender_player{};
     // TODO: remove once we will be able to have card by card_id!
