@@ -81,7 +81,7 @@ public:
         server.start_listening(network::players_count);
         for (std::optional<meow::network::Action> action;; action = server.receive_action()) {
             if (action) {
-                server.send_action(action->targeted_player, *action);
+                server.send_action(action->target_player, *action);
             }
         }
     }
