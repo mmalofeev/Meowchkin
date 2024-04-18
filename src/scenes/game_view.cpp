@@ -1,9 +1,10 @@
-#include <bitset>
 #include <filesystem>
-#include <random>
+#include <iostream>
+#include "client.hpp"
 #include "enum_array.hpp"
 #include "gui_board.hpp"
 #include "gui_card_span.hpp"
+#include "gui_dice_roller.hpp"
 #include "gui_text_chat.hpp"
 #include "gui_usernames_box.hpp"
 #define RAYGUI_IMPLEMENTATION
@@ -40,26 +41,23 @@ private:
     EnumArray<PauseButton, bool> m_pause_button_pressed;
     bool m_should_draw_pause = false;
 
-    /* draggable items */
-    static constexpr std::size_t draggable_items_count = 3;
-    std::bitset<draggable_items_count> m_being_dragged;
-
     /* misc */
     std::vector<std::filesystem::path> m_card_image_paths;
     bool m_show_chat = false;
     bool m_something_dragged = false;
 
 protected:
-    void on_window_attach() override {
+    void on_instances_attach() override {
         setup_background();
         setup_pause_menu();
         setup_hand();
-        m_board.setup(m_window, &m_player_hand);
-        m_usernames_box.set_window(m_window);
-        for (int i = 1; i <= 4; i++) {
-            m_usernames_box.add_username(std::string("bebrik #") + std::to_string(i));
-        }
+        m_board.setup(m_window, &m_player_hand, m_client);
         m_text_chat.set_window(m_window);
+        m_usernames_box.set_window(m_window);
+
+        for (const auto &info : m_client->get_players_info()) {
+            m_usernames_box.add_username(info.name);
+        }
     }
 
 public:
@@ -77,7 +75,20 @@ public:
     void draw() override {
         if (m_window == nullptr) {
             throw std::runtime_error("invalid attached window!");
+        } else if (m_client == nullptr) {
+            throw std::runtime_error("invalid attached client!");
         }
+
+        if (auto action = m_client->receive_action(); action) {
+            // std::cout << "received " << action->card_filename << '\n';
+            m_board.m_active_cards.add_card(action->card_filename);
+        }
+        if (auto chat_message = m_client->receive_chat_message(); chat_message) {
+            std::cout << "received from " << chat_message->sender_player << ": "
+                      << chat_message->message << '\n';
+            m_text_chat.receive(*chat_message);
+        }
+
         if (IsKeyDown(KEY_LEFT_SHIFT) && IsKeyPressed(KEY_ENTER)) {
             m_show_chat = !m_show_chat;
         }
@@ -92,10 +103,7 @@ public:
         }
         if (!m_should_draw_pause && GuiButton({40, 0, 40, 40}, "+") &&
             m_player_hand.card_count() < 10) {
-            std::random_device rd;
-            std::mt19937 gen(rd());
-            std::uniform_int_distribution<> distrib(0, m_card_image_paths.size() - 1);
-            int random_index = distrib(gen);
+            const auto random_index = random_integer<std::size_t>(0, m_card_image_paths.size() - 1);
             m_player_hand.add_card(m_card_image_paths[random_index].c_str());
         }
         GuiStatusBar({0, (float)m_window->GetHeight() - 30, 100, 30}, "status bar....");
@@ -106,13 +114,23 @@ public:
                 raylib::Mouse::IsButtonDown(MOUSE_BUTTON_LEFT)) {
                 m_text_chat.position += raylib::Mouse::GetDelta();
             }
-            m_text_chat.draw();
+            m_text_chat.draw(*m_client);
         }
         if (!m_should_draw_pause) {
             m_should_draw_pause = IsKeyPressed(KEY_ESCAPE);
         } else if (m_should_draw_pause) {
             m_blur.Draw();
             draw_pause_menu();
+        }
+
+        if (IsKeyPressed(KEY_SPACE)) {
+            const auto random_index = random_integer<std::size_t>(0, m_card_image_paths.size() - 1);
+            for (auto &info : m_client->get_players_info()) {
+                std::cout << "send to " << info.name << '\n';
+                m_client->send_action(network::Action(
+                    m_card_image_paths[random_index].c_str(), info.id, m_client->get_id_of_client()
+                ));
+            }
         }
     }
 
@@ -147,10 +165,7 @@ private:
         m_player_hand.set_window(m_window);
         m_player_hand.set_span_borders({m_window->GetPosition(), m_window->GetSize()});
         for (int i = 0; i < 5; i++) {
-            std::random_device rd;
-            std::mt19937 gen(rd());
-            std::uniform_int_distribution<> distrib(0, m_card_image_paths.size() - 1);
-            int random_index = distrib(gen);
+            const auto random_index = random_integer<std::size_t>(0, m_card_image_paths.size() - 1);
             m_player_hand.add_card(m_card_image_paths[random_index].c_str());
         }
     }

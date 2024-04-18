@@ -5,13 +5,9 @@
 #include <string>
 #include "gui_window_dependable.hpp"
 #include "raylib-cpp.hpp"
+#include "client.hpp"
 
 namespace meow {
-
-struct Message {
-    std::string text;
-    std::string sender;
-};
 
 class GuiTextChat : WindowDependable<GuiTextChat> {
 private:
@@ -20,7 +16,7 @@ private:
     static constexpr std::size_t max_message_length = 100;
     raylib::Window *m_window;
     raylib::Rectangle m_border;
-    std::deque<Message> m_messages;
+    std::deque<network::ChatMessage> m_messages;
     char msg[max_message_length];
 
 public:
@@ -31,8 +27,8 @@ public:
         return m_border;
     }
 
-    void receive(const Message &msg);
-    void draw();
+    void receive(const network::ChatMessage &msg);
+    void draw(network::Client &client);
     void set_window(raylib::Window *window);
 };
 

@@ -1,3 +1,4 @@
+#include <iostream>
 #include "gui_usernames_box.hpp"
 
 void meow::GuiUsernamesBox::add_username(std::string_view username) {
@@ -23,14 +24,20 @@ void meow::GuiUsernamesBox::draw() const {
     // m_border.DrawRoundedLines(0.2, 3, 2, raylib::Color::Green());
     // m_border.DrawLines(raylib::Color::Green());
     raylib::Rectangle(
-        m_boxes.begin()->GetPosition(), m_boxes.back().GetPosition() + m_boxes.back().GetSize() - raylib::Vector2(0, padding)
-    ).DrawRoundedLines(0.03, 4, 2, raylib::Color::Red());
+        m_boxes.begin()->GetPosition(),
+        m_boxes.back().GetPosition() + m_boxes.back().GetSize() - raylib::Vector2(0, padding)
+    )
+        .DrawRoundedLines(0.03, 4, 2, raylib::Color::Red());
 }
 
 void meow::GuiUsernamesBox::set_window(raylib::Window *window) {
+    if (window == nullptr) {
+        throw std::runtime_error("invalid window ptr!");
+    }
     m_window = window;
     m_border.x = window->GetWidth() - width;
     m_border.y = 0;
     m_border.width = width;
     m_border.height = 0;
+    std::cout << m_border.x << '\n' << m_border.y << '\n' << m_border.width << '\n';
 }
