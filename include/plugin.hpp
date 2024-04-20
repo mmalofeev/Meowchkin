@@ -15,7 +15,7 @@ private:
     boost::dll::shared_library m_library;
 
 public:
-    explicit Plugin() = default;
+    Plugin() = default;
 
     explicit Plugin(std::string_view name, std::string_view import_item) {
         reload(name.data(), import_item.data());
@@ -45,8 +45,8 @@ public:
         return m_ptr;
     }
 
-    [[nodiscard]] T *operator*() noexcept {
-        return m_ptr;
+    [[nodiscard]] T &operator*() noexcept {
+        return *m_ptr;
     }
 
     [[nodiscard]] T *get() noexcept {

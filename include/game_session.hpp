@@ -3,26 +3,23 @@
 
 #include <vector>
 #include "game.hpp"
+#include "game_view.hpp"
 #include "virtual_machine.hpp"
-// #include "game_view.hpp"
-#include "message_types.hpp"
 
 namespace meow {
 
 struct GameSession {
 private:
+    GameView &game_view;
     std::size_t user_id{};
 
 public:
     //  пока GameSession не дописан game будет public для удобства тестирования.
     model::Game game;
 
-    GameSession() {
+    explicit GameSession(GameView &game_view) : game_view(game_view) {
         model::VirtualMachine::get_instance().set_game_reference(&game);
     }
-
-    // GameView *observed;
-    std::vector<const char *> cards_on_board;
 
     /*
     void notify_gameview(const network::Action &) {

@@ -4,6 +4,7 @@
 #include <string>
 #include "client.hpp"
 #include "enum_array.hpp"
+#include "game_session.hpp"
 #include "plugin.hpp"
 #include "scene.hpp"
 #include "server.hpp"
@@ -34,11 +35,11 @@ private:
     network::Client &m_client = network::Client::get_instance();
 
     std::string m_client_name;
-    // raylib::Texture m_loading_wheel_texture;
-    // raylib::Shader m_loading_wheel_shader;
+
+    meow::GameSession m_game_session;
 
 public:
-    explicit Application()
+    Application()
         : m_window(
               window_width,
               window_height,
@@ -47,7 +48,8 @@ public:
           ),
           m_main_menu(plugin_names[meow::SceneType::MAIN_MENU]),
           m_game_view(plugin_names[meow::SceneType::GAME]),
-          m_scene_manager(std::make_unique<meow::SceneManager>()) {
+          m_scene_manager(std::make_unique<meow::SceneManager>()),
+          m_game_session(dynamic_cast<GameView &>(*m_game_view)) {
         m_scene_manager->set_scene(meow::SceneType::MAIN_MENU, m_main_menu.get());
         m_scene_manager->set_scene(meow::SceneType::GAME, m_game_view.get());
 

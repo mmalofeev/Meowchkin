@@ -8,7 +8,7 @@
 namespace meow {
 
 class GuiBoard {
-    friend class GameView;
+    friend class RaylibGameView;
 
 private:
     static constexpr const int width = 1200;
