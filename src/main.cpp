@@ -1,13 +1,10 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
-#include <stdexcept>
 #include <string>
 #include "client.hpp"
 #include "enum_array.hpp"
-#include "gui_dice_roller.hpp"
 #include "plugin.hpp"
-#include "raylib-cpp.hpp"
 #include "scene.hpp"
 #include "server.hpp"
 

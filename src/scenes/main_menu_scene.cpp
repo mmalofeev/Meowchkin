@@ -16,7 +16,7 @@ private:
     static constexpr int button_height = 40;
 
     enum class Button { JOIN_LOBBY, CREATE_LOBBY, ENTER_NAME, QUIT, COUNT };
-    const EnumArray<Button, const char *> m_button_labels = {
+    static constexpr EnumArray<Button, const char *> m_button_labels = {
         {Button::JOIN_LOBBY, "Join lobby"},
         {Button::CREATE_LOBBY, "Create lobby"},
         {Button::ENTER_NAME, "Enter name"},
