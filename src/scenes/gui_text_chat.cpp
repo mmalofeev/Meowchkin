@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cstring>
 #include <map>
+#include "paths_to_binaries.hpp"
 #include "raygui.h"
 
 namespace {
@@ -41,12 +42,14 @@ void meow::GuiTextChat::draw(network::Client &client) {
     m_border.SetPosition(position);
     raylib::Vector2 offset{0, 0};
     for (const auto &msg : m_messages) {
+        static const raylib::Font font = raylib::LoadFontEx(gui_font_path, 20.0f, 0, 0);
         raylib::Rectangle(position + offset, message_rectangle_size).Draw(raylib::Color::SkyBlue());
         std::string text = (std::stringstream{} << get_client_name(client, msg.sender_player)
                                                 << ": " << msg.message)
                                .str();
-        raylib::DrawText(
-            text, (position + offset).x, (position + offset).y, 20, raylib::Color::Blue()
+        raylib::DrawTextEx(
+            font, text, {(position + offset).x, (position + offset).y}, 20.0f, 0.0f,
+            raylib::Color::Blue()
         );
         offset.y += message_rectangle_size.y;
     }

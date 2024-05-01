@@ -2,12 +2,13 @@
 #define RAYLIB_GAME_VIEW_HPP_
 
 #include <filesystem>
+#include <memory>
 #include "enum_array.hpp"
 #include "gui_board.hpp"
 #include "gui_card_span.hpp"
+#include "gui_player_statistics_menu.hpp"
 #include "gui_text_chat.hpp"
 #include "gui_usernames_box.hpp"
-#define RAYGUI_IMPLEMENTATION
 #include "game_view.hpp"
 #include "raygui.h"
 
@@ -17,12 +18,13 @@ class RaylibGameView : public GameView {
 private:
     static constexpr int button_width = 300;
     static constexpr int button_height = 40;
-    const raylib::Color background_color = raylib::Color(77, 120, 204, 255);
+    inline static const raylib::Color background_color = raylib::Color(77, 120, 204, 255);
 
     GuiBoard m_board;
     GuiCardSpan m_player_hand;
     GuiUsernamesBox m_usernames_box;
     GuiTextChat m_text_chat;
+    GuiPlayerStatisticsMenu m_stats;
 
     /* background */
     raylib::Texture m_background;
@@ -52,7 +54,8 @@ public:
     void draw() override;
 
     /* Callbacks */
-    void on_card_draw(std::string_view card_filename) override;
+    void on_card_add(std::string_view card_filename) override;
+    void on_card_remove(std::string_view card_filename) override;
     void on_turn_begin() override;
     void on_turn_end() override;
     void on_levelup() override;  // maybe?..
@@ -61,6 +64,10 @@ public:
     void on_item_loss() override;
     void on_monster_elimination() override;
     void on_being_cursed() override;
+
+    static std::shared_ptr<RaylibGameView> make_raylib_gameview() {
+        return std::make_shared<RaylibGameView>();
+    }
 
 private:
     void setup_background();

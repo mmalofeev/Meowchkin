@@ -9,7 +9,8 @@ namespace meow {
 class BOOST_SYMBOL_VISIBLE GameView : public Scene {
 public:
     // TODO: string -> size_t
-    virtual void on_card_draw(std::string_view card_filename) = 0;
+    virtual void on_card_add(std::string_view card_filename) = 0;
+    virtual void on_card_remove(std::string_view card_filename) = 0;
     virtual void on_turn_begin() = 0;
     virtual void on_turn_end() = 0;
     virtual void on_levelup() = 0;

@@ -3,6 +3,7 @@
 
 #include "client.hpp"
 #include "gui_card_span.hpp"
+#include "gui_card_span_dropdown_menu.hpp"
 #include "raylib-cpp.hpp"
 
 namespace meow {
@@ -25,11 +26,16 @@ private:
 #endif
 
 public:
-    explicit GuiBoard() = default;
+    GuiBoard() : m_active_cards(std::make_unique<DropDownMenu>(&m_active_cards)) {
+    }
 
     void setup(raylib::Window *window, GuiCardSpan *hand, network::Client *client);
     void draw(float frame_time, bool is_pause);
     void add_card(std::string_view card_filename);
+
+    void remove_card(std::string_view card_filename) {
+        m_active_cards.remove_card(card_filename);
+    }
 };
 
 }  // namespace meow

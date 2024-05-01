@@ -14,7 +14,7 @@ void GuiBoard::setup(raylib::Window *window, GuiCardSpan *hand, network::Client 
     m_client = client;
     const raylib::Vector2 offset = {(m_window->GetWidth() - width) / 2.0f, 10.0f};
     m_rect = raylib::Rectangle(offset.x, offset.y, width, height);
-    const float rect_side = 10;
+    const float rect_side = 10.0f;
     m_drop_card_rect = raylib::Rectangle(
         offset.x + (m_rect.width - rect_side) / 2, offset.y + (m_rect.height - rect_side) / 2,
         rect_side, rect_side
