@@ -3,13 +3,14 @@
 
 #include <filesystem>
 #include <memory>
+#include <variant>
 #include "enum_array.hpp"
+#include "game_view.hpp"
 #include "gui_board.hpp"
 #include "gui_card_span.hpp"
 #include "gui_player_statistics_menu.hpp"
 #include "gui_text_chat.hpp"
 #include "gui_usernames_box.hpp"
-#include "game_view.hpp"
 #include "raygui.h"
 
 namespace meow {
@@ -20,26 +21,32 @@ private:
     static constexpr int button_height = 40;
     inline static const raylib::Color background_color = raylib::Color(77, 120, 204, 255);
 
-    GuiBoard m_board;
-    GuiCardSpan m_player_hand;
-    GuiUsernamesBox m_usernames_box;
-    GuiTextChat m_text_chat;
-    GuiPlayerStatisticsMenu m_stats;
+    struct GameplayObjs {
+        GuiBoard board{};
+        GuiCardSpan player_hand{std::make_unique<PlayerHandDDM>(&player_hand)};
+        GuiUsernamesBox usernames_box{};
+        GuiTextChat text_chat{};
+        GuiPlayerStatisticsMenu stats{};
+    } m_gameplay_objects;
+
+    enum class PauseButton { CONTINUE, BACK_TO_LOBBY, QUIT, COUNT };  // TODO: settings
+
+    struct PauseMenuObjs {
+        EnumArray<PauseButton, const char *> pause_button_labels = {
+            {PauseButton::CONTINUE, "Continue"},
+            {PauseButton::BACK_TO_LOBBY, "Back to lobby"},
+            {PauseButton::QUIT, "Quit"},
+        };
+        EnumArray<PauseButton, raylib::Rectangle> pause_button_rects{};
+        EnumArray<PauseButton, bool> pause_button_pressed{};
+        bool should_draw_pause = false;
+    } m_pause_menu_objects;
+
+    std::variant<GameplayObjs *, PauseMenuObjs *> m_active_display;
 
     /* background */
     raylib::Texture m_background;
     raylib::Texture m_blur;
-
-    /* pause menu */
-    enum class PauseButton { CONTINUE, BACK_TO_LOBBY, QUIT, COUNT };  // TODO: settings
-    EnumArray<PauseButton, const char *> m_pause_button_labels = {
-        {PauseButton::CONTINUE, "Continue"},
-        {PauseButton::BACK_TO_LOBBY, "Back to lobby"},
-        {PauseButton::QUIT, "Quit"},
-    };
-    EnumArray<PauseButton, raylib::Rectangle> m_pause_button_rects;
-    EnumArray<PauseButton, bool> m_pause_button_pressed;
-    bool m_should_draw_pause = false;
 
     /* misc */
     std::vector<std::filesystem::path> m_card_image_paths;

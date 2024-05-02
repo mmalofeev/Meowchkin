@@ -89,10 +89,10 @@ public:
 
         if (pressed[Button::DROP]) {
             m_parental_span->remove_card(m_card_iter);
-            m_card_iter = m_cards.end();
         }
         if (something_pressed) {
             m_spawn_point = Vector2{-1, -1};
+            m_card_iter = m_cards.end();
         }
     }
 };
