@@ -1,14 +1,15 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(meowchkin)
-
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD 20)
 set(suppressed_warnings "-Wno-sign-compare -Wno-unused-function -Wno-unused-parameter -Wno-missing-field-initializers ") # sorry
 set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 set(CMAKE_CXX_FLAGS ${suppressed_warnings})
-set(CMAKE_CXX_FLAGS_DEBUG_INIT "-g -fsanitize=address -fsanitize=undefined -fno-gnu-unique")
+set(CMAKE_CXX_FLAGS_DEBUG_INIT "-g -fsanitize=address -fsanitize=undefined")
 set(CMAKE_CXX_FLAGS_RELEASE_INIT "-O2")
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+project(meowchkin)
 
 include_directories("include/"
         "third_party/")
@@ -48,8 +49,8 @@ endif ()
 add_library(mainmenu-scene SHARED src/scenes/main_menu_scene.cpp src/scenes/scene.cpp)
 target_link_libraries(mainmenu-scene ${Boost_LIBRARIES} ${CMAKE_DL_LIBS} raylib raylib_cpp)
 
-add_library(game-scene SHARED
-                src/scenes/game_view.cpp
+add_library(gameview-scene SHARED
+                src/scenes/raylib_game_view.cpp
                 src/scenes/scene.cpp
                 src/scenes/gui_card_span.cpp
                 src/scenes/gui_board.cpp
@@ -57,7 +58,7 @@ add_library(game-scene SHARED
                 src/scenes/gui_text_chat.cpp
                 src/client.cpp
                 src/server.cpp)
-target_link_libraries(game-scene ${Boost_LIBRARIES} ${CMAKE_DL_LIBS} raylib raylib_cpp)
+target_link_libraries(gameview-scene ${Boost_LIBRARIES} ${CMAKE_DL_LIBS} raylib raylib_cpp)
 
 FILE(GLOB SRCFILES src/*.cpp src/scenes/scene.cpp)
 add_executable(meowchkin ${SRCFILES})

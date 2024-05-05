@@ -1,3 +1,4 @@
+#include <boost/dll/alias.hpp>
 #include <cstring>
 #include <iostream>
 #include <string>
@@ -135,7 +136,13 @@ public:
         }
         GuiStatusBar(Rectangle{w - 300.0f, h - 40.0f, 300, 40}, status_bar_text.c_str());
     }
+
+    static std::shared_ptr<MainMenu> make_mainmenu() {
+        return std::make_shared<MainMenu>();
+    }
 };
+
+BOOST_DLL_ALIAS(meow::MainMenu::make_mainmenu, make_mainmenu)
 
 // NOLINTBEGIN cppcoreguidelines-avoid-non-const-global-variables
 extern "C" BOOST_SYMBOL_EXPORT MainMenu main_menu;
