@@ -2,27 +2,31 @@
 #define GAME_SESSION_HPP_
 
 #include <vector>
-#include "game.hpp"
+#include "shared_game_state.hpp"
 #include "virtual_machine.hpp"
 // #include "game_view.hpp"
 #include "message_types.hpp"
 
-namespace meow {
+namespace meow::model {
 
 struct GameSession {
+    friend struct VirtualMachine;
+
 private:
     std::size_t user_id{};
 
 public:
     //  пока GameSession не дописан game будет public для удобства тестирования.
-    model::Game game;
+    SharedGameState shared_state;
+    std::unique_ptr<GameState> current_state;
 
-    GameSession() {
-        model::VirtualMachine::get_instance().set_game_reference(&game);
+    GameSession(const std::vector<std::size_t> &users)
+        : shared_state(users), current_state(std::make_unique<InitState>(&shared_state)) {
+        VirtualMachine::get_instance().set_game_session_reference(this);
     }
 
     // GameView *observed;
-    std::vector<const char *> cards_on_board;
+    // std::vector<const char *> cards_on_board;
 
     /*
     void notify_gameview(const network::Action &) {
@@ -31,6 +35,6 @@ public:
     */
 };
 
-}  // namespace meow
+}  // namespace meow::model
 
 #endif

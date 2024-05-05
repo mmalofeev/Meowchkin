@@ -22,19 +22,19 @@ private:
     int unused_smut = 1;
     int unused_breastplate = 1;
     int cards_after_turn_balance = 5;
-    const std::size_t max_cards_in_hand = 10;
+    static constexpr std::size_t max_cards_in_hand = 10;
 
     // оставил на потом
     // std::optional<Race> race_;
     // std::optional<Class> class_;
 
     std::vector<std::unique_ptr<Card>> hand;
-    std::set<std::unique_ptr<Card>> storage;
+    std::vector<std::unique_ptr<Card>> storage;
 
 public:
     const std::size_t user_id;
 
-    Player(std::size_t user_id) : user_id(user_id) {
+    explicit Player(std::size_t user_id) : user_id(user_id) {
     }
 
     int power() const {
@@ -46,7 +46,7 @@ public:
     }
 
     void add_card_to_storage(std::unique_ptr<Card> card) {
-        storage.insert(std::move(card));
+        storage.emplace_back(std::move(card));
     }
 
     void add_card_to_hand(std::unique_ptr<Card> card) {
@@ -56,6 +56,8 @@ public:
     }
 
     std::unique_ptr<Card> drop_card_from_hand_by_id(std::size_t obj_id);
+
+    std::unique_ptr<Card> drop_card_from_storage_by_id(std::size_t obj_id);
 
     const Card *get_card_from_hand_by_id(std::size_t obj_id) const;
 

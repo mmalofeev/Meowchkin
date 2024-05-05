@@ -1,12 +1,12 @@
 #include "model_card_manager.hpp"
-#include "paths_to_binaries.hpp"
-#include "model_card.hpp"
-
-#include <nlohmann/json.hpp>
 #include <cassert>
 #include <fstream>
+#include <map>
 #include <memory>
+#include <nlohmann/json.hpp>
 #include <vector>
+#include "model_card.hpp"
+#include "paths_to_binaries.hpp"
 
 namespace meow {
 CardManager::CardManager() {
@@ -27,10 +27,11 @@ CardManager::CardManager() {
         std::size_t card_id = counter++;
         model::CardType type = str_to_type[card["type"].get<std::string>()];
         bool openable = card["openable"].get<bool>();
+        bool storable = card["storable"].get<bool>();
         std::vector<model::Command> verification =
             model::Command::parse(card["verification"].get<std::vector<std::string>>());
 
-        model::CardInfo info(image, card_id, type, openable, verification);
+        model::CardInfo info(image, card_id, type, openable, storable, verification);
 
         switch (type) {
             case model::CardType::SPELL: {
@@ -38,12 +39,11 @@ CardManager::CardManager() {
                     model::Command::parse(card["action"].get<std::vector<std::string>>());
                 std::vector<model::Command> unwind =
                     model::Command::parse(card["unwind"].get<std::vector<std::string>>());
-                bool storable = card["storable"].get<bool>();
-                bool is_one_time = card["is_one_time"].get<bool>();
+                int cost = card["cost"].get<int>();
 
-                cards_instances.emplace_back(std::make_unique<model::SpellCardInfo>(
-                    std::move(info), storable, is_one_time, action, unwind
-                ));
+                cards_instances.emplace_back(
+                    std::make_unique<model::SpellCardInfo>(std::move(info), cost, action, unwind)
+                );
             } break;
             default:
                 break;
@@ -54,7 +54,9 @@ CardManager::CardManager() {
 std::unique_ptr<model::Card> CardManager::get_card(std::size_t card_id) const {
     switch (cards_instances.at(card_id)->type) {
         case model::CardType::SPELL: {
-            return std::make_unique<model::SpellCard>(cards_instances.at(card_id).get());
+            auto result = std::make_unique<model::SpellCard>(cards_instances.at(card_id).get());
+            obj_id_to_card_id[result->obj_id] = card_id;
+            return result;
         } break;
         default:
             break;
@@ -62,4 +64,19 @@ std::unique_ptr<model::Card> CardManager::get_card(std::size_t card_id) const {
     assert(false);
     return nullptr;
 }
+
+void CardManager::delete_obj_id(std::size_t obj_id) {
+    assert(obj_id_to_card_id.find(obj_id) != obj_id_to_card_id.end());
+    obj_id_to_card_id.erase(obj_id_to_card_id.find(obj_id));
+}
+
+const model::CardInfo *CardManager::get_card_info_by_obj_id(std::size_t obj_id) const {
+    assert(obj_id_to_card_id.find(obj_id) != obj_id_to_card_id.end());
+    return cards_instances[obj_id_to_card_id[obj_id]].get();
+}
+
+std::size_t CardManager::get_number_of_cards() const {
+    return cards_instances.size();
+}
+
 }  // namespace meow

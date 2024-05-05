@@ -5,7 +5,7 @@
         "image": "",
         "openable": true,
         "storable": false,
-        "is_one_time": false,
+        "cost": 0,
         "verification": [
           "IS_DESK",
           "RETURN"

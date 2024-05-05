@@ -60,8 +60,7 @@ public:
             {"card_id", card_id},
             {"target_player", target_player},
             {"sender_player", sender_player},
-            {"card_filename", card_filename}
-        };
+            {"card_filename", card_filename}};
     }
 };
 
@@ -144,8 +143,7 @@ public:
             {"message", message},
             {"sender_player", sender_player},
             {"general", general},
-            {"target_player", target_player}
-        };
+            {"target_player", target_player}};
     }
 };
 }  // namespace meow::network

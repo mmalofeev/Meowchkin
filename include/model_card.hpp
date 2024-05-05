@@ -7,13 +7,14 @@
 
 namespace meow::model {
 
-enum class CardType { SPELL, MONSTER, RACE, CLASS, ITEM };
+enum class CardType { SPELL, MONSTER, RACE, CLASS, ITEM, DICE };
 
 struct CardInfo {
     const std::string image;
     const std::size_t card_id;
     const CardType type;
     const bool openable;
+    const bool storable;
     const std::vector<Command> verification;
 
     CardInfo(
@@ -21,12 +22,14 @@ struct CardInfo {
         std::size_t card_id,
         CardType type,
         bool openable,
+        bool storable,
         const std::vector<Command> &verification
     )
         : image(image),
           card_id(card_id),
           type(type),
           openable(openable),
+          storable(storable),
           verification(verification) {
     }
 
@@ -36,22 +39,16 @@ struct CardInfo {
 struct SpellCardInfo : CardInfo {
 public:
     const std::vector<Command> action;
-    const std::vector<Command> unwind; // will be called when the action needs to be canceled
-    const bool storable;
-    const bool is_one_time;
+    const std::vector<Command> unwind;  // will be called when the action needs to be canceled
+    const int cost;
 
     SpellCardInfo(
         CardInfo base,
-        bool storable,
-        bool is_one_time,
+        int cost,
         const std::vector<Command> &action,
         const std::vector<Command> &unwind
     )
-        : CardInfo(std::move(base)),
-          action(action),
-          unwind(unwind),
-          storable(storable),
-          is_one_time(is_one_time) {
+        : CardInfo(std::move(base)), action(action), unwind(unwind), cost(cost) {
     }
 };
 
@@ -77,7 +74,9 @@ public:
     }
 
     bool verify(std::size_t player_id, std::size_t target_id) const;
-    virtual void apply(std::size_t player_id, std::size_t target_id) = 0;
+    virtual void apply(std::size_t player_id, std::size_t target_id){};
+
+    virtual ~Card();
 };
 
 struct SpellCard : Card {

@@ -3,9 +3,9 @@
 
 #include <deque>
 #include <string>
+#include "client.hpp"
 #include "gui_window_dependable.hpp"
 #include "raylib-cpp.hpp"
-#include "client.hpp"
 
 namespace meow {
 
