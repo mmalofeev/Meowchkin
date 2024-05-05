@@ -22,52 +22,46 @@ std::string get_client_name(const meow::network::Client &client, std::size_t id)
 
 void meow::GuiTextChat::set_window(raylib::Window *window) {
     m_window = window;
-    m_border.x = window->GetWidth() - (message_rectangle_size.x + 10);
-    m_border.y = 400;
-    m_border.width = message_rectangle_size.x;
+    const raylib::Vector2 offset = {(m_window->GetWidth() - message_width) / 2.0f, 10.0f};
+    m_border.width = message_width;
     m_border.height = 0;
-    position = m_border.GetPosition();
+    m_border.SetPosition(offset);
 }
 
 void meow::GuiTextChat::receive(const network::ChatMessage &msg) {
     m_messages.push_back(msg);
     if (m_messages.size() > max_messages) {
         m_messages.pop_front();
-        m_border.height -= message_rectangle_size.y;
+        m_border.height -= message_height;
     }
-    m_border.height += message_rectangle_size.y;
+    m_border.height += message_height;
 }
 
 void meow::GuiTextChat::draw(network::Client &client) {
-    m_border.SetPosition(position);
-    raylib::Vector2 offset{0, 0};
+    raylib::Vector2 offset = {(m_window->GetWidth() - message_width) / 2.0f, 10.0f};
     for (const auto &msg : m_messages) {
         static const raylib::Font font = raylib::LoadFontEx(gui_font_path, 20.0f, 0, 0);
-        raylib::Rectangle(position + offset, message_rectangle_size).Draw(raylib::Color::SkyBlue());
+        raylib::Rectangle(offset, raylib::Vector2{message_width, message_height})
+            .Draw(raylib::Color(0xFFFFFF44));
         std::string text = (std::stringstream{} << get_client_name(client, msg.sender_player)
                                                 << ": " << msg.message)
                                .str();
         raylib::DrawTextEx(
-            font, text, {(position + offset).x, (position + offset).y}, 20.0f, 0.0f,
-            raylib::Color::Blue()
+            font, text, {offset.x + 5.0f, offset.y + 5.0f}, 20.0f, 0.0f, raylib::Color::RayWhite()
         );
-        offset.y += message_rectangle_size.y;
+        offset.y += message_height;
     }
 
     if (GuiTextBox(
             raylib::Rectangle(
-                m_border.GetPosition() + m_border.GetSize() +
-                    raylib::Vector2(-message_rectangle_size.x, 0),
-                message_rectangle_size
+                m_border.GetPosition() + m_border.GetSize() + raylib::Vector2(-message_width, 0),
+                raylib::Vector2(message_width, message_height)
             ),
-            msg, 100, true
+            m_msg, 100, true
         ) &&
-        std::strlen(msg) > 0) {
-        for (std::size_t i = 0, len = std::strlen(msg); i < len; i += 20) {
-            // receive({std::string(msg + i, msg + std::min(i + 20, len)), "sender"});
-            client.send_chat_message(network::ChatMessage(msg, client.get_id_of_client()));
-        }
-        msg[0] = 0;
+        std::strlen(m_msg) > 0) {
+        client.send_chat_message(network::ChatMessage(m_msg, client.get_id_of_client()));
+        m_msg[0] = 0;
     }
     m_border.DrawLines(raylib::Color::Red());
 }

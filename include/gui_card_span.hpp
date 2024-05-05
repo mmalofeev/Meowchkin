@@ -2,11 +2,11 @@
 #define GUI_CARD_SPAN_HPP_
 
 #include <algorithm>
-#include <gui_window_dependable.hpp>
 #include <list>
 #include <memory>
 #include <optional>
 #include "gui_card.hpp"
+#include "gui_window_dependable.hpp"
 #include "noncopyable.hpp"
 #include "raygui.h"
 #include "raylib-cpp.hpp"
@@ -17,6 +17,7 @@ class DropDownMenu;
 
 class GuiCardSpan : Noncopyable, WindowDependable<GuiCardSpan> {
     friend class DropDownMenu;
+    friend class PlayerHandDDM;
 
 private:
     struct RemovedGuiCard {
@@ -34,8 +35,17 @@ private:
 
     std::unique_ptr<DropDownMenu> m_dropdown_menu;
 
+    // on all instances!
+    inline static bool something_dragged = false;
+    inline static GuiCard *inspected_card = nullptr;
+    inline static std::optional<raylib::Texture> inspected_card_texture;
+
 public:
     explicit GuiCardSpan(std::unique_ptr<DropDownMenu> ddm) : m_dropdown_menu(std::move(ddm)) {
+    }
+
+    [[nodiscard]] bool somethind_inspected() const {
+        return inspected_card != nullptr;
     }
 
     [[nodiscard]] std::size_t card_count() const noexcept {
@@ -87,7 +97,8 @@ public:
     }
 
     void remove_card(std::size_t card_id);
-    void draw_cards(float frame_time, bool can_be_dragged);
+    void draw_cards(float frame_time);
+    static void draw_inspected_card(int window_width, int window_height);
 };
 
 }  // namespace meow

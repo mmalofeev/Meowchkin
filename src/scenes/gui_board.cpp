@@ -1,8 +1,11 @@
 #include "gui_board.hpp"
+#include <chrono>
+#include <cmath>
 #include <iostream>
 #include "Vector2.hpp"
 #include "message_types.hpp"
 #include "paths_to_binaries.hpp"
+#include "timed_state_machine.hpp"
 
 namespace meow {
 
@@ -36,8 +39,20 @@ void GuiBoard::setup(raylib::Window *window, GuiCardSpan *hand, network::Client 
     m_opponent_cards.set_span_borders(m_rect, {m_rect.x, m_rect.height / 2 + 30});
 }
 
-void GuiBoard::draw(float frame_time, bool is_pause) {
-    m_rect.DrawRoundedLines(0.1, 4, 5, raylib::Color::RayWhite());
+void GuiBoard::draw(float frame_time) {
+    static int color1 = 0xFFFFFFDD;
+    static int color2 = 0xFFFFFFFF;
+    static auto bebra = make_timed_state_machine([this, frame_time](auto, auto){
+        color1 = (int)(color1 + (color2 - color1) * frame_time);
+    });
+    if (m_player_hand->selected()) {
+        color2 = 0xFFFFFFFF;
+    } else {
+        color2 = 0xFFFFFFBB;
+    }
+    bebra(std::chrono::milliseconds(1000), true);
+    m_texture.Draw(m_rect.GetPosition(), raylib::Color(color1));
+    m_rect.DrawLines(raylib::Color::RayWhite(), 5);
     raylib::Vector2(m_rect.x, m_rect.y + m_rect.height / 2.0f)
         .DrawLine({m_rect.x + m_rect.width, m_rect.y + m_rect.height / 2.0f}, raylib::Color::Red());
     m_drop_card_rect.DrawLines(raylib::Color::Green());
@@ -48,8 +63,8 @@ void GuiBoard::draw(float frame_time, bool is_pause) {
         add_card(m_player_hand->pop_selected().filename);
     }
 
-    m_kitten_cards.draw_cards(frame_time, is_pause);
-    m_opponent_cards.draw_cards(frame_time, is_pause);
+    m_kitten_cards.draw_cards(frame_time);
+    m_opponent_cards.draw_cards(frame_time);
 }
 
 void GuiBoard::add_card(std::string_view card_filename) {

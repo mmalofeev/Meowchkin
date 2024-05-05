@@ -33,7 +33,7 @@ public:
     }
 
     void setup(raylib::Window *window, GuiCardSpan *hand, network::Client *client);
-    void draw(float frame_time, bool is_pause);
+    void draw(float frame_time);
     void add_card(std::string_view card_filename);
 
     void remove_card(std::string_view card_filename) {

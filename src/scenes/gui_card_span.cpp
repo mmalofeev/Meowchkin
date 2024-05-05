@@ -1,5 +1,10 @@
 #include "gui_card_span.hpp"
+#include <chrono>
+#include <cstdlib>
+#include "gui_card_loader.hpp"
 #include "gui_card_span_dropdown_menu.hpp"
+#include "raylib.h"
+#include "timed_state_machine.hpp"
 
 namespace meow {
 
@@ -25,24 +30,26 @@ void GuiCardSpan::recalculate_card_rects() noexcept {
 }
 
 void GuiCardSpan::add_card(std::string_view path_to_texture) {
-    raylib::Image img;
+    raylib::Image img, img2;
     try {
-        img.Load(path_to_texture.data());
-        img.Resize(GuiCard::width, GuiCard::height);
-        img.Mipmaps();
+        img = meow::load_card_img(path_to_texture);
+        // img.Load(path_to_texture.data());
+        // img.Mipmaps();
     } catch (const raylib::RaylibException &) {
         img = raylib::Image::Color(GuiCard::width, GuiCard::height, raylib::Color::Green());
     }
+    img2 = img;
+    img.Resize(GuiCard::width, GuiCard::height);
     raylib::Texture tex = raylib::Texture(img);
     tex.GenMipmaps();
     add_card(
-        {raylib::Rectangle(m_window->GetWidth(), 0, 0, 0), raylib::Vector2(0), std::move(tex),
+        {raylib::Rectangle(m_window->GetWidth(), 0, 0, 0), raylib::Vector2(0), std::move(tex), img2,
          path_to_texture.data()}
     );
 }
 
 void GuiCardSpan::add_card(GuiCard &&card) {
-    m_cards.push_back(std::move(card));
+    m_cards.emplace_back(std::move(card));
     m_card_gap -= 10;
     recalculate_card_rects();
 }
@@ -71,7 +78,8 @@ void GuiCardSpan::remove_card() {
     recalculate_card_rects();
 }
 
-void GuiCardSpan::draw_cards(float frame_time, bool can_be_dragged) {
+void GuiCardSpan::draw_cards(float frame_time) {
+    const bool can_be_dragged = !something_dragged;
     if (!can_be_dragged || raylib::Mouse::IsButtonReleased(MOUSE_BUTTON_LEFT)) {
         m_selected = m_cards.end();
     }
@@ -96,15 +104,17 @@ void GuiCardSpan::draw_cards(float frame_time, bool can_be_dragged) {
 
     // ratio is for texture; maybe i should store ratio as class member
     const double ratio = std::sqrt(m_span_borders.height / m_window->GetHeight());
-    for (auto card_it = m_cards.begin(); card_it != m_cards.end(); card_it++) {
+    for (auto card_it = m_cards.begin(); card_it != m_cards.end(); ++card_it) {
         if (card_it == m_selected) {
             continue;
         }
+
         if (m_selected == m_cards.end()) {
             card_it->border.DrawRounded(0.1f, 4, raylib::Color(0x004400FF));
         } else {
             card_it->border.DrawRounded(0.1f, 4, raylib::Color(0x00440088));
         }
+
         card_it->texture.Draw(
             card_it->border.GetPosition(), 0, ratio, raylib::Color(255, 255, 255, 200)
         );
@@ -144,6 +154,35 @@ void GuiCardSpan::draw_cards(float frame_time, bool can_be_dragged) {
         }
     }
     m_dropdown_menu->draw();
+    something_dragged = m_selected != m_cards.end();
+}
+
+void GuiCardSpan::draw_inspected_card(int window_width, int window_height) {
+    if (inspected_card == nullptr) {
+        return;
+    }
+    if (!inspected_card_texture) {
+        inspected_card_texture = raylib::Texture(inspected_card->orig_img);
+    }
+    raylib::Color col{255, 255, 255, 255};
+    // static auto blinker = make_timed_state_machine([&col](auto st, auto et) {
+    //     auto t =
+    //         (float)(et - std::chrono::steady_clock::now()).count() / (et - st).count();  // [0..1]
+    //     t = std::abs((t - 0.5) * 255 / 2.0f);  // [-125..125] * 1/4
+    //     col.a = 3 * 255 / 4.0f + t;            // [125..255]
+    //     // col.a = 255 - col.g;//(float)(et - std::chrono::steady_clock::now()).count() / (et -
+    //     // st).count();
+    // });
+    const raylib::Vector2 pos{
+        (window_width - inspected_card->orig_img.width) / 2.0f,
+        (window_height - inspected_card->orig_img.height) / 2.0f
+    };
+    // blinker(std::chrono::seconds(5), true);
+    inspected_card_texture->Draw(pos, col);
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        // inspected_card_texture = std::nullopt;
+        inspected_card = nullptr;
+    }
 }
 
 }  // namespace meow

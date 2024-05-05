@@ -2,6 +2,7 @@
 #define RAYLIB_GAME_VIEW_HPP_
 
 #include <filesystem>
+#include <functional>
 #include <memory>
 #include <variant>
 #include "enum_array.hpp"
@@ -11,7 +12,7 @@
 #include "gui_player_statistics_menu.hpp"
 #include "gui_text_chat.hpp"
 #include "gui_usernames_box.hpp"
-#include "raygui.h"
+#include "timed_state_machine.hpp"
 
 namespace meow {
 
@@ -29,17 +30,15 @@ private:
         GuiPlayerStatisticsMenu stats{};
     } m_gameplay_objects;
 
-    enum class PauseButton { CONTINUE, BACK_TO_LOBBY, QUIT, COUNT };  // TODO: settings
-
     struct PauseMenuObjs {
-        EnumArray<PauseButton, const char *> pause_button_labels = {
+        enum class PauseButton { CONTINUE, BACK_TO_LOBBY, QUIT, COUNT };  // TODO: settings
+        EnumArray<PauseButton, const char *> button_labels = {
             {PauseButton::CONTINUE, "Continue"},
             {PauseButton::BACK_TO_LOBBY, "Back to lobby"},
             {PauseButton::QUIT, "Quit"},
         };
-        EnumArray<PauseButton, raylib::Rectangle> pause_button_rects{};
-        EnumArray<PauseButton, bool> pause_button_pressed{};
-        bool should_draw_pause = false;
+        EnumArray<PauseButton, raylib::Rectangle> button_rects{};
+        EnumArray<PauseButton, bool> button_pressed{};
     } m_pause_menu_objects;
 
     std::variant<GameplayObjs *, PauseMenuObjs *> m_active_display;
@@ -51,7 +50,10 @@ private:
     /* misc */
     std::vector<std::filesystem::path> m_card_image_paths;
     bool m_show_chat = false;
-    bool m_something_dragged = false;
+    raylib::Texture m_on_levelup_texture;
+    std::function<void(std::chrono::milliseconds, bool)> m_levelup_blink_call =
+        make_timed_state_machine([this](auto, auto) { m_on_levelup_texture.Draw(); });
+    bool m_levelup_blink = false;
 
 protected:
     void on_instances_attach() override;
@@ -65,7 +67,7 @@ public:
     void on_card_remove(std::string_view card_filename) override;
     void on_turn_begin() override;
     void on_turn_end() override;
-    void on_levelup() override;  // maybe?..
+    void on_levelup() override;
     void on_card_receive() override;
     void on_item_equip() override;
     void on_item_loss() override;
