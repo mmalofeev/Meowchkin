@@ -13,9 +13,6 @@ class GuiBoard {
     friend class RaylibGameView;
 
 private:
-    static constexpr const int width = 1200;
-    static constexpr const int height = 700;
-
     GuiCardSpan *m_player_hand = nullptr;
     raylib::Window *m_window = nullptr;
     network::Client *m_client = nullptr;
@@ -27,6 +24,10 @@ private:
     GuiCardSpan m_opponent_cards;
 
 public:
+    static constexpr const int width = 1200;
+    static constexpr const int height = 700;
+    static constexpr const int offset_top = 60;
+
     GuiBoard()
         : m_kitten_cards(std::make_unique<DropDownMenu>(&m_kitten_cards)),
           m_opponent_cards(std::make_unique<DropDownMenu>(&m_opponent_cards)) {

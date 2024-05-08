@@ -2,9 +2,11 @@
 #include <boost/dll/alias.hpp>
 #include <chrono>
 #include <iostream>
+#include <limits>
 #include <ratio>
 #include <string_view>
 #include <variant>
+#include "RaylibException.hpp"
 #include "gui_card_loader.hpp"
 #include "gui_dice_roller.hpp"
 #include "paths_to_binaries.hpp"
@@ -38,6 +40,7 @@ void meow::RaylibGameView::on_instances_attach() {
     setup_background();
     setup_pause_menu();
     setup_hand();
+    setup_active_display_selector();
     m_gameplay_objects.board.setup(m_window, &m_gameplay_objects.player_hand, m_client);
     m_gameplay_objects.text_chat.set_window(m_window);
     m_gameplay_objects.usernames_box.set_window(m_window);
@@ -65,13 +68,39 @@ void meow::RaylibGameView::setup_background() {
 }
 
 void meow::RaylibGameView::setup_pause_menu() {
-    for (std::size_t i = 0; i < m_pause_menu_objects.button_rects.size(); i++) {
-        m_pause_menu_objects.button_rects[i].width = button_width;
-        m_pause_menu_objects.button_rects[i].height = button_height;
+    for (std::size_t i = 0; i < m_pause_menu_objects.button_rects.size(); ++i) {
+        m_pause_menu_objects.button_rects[i].width = PauseMenuObjs::button_width;
+        m_pause_menu_objects.button_rects[i].height = PauseMenuObjs::button_height;
         m_pause_menu_objects.button_rects[i].x =
-            (float)m_window->GetWidth() / 2 - (float)button_width / 2;
+            (float)m_window->GetWidth() / 2 - (float)PauseMenuObjs::button_width / 2;
         m_pause_menu_objects.button_rects[i].y =
-            (float)m_window->GetHeight() / 2 + i * button_height;
+            (float)m_window->GetHeight() / 2 + i * PauseMenuObjs::button_height;
+    }
+}
+
+void meow::RaylibGameView::setup_active_display_selector() {
+    auto &br = m_active_display_selector.button_rects;
+    auto &texs = m_active_display_selector.button_texs;
+
+    float height = 0;
+    const int w = ActiveDisplaySelector::button_width, h = ActiveDisplaySelector::button_height;
+    for (std::size_t i = 0; i < br.size(); ++i) {
+        br[i].width = w;
+        br[i].height = h;
+        br[i].x = (float)(m_window->GetWidth() - GuiBoard::width) / 2 - h;
+        height = br[i].y = i * h;
+
+        try {
+            texs[i] = raylib::Image(m_active_display_selector.button_texture_paths[i]).Resize(w, h);
+        } catch (const raylib::RaylibException &) {
+            texs[i] = raylib::Image().Color(w, h, raylib::Color(random_integer<unsigned>()));
+        }
+    }
+
+    // align with board center
+    height += h;
+    for (std::size_t i = 0; i < br.size(); ++i) {
+        br[i].y = br[i].y - height / 2 + GuiBoard::offset_top + GuiBoard::height / 2.0f;
     }
 }
 
@@ -85,8 +114,8 @@ void meow::RaylibGameView::setup_hand() {
 }
 
 void meow::RaylibGameView::draw_pause_menu() {
-    using PauseButton = PauseMenuObjs::PauseButton;
-    for (std::size_t i = 0; i < m_pause_menu_objects.button_labels.size(); i++) {
+    using PauseButton = PauseMenuObjs::Button;
+    for (std::size_t i = 0; i < m_pause_menu_objects.button_labels.size(); ++i) {
         m_pause_menu_objects.button_pressed[i] =
             GuiButton(m_pause_menu_objects.button_rects[i], m_pause_menu_objects.button_labels[i]);
     }
@@ -101,25 +130,42 @@ void meow::RaylibGameView::draw_pause_menu() {
     }
 }
 
+void meow::RaylibGameView::draw_active_display_selector() {
+    auto &br = m_active_display_selector.button_rects;
+    auto &texs = m_active_display_selector.button_texs;
+    auto &pressed = m_active_display_selector.button_pressed;
+
+    GuiSetAlpha(0.3f);
+    for (std::size_t i = 0; i < br.size(); ++i) {
+        br[i].DrawRoundedLines(0.1, 4, 1, raylib::Color::RayWhite());
+        br[i].DrawRounded(0.1, 4, raylib::Color(0xFFFFFF88));
+        texs[i].Draw(br[i].GetPosition());
+        pressed[i] = GuiButton(br[i], "");
+    }
+    GuiSetAlpha(1.0f);
+
+    using Button = ActiveDisplaySelector::Button;
+    if (pressed[Button::BRAWL]) {
+        m_active_display = &m_gameplay_objects;
+        m_show_chat = false;
+    } else if (pressed[Button::PAUSE]) {
+        m_active_display = &m_pause_menu_objects;
+    } else if (pressed[Button::CHAT]) {
+        m_show_chat = !m_show_chat;
+    }
+}
+
 void meow::RaylibGameView::draw() {
     Overload active_display_visitor = {
         [this](GameplayObjs *objs) {
             objs->board.draw(m_window->GetFrameTime());
             objs->player_hand.draw_cards(m_window->GetFrameTime());
             objs->usernames_box.draw();
-            if (objs->stats.m_borders.CheckCollision(raylib::Mouse::GetPosition()) &&
-                raylib::Mouse::IsButtonDown(MOUSE_BUTTON_LEFT)) {
-                objs->stats.m_borders.x += raylib::Mouse::GetDelta().x;
-                objs->stats.m_borders.y += raylib::Mouse::GetDelta().y;
-            }
             if (m_show_chat) {
-                // if (objs->text_chat.get_border().CheckCollision(raylib::Mouse::GetPosition()) &&
-                //     raylib::Mouse::IsButtonDown(MOUSE_BUTTON_LEFT)) {
-                //     objs->text_chat.position += raylib::Mouse::GetDelta();
-                // }
                 objs->text_chat.draw(*m_client);
             }
             objs->stats.draw();  // TODO: move to separate object
+            draw_active_display_selector();
             GuiCardSpan::draw_inspected_card(m_window->GetWidth(), m_window->GetHeight());
 
             if (GuiButton({0, 0, 40, 40}, "-") && objs->player_hand.card_count() > 0) {
@@ -129,9 +175,6 @@ void meow::RaylibGameView::draw() {
                 const auto random_index =
                     random_integer<std::size_t>(0, m_card_image_paths.size() - 1);
                 objs->player_hand.add_card(m_card_image_paths[random_index].c_str());
-            }
-            if (IsKeyDown(KEY_LEFT_SHIFT) && IsKeyPressed(KEY_ENTER)) {
-                m_show_chat = !m_show_chat;
             }
             if (objs->player_hand.somethind_inspected()) {
                 m_blur.Draw();
@@ -144,6 +187,7 @@ void meow::RaylibGameView::draw() {
         [](auto...) { throw std::runtime_error("unhandled type(s) in active display!"); }
     };
 
+    // FIXME
     if (auto action = m_client->receive_action(); action) {
         if (random_integer(0, 1) == 0) {
             m_gameplay_objects.board.m_kitten_cards.add_card(action->card_filename);
@@ -151,6 +195,7 @@ void meow::RaylibGameView::draw() {
             m_gameplay_objects.board.m_opponent_cards.add_card(action->card_filename);
         }
     }
+
     if (auto chat_message = m_client->receive_chat_message(); chat_message) {
         std::cout << "received from " << chat_message->sender_player << ": "
                   << chat_message->message << '\n';
@@ -158,11 +203,7 @@ void meow::RaylibGameView::draw() {
     }
 
     m_background.Draw();
-    // m_board.draw(m_window->GetFrameTime(), !m_should_draw_pause);
     std::visit(active_display_visitor, m_active_display);
-
-    // GuiStatusBar({0, (float)m_window->GetHeight() - 30, 100, 30}, "status bar....");
-
 
     if (IsKeyPressed(KEY_SPACE)) {
         on_levelup();
@@ -198,9 +239,9 @@ void meow::RaylibGameView::on_turn_end() {
 }
 
 void meow::RaylibGameView::on_levelup() {
-    ++m_gameplay_objects.stats.menu_elements[GuiPlayerStatisticsMenu::StatisticKind::LEVEL].value;
-    m_gameplay_objects.stats.blink = true;
-    m_gameplay_objects.stats.blink_color = raylib::Color(0, 200, 0, 180);
+    // ++m_gameplay_objects.stats.menu_elements[GuiPlayerStatisticsMenu::StatisticKind::LEVEL].value;
+    // m_gameplay_objects.stats.blink = true;
+    // m_gameplay_objects.stats.blink_color = raylib::Color(0, 200, 0, 180);
     m_levelup_blink = true;
 }
 

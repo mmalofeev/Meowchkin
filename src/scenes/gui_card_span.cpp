@@ -161,18 +161,13 @@ void GuiCardSpan::draw_inspected_card(int window_width, int window_height) {
     if (inspected_card == nullptr) {
         return;
     }
-    if (!inspected_card_texture) {
+
+    static bool reset = true;
+    if (reset) {
         inspected_card_texture = raylib::Texture(inspected_card->orig_img);
+        reset = false;
     }
     raylib::Color col{255, 255, 255, 255};
-    // static auto blinker = make_timed_state_machine([&col](auto st, auto et) {
-    //     auto t =
-    //         (float)(et - std::chrono::steady_clock::now()).count() / (et - st).count();  // [0..1]
-    //     t = std::abs((t - 0.5) * 255 / 2.0f);  // [-125..125] * 1/4
-    //     col.a = 3 * 255 / 4.0f + t;            // [125..255]
-    //     // col.a = 255 - col.g;//(float)(et - std::chrono::steady_clock::now()).count() / (et -
-    //     // st).count();
-    // });
     const raylib::Vector2 pos{
         (window_width - inspected_card->orig_img.width) / 2.0f,
         (window_height - inspected_card->orig_img.height) / 2.0f
@@ -181,6 +176,7 @@ void GuiCardSpan::draw_inspected_card(int window_width, int window_height) {
     inspected_card_texture->Draw(pos, col);
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         // inspected_card_texture = std::nullopt;
+        reset = true;
         inspected_card = nullptr;
     }
 }

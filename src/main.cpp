@@ -18,7 +18,7 @@ namespace meow {
 
 namespace network {
 constexpr const char *port_file = "port.txt";
-constexpr std::size_t players_count = 2;
+constexpr std::size_t players_count = 1;
 }  // namespace network
 
 class Application {
@@ -72,13 +72,13 @@ public:
         SetExitKey(0);
         m_window.SetTargetFPS(60);
         m_mainmenu->attach_instances(&m_client, &m_window);
-        m_music.SetLooping(true);
-        m_music.Play();
+        // m_music.SetLooping(true);
+        // m_music.Play();
     }
 
     void run() {
         while (!m_window.ShouldClose() && m_scene_manager->active_scene()->running()) {
-            m_music.Update();
+            // m_music.Update();
             response();
             render();
         }

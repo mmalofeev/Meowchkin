@@ -17,7 +17,7 @@ void GuiBoard::setup(raylib::Window *window, GuiCardSpan *hand, network::Client 
     m_window = window;
     m_client = client;
 
-    const raylib::Vector2 offset = {(m_window->GetWidth() - width) / 2.0f, 10.0f};
+    const raylib::Vector2 offset = {(m_window->GetWidth() - width) / 2.0f, offset_top};
     m_rect = raylib::Rectangle(offset.x, offset.y, width, height);
     const float rect_side = 10.0f;
     m_drop_card_rect = raylib::Rectangle(
@@ -40,7 +40,7 @@ void GuiBoard::setup(raylib::Window *window, GuiCardSpan *hand, network::Client 
 }
 
 void GuiBoard::draw(float frame_time) {
-    static int color1 = 0xFFFFFFDD;
+    static int color1 = 0xFFFFFFED;
     static int color2 = 0xFFFFFFFF;
     static auto bebra = make_timed_state_machine([this, frame_time](auto, auto){
         color1 = (int)(color1 + (color2 - color1) * frame_time);

@@ -18,8 +18,6 @@ namespace meow {
 
 class RaylibGameView : public GameView {
 private:
-    static constexpr int button_width = 300;
-    static constexpr int button_height = 40;
     inline static const raylib::Color background_color = raylib::Color(77, 120, 204, 255);
 
     struct GameplayObjs {
@@ -31,17 +29,36 @@ private:
     } m_gameplay_objects;
 
     struct PauseMenuObjs {
-        enum class PauseButton { CONTINUE, BACK_TO_LOBBY, QUIT, COUNT };  // TODO: settings
-        EnumArray<PauseButton, const char *> button_labels = {
-            {PauseButton::CONTINUE, "Continue"},
-            {PauseButton::BACK_TO_LOBBY, "Back to lobby"},
-            {PauseButton::QUIT, "Quit"},
+        static constexpr int button_width = 300;
+        static constexpr int button_height = 40;
+
+        enum class Button { CONTINUE, BACK_TO_LOBBY, QUIT, COUNT };  // TODO: settings
+        EnumArray<Button, const char *> button_labels = {
+            {Button::CONTINUE, "Continue"},
+            {Button::BACK_TO_LOBBY, "Back to lobby"},
+            {Button::QUIT, "Quit"},
         };
-        EnumArray<PauseButton, raylib::Rectangle> button_rects{};
-        EnumArray<PauseButton, bool> button_pressed{};
+        EnumArray<Button, raylib::Rectangle> button_rects{};
+        EnumArray<Button, bool> button_pressed{};
     } m_pause_menu_objects;
 
     std::variant<GameplayObjs *, PauseMenuObjs *> m_active_display;
+
+    struct ActiveDisplaySelector {
+        static constexpr int button_width = 80;
+        static constexpr int button_height = 80;
+
+        enum class Button { BRAWL, STATS, CHAT, PAUSE, COUNT };
+        EnumArray<Button, const char *> button_texture_paths = {
+            {Button::BRAWL, "bin/imgs/brawl_button_texture.png"},
+            {Button::STATS, "bin/imgs/stats_button_texture.png"},
+            {Button::CHAT, "bin/imgs/chat_button_texture.png"},
+            {Button::PAUSE, "bin/imgs/pause_button_texture.png"},
+        };
+        EnumArray<Button, raylib::Texture> button_texs{};
+        EnumArray<Button, raylib::Rectangle> button_rects{};
+        EnumArray<Button, bool> button_pressed{};
+    } m_active_display_selector;
 
     /* background */
     raylib::Texture m_background;
@@ -81,8 +98,10 @@ public:
 private:
     void setup_background();
     void setup_pause_menu();
+    void setup_active_display_selector();
     void setup_hand();
     void draw_pause_menu();
+    void draw_active_display_selector();
 };
 
 }  // namespace meow

@@ -22,7 +22,7 @@ std::string get_client_name(const meow::network::Client &client, std::size_t id)
 
 void meow::GuiTextChat::set_window(raylib::Window *window) {
     m_window = window;
-    const raylib::Vector2 offset = {(m_window->GetWidth() - message_width) / 2.0f, 10.0f};
+    const raylib::Vector2 offset = {(m_window->GetWidth() - message_width) / 2.0f, 70.0f};
     m_border.width = message_width;
     m_border.height = 0;
     m_border.SetPosition(offset);
@@ -38,7 +38,7 @@ void meow::GuiTextChat::receive(const network::ChatMessage &msg) {
 }
 
 void meow::GuiTextChat::draw(network::Client &client) {
-    raylib::Vector2 offset = {(m_window->GetWidth() - message_width) / 2.0f, 10.0f};
+    raylib::Vector2 offset = {(m_window->GetWidth() - message_width) / 2.0f, 70.0f};
     for (const auto &msg : m_messages) {
         static const raylib::Font font = raylib::LoadFontEx(gui_font_path, 20.0f, 0, 0);
         raylib::Rectangle(offset, raylib::Vector2{message_width, message_height})
