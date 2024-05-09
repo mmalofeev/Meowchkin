@@ -1,5 +1,5 @@
-#include <iostream>
 #include "gui_usernames_box.hpp"
+#include "paths_to_binaries.hpp"
 
 void meow::GuiUsernamesBox::add_username(std::string_view username) {
     m_usernames.push_back(username.data());
@@ -13,7 +13,7 @@ void meow::GuiUsernamesBox::add_username(std::string_view username) {
 void meow::GuiUsernamesBox::draw() const {
     std::size_t i = 0;
     static const raylib::Color colors[] = {0x2F3C7EAA, 0x3B3FEEAA, 0x2F3C7EAA, 0xFBEAEBAA};
-    static const raylib::Font font = raylib::LoadFont("bin/fonts/mono.ttf");
+    static const raylib::Font font = raylib::LoadFont(gui_font_path);
     for (const auto &box : m_boxes) {
         box.DrawGradientH(colors[0], colors[1]);
         box.DrawLines(raylib::Color::Green(), 1);
@@ -39,5 +39,4 @@ void meow::GuiUsernamesBox::set_window(raylib::Window *window) {
     m_border.y = 0;
     m_border.width = width;
     m_border.height = 0;
-    std::cout << m_border.x << '\n' << m_border.y << '\n' << m_border.width << '\n';
 }

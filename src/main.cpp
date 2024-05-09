@@ -1,13 +1,11 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
-#include <stdexcept>
 #include <string>
 #include "client.hpp"
 #include "enum_array.hpp"
-#include "gui_dice_roller.hpp"
+#include "game_session.hpp"
 #include "plugin.hpp"
-#include "raylib-cpp.hpp"
 #include "scene.hpp"
 #include "server.hpp"
 
@@ -24,41 +22,44 @@ private:
     static constexpr int window_height = 1080;
     static constexpr const char *window_title = "meow";
 
-    inline static const meow::EnumArray<meow::SceneType, std::pair<const char *, const char *>>
-        plugin_names{
-            {meow::SceneType::MAIN_MENU, {"mainmenu-scene", "main_menu"}},
-            {meow::SceneType::GAME, {"game-scene", "game_view"}},
-        };
+    static constexpr EnumArray<SceneType, std::pair<const char *, const char *>> plugin_names{
+        {SceneType::MAIN_MENU, {"mainmenu-scene", "make_mainmenu"}},
+        {SceneType::GAME, {"gameview-scene", "make_gameview"}},
+    };
 
     raylib::Window m_window;
-    meow::Plugin<meow::Scene> m_main_menu;
-    meow::Plugin<meow::Scene> m_game_view;
-    std::unique_ptr<meow::SceneManager> m_scene_manager;
-    network::Client &m_client = network::Client::get_instance();
 
+    using maker_scene_t = std::shared_ptr<Scene> (*)();
+    Plugin<maker_scene_t> m_gameview_maker;
+    Plugin<maker_scene_t> m_mainmenu_maker;
+    std::shared_ptr<Scene> m_gameview;
+    std::shared_ptr<Scene> m_mainmenu;
+    std::unique_ptr<SceneManager> m_scene_manager;
+
+    network::Client &m_client = network::Client::get_instance();
     std::string m_client_name;
-    // raylib::Texture m_loading_wheel_texture;
-    // raylib::Shader m_loading_wheel_shader;
+    GameSession m_game_session;
 
 public:
-    explicit Application()
+    Application()
         : m_window(
               window_width,
               window_height,
               window_title,
               FLAG_MSAA_4X_HINT | FLAG_FULLSCREEN_MODE
           ),
-          m_main_menu(plugin_names[meow::SceneType::MAIN_MENU]),
-          m_game_view(plugin_names[meow::SceneType::GAME]),
-          m_scene_manager(std::make_unique<meow::SceneManager>()) {
-        m_scene_manager->set_scene(meow::SceneType::MAIN_MENU, m_main_menu.get());
-        m_scene_manager->set_scene(meow::SceneType::GAME, m_game_view.get());
+          m_mainmenu_maker(plugin_names[SceneType::MAIN_MENU]),
+          m_mainmenu((*m_mainmenu_maker)()),
+          m_gameview_maker(plugin_names[SceneType::GAME]),
+          m_gameview((*m_gameview_maker)()),
+          m_scene_manager(std::make_unique<SceneManager>()),
+          m_game_session(std::dynamic_pointer_cast<GameView>(m_gameview)) {
+        m_scene_manager->set_scene(SceneType::MAIN_MENU, m_mainmenu.get());
+        m_scene_manager->set_scene(SceneType::GAME, m_gameview.get());
 
         SetExitKey(0);
         m_window.SetTargetFPS(60);
-        // m_loading_wheel_texture.Load(raylib::Image::Color(raylib::Color::DarkGray()));
-
-        m_main_menu->attach_instances(&m_client, &m_window);
+        m_mainmenu->attach_instances(&m_client, &m_window);
     }
 
     // as client
@@ -69,8 +70,9 @@ public:
         }
     }
 
+private:
     static void run_server() {
-        auto &server = meow::network::Server::get_instance();
+        auto &server = network::Server::get_instance();
 
         // running on single machine for now, so no hand typing port number
         // for clients hehehehhehehehehe
@@ -79,14 +81,13 @@ public:
         f.close();
 
         server.start_listening(network::players_count);
-        for (std::optional<meow::network::Action> action;; action = server.receive_action()) {
+        for (std::optional<network::Action> action;; action = server.receive_action()) {
             if (action) {
                 server.send_action(action->target_player, *action);
             }
         }
     }
 
-private:
     void join_lobby() {
         m_client.set_name_of_client(m_client_name);
         std::cout << "your name is " << m_client_name << '\n';
@@ -95,36 +96,56 @@ private:
         std::string port;
         f >> port;
         f.close();
-        std::cout << port << '\n';
+        std::cout << "joining to port " << port << '\n';
         m_client.connect(std::string("localhost:") + port);
 
         std::cout << "lobby:\n";
         for (const auto &info : m_client.get_players_info()) {
             std::cout << '\t' << info.name << '\n';
         }
-        m_game_view->attach_instances(&m_client, &m_window);
+        m_gameview->attach_instances(&m_client, &m_window);
     }
 
     void response() {
         m_window.SetFocused();
         if (IsKeyDown(KEY_LEFT_SHIFT) && IsKeyPressed(KEY_R)) {
-            m_main_menu.reload(plugin_names[meow::SceneType::MAIN_MENU]);
-            m_main_menu->attach_instances(&m_client, &m_window);
-            m_scene_manager->set_scene(meow::SceneType::MAIN_MENU, m_main_menu.get());
+            m_mainmenu_maker.reload(plugin_names[SceneType::MAIN_MENU]);
+            m_gameview_maker.reload(plugin_names[SceneType::GAME]);
 
-            m_game_view.reload(plugin_names[meow::SceneType::GAME]);
-            m_game_view->attach_instances(&m_client, &m_window);
-            m_scene_manager->set_scene(meow::SceneType::GAME, m_game_view.get());
+            m_mainmenu.reset();
+            m_mainmenu = (*m_mainmenu_maker)();
+            m_gameview.reset();
+            m_gameview = (*m_gameview_maker)();
+            m_game_session.reset_game_view(std::dynamic_pointer_cast<GameView>(m_gameview));
+
+            m_mainmenu->attach_instances(&m_client, &m_window);
+            m_gameview->attach_instances(&m_client, &m_window);
+
+            m_scene_manager->set_scene(SceneType::MAIN_MENU, m_mainmenu.get());
+            m_scene_manager->set_scene(SceneType::GAME, m_gameview.get());
+            //     m_main_menu.reload(plugin_names[SceneType::MAIN_MENU]);
+            //     m_main_menu->attach_instances(&m_client, &m_window);
+            //     m_scene_manager->set_scene(SceneType::MAIN_MENU, m_main_menu.get());
+            //
+            //     m_game_view.reload(plugin_names[SceneType::GAME]);
+            //     m_game_view->attach_instances(&m_client, &m_window);
+            //     m_scene_manager->set_scene(SceneType::GAME, m_game_view.get());
         }
-        if (auto msg = m_scene_manager->read_message(); msg) {
-            if (msg->find("join lobby") != std::string::npos) {
-                m_client_name = msg->substr(msg->find(':') + 1);
-                join_lobby();
-            } else if (msg->find("create lobby") != std::string::npos) {
-                m_client_name = msg->substr(msg->find(':') + 1);
-                std::thread(meow::Application::run_server).detach();
-                std::this_thread::sleep_for(std::chrono::milliseconds(500));
-                join_lobby();
+
+        static bool connected = false;
+        if (!connected) {
+            if (auto msg = m_scene_manager->read_message(); msg) {
+                if (msg->find("join lobby") != std::string::npos) {
+                    m_client_name = msg->substr(msg->find(':') + 1);
+                    join_lobby();
+                    connected = true;
+                } else if (msg->find("create lobby") != std::string::npos) {
+                    m_client_name = msg->substr(msg->find(':') + 1);
+                    std::thread(Application::run_server).detach();
+                    network::Server::get_instance().wait_for_listening();
+                    join_lobby();
+                    connected = true;
+                }
             }
         }
     }

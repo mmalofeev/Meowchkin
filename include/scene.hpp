@@ -2,7 +2,6 @@
 #define SCENE_HPP_
 
 #include <boost/config.hpp>
-#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -19,19 +18,16 @@ class BOOST_SYMBOL_VISIBLE Scene : Noncopyable {
     friend class SceneManager;
 
 protected:
-    // NOLINTBEGIN cppcoreguidelines-non-private-member-variables-in-classes
     raylib::Window *m_window = nullptr;
     SceneManager *m_scene_manager = nullptr;
     network::Client *m_client = nullptr;
     bool m_running = true;  // will be removed(?...)
 
-    // NOLINTEND
-
     virtual void on_instances_attach() {
     }
 
 public:
-    explicit Scene() = default;
+    Scene() = default;
     virtual void draw() = 0;
 
     // need to pass this to shared object
@@ -55,7 +51,7 @@ private:
     std::optional<std::string> m_message_from_active_scene = std::nullopt;
 
 public:
-    explicit SceneManager() = default;
+    SceneManager() = default;
     void draw_scene() const;
     void switch_scene(SceneType scene_type);
     void set_scene(SceneType scene_type, Scene *scene);
