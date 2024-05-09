@@ -4,8 +4,14 @@
 namespace meow::model {
 
 struct Object {
+    friend struct SharedGameState;
+
 private:
     thread_local static inline std::size_t counter = 0;
+
+    static void set_seed(std::size_t seed) {
+        counter = seed;
+    }
 
 public:
     const std::size_t obj_id;
@@ -14,10 +20,6 @@ public:
     }
 
     Object(std::size_t _obj_id) : obj_id(_obj_id) {
-    }
-
-    static void set_seed(std::size_t seed) {
-        counter = seed;
     }
 
     virtual ~Object() = default;

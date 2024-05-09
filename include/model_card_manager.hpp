@@ -8,6 +8,8 @@
 
 namespace meow {
 
+std::unique_ptr<model::MonsterCard> card_to_monster(std::unique_ptr<model::Card> card);
+
 struct CardManager {
 private:
     std::vector<std::unique_ptr<model::CardInfo>> cards_instances;

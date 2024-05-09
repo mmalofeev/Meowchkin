@@ -8,11 +8,6 @@
 
 namespace meow::model {
 
-void VirtualMachine::set_args(std::size_t player_id, std::size_t target_id) {
-    st.push(static_cast<int>(player_id));
-    st.push(static_cast<int>(target_id));
-}
-
 void VirtualMachine::increse_level(bool force = false) {
     int delta = st.top();
     st.pop();
@@ -21,11 +16,7 @@ void VirtualMachine::increse_level(bool force = false) {
 
     Player *player =
         game_session->shared_state.get_player_by_player_id(static_cast<std::size_t>(player_id));
-    player->level_ += delta;
-
-    if (!force) {
-        player->level_ = std::max(1, std::min(9, player->level_));
-    }
+    player->increse_level(delta, force);
 }
 
 std::optional<int> VirtualMachine::execute(const std::vector<Command> &code) {

@@ -9,6 +9,13 @@
 #include "paths_to_binaries.hpp"
 
 namespace meow {
+
+std::unique_ptr<model::MonsterCard> card_to_monster(std::unique_ptr<model::Card> card) {
+    std::unique_ptr<model::MonsterCard> monster(dynamic_cast<model::MonsterCard *>(card.get()));
+    card.release();
+    return monster;
+}
+
 CardManager::CardManager() {
     std::map<std::string, model::CardType> str_to_type{
         {"SPELL", model::CardType::SPELL},
@@ -34,6 +41,7 @@ CardManager::CardManager() {
         model::CardInfo info(image, card_id, type, openable, storable, verification);
 
         switch (type) {
+            case model::CardType::ITEM:
             case model::CardType::SPELL: {
                 std::vector<model::Command> action =
                     model::Command::parse(card["action"].get<std::vector<std::string>>());
@@ -45,6 +53,21 @@ CardManager::CardManager() {
                     std::make_unique<model::SpellCardInfo>(std::move(info), cost, action, unwind)
                 );
             } break;
+            case model::CardType::MONSTER: {
+                std::vector<model::Command> buff =
+                    model::Command::parse(card["buff"].get<std::vector<std::string>>());
+                std::vector<model::Command> stalking_checker =
+                    model::Command::parse(card["stalking_checker"].get<std::vector<std::string>>());
+                std::vector<model::Command> lewdness =
+                    model::Command::parse(card["lewdness"].get<std::vector<std::string>>());
+                int power = card["power"].get<int>();
+                int treasures = card["treasures"].get<int>();
+                bool undead = card["undead"].get<bool>();
+
+                cards_instances.emplace_back(std::make_unique<model::MonsterCardInfo>(
+                    std::move(info), buff, stalking_checker, lewdness, power, treasures, undead
+                ));
+            } break;
             default:
                 break;
         }
@@ -53,8 +76,14 @@ CardManager::CardManager() {
 
 std::unique_ptr<model::Card> CardManager::get_card(std::size_t card_id) const {
     switch (cards_instances.at(card_id)->type) {
+        case model::CardType::ITEM:
         case model::CardType::SPELL: {
             auto result = std::make_unique<model::SpellCard>(cards_instances.at(card_id).get());
+            obj_id_to_card_id[result->obj_id] = card_id;
+            return result;
+        } break;
+        case model::CardType::MONSTER: {
+            auto result = std::make_unique<model::MonsterCard>(cards_instances.at(card_id).get());
             obj_id_to_card_id[result->obj_id] = card_id;
             return result;
         } break;

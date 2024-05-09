@@ -18,7 +18,11 @@ private:
     void increse_level(bool force);
 
 public:
-    void set_args(std::size_t player_id, std::size_t target_id);
+    template <typename... T>
+    void set_args(const T &...args) {
+        (st.push(static_cast<int>(args)), ...);
+    }
+
     std::optional<int> execute(const std::vector<Command> &code);
 
     void set_game_session_reference(GameSession *_game_session) {

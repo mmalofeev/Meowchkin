@@ -2,13 +2,15 @@
 #define GAME_STATE_HPP_
 #include <cassert>
 #include <memory>
+#include <set>
 #include <vector>
+#include "model_card.hpp"
 
 namespace meow::model {
 
 struct SharedGameState;
 
-enum class StateType { INIT, MANAGEMENT, BROWL, LOOKTROUBLE, POSTMANAGEMENT, END };
+enum class StateType { INIT, MANAGEMENT, BRAWL, LOOKTROUBLE, POSTMANAGEMENT, END };
 
 struct GameState {
 protected:
@@ -44,12 +46,16 @@ public:
     virtual std::unique_ptr<GameState> roll_dice(std::size_t user_id) {
         return nullptr;
     }
+
+    virtual std::unique_ptr<GameState> pass(std::size_t user_id) {
+        return nullptr;
+    }
 };
 
 struct InitState : GameState {
 private:
     std::vector<int> results;
-    int count = 0;
+    int move_count = 0;
     static constexpr std::size_t init_hand_size = 4;
 
 public:
@@ -79,12 +85,39 @@ public:
     std::unique_ptr<GameState> end_turn(std::size_t user_id) override;
 };
 
-/*
-struct BrowlState : GameState {
+struct BrawlState : GameState {
+    friend struct VirtualMachine;
+
 private:
+    std::vector<std::size_t> heroes;
+    std::vector<std::unique_ptr<Card>> heroes_storage;
+    std::vector<std::unique_ptr<MonsterCard>> monsters;
+    // bool equal_power_condition = false;
+    std::set<std::size_t> passed_players;
+    int passed_heroes_count = 0;
+
 public:
+    BrawlState(
+        SharedGameState *shared_state_,
+        std::size_t player_id,
+        std::unique_ptr<MonsterCard> monster
+    );
+
+    bool is_hero(std::size_t obj_id) const;
+    bool is_monster(std::size_t obj_id) const;
+    void add_hero(std::size_t player_id);
+    void add_monster(std::unique_ptr<MonsterCard> monster);
+    void update_monster(MonsterCard *monster);
+    MonsterCard *get_monster(std::size_t obj_id);
+    int get_monsters_power() const;
+    int get_treasures_pool() const;
+    int get_heroes_power() const;
+    bool are_heroes_leading() const;
+
+    std::unique_ptr<GameState>
+    play_card(std::size_t user_id, std::size_t target_id, std::size_t card_obj_id) override;
+    std::unique_ptr<GameState> pass(std::size_t user_id) override;
 };
-*/
 
 }  // namespace meow::model
 

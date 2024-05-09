@@ -7,7 +7,7 @@
 
 namespace meow::model {
 
-enum class CardType { SPELL, MONSTER, RACE, CLASS, ITEM, DICE };
+enum class CardType { SPELL, MONSTER, RACE, CLASS, ITEM };
 
 struct CardInfo {
     const std::string image;
@@ -54,15 +54,30 @@ public:
 
 struct MonsterCardInfo : CardInfo {
 public:
+    const std::vector<Command> buff_checker;
     const std::vector<Command> buff;
+    const std::vector<Command> stalking_checker;
     const std::vector<Command> lewdness;
+    const int power;
+    const int treasures;
+    const bool undead;
 
     MonsterCardInfo(
         CardInfo base,
         const std::vector<Command> &buff,
-        const std::vector<Command> &lewdness
+        const std::vector<Command> &stalking_checker,
+        const std::vector<Command> &lewdness,
+        const int power,
+        const int treasures,
+        const bool undead
     )
-        : CardInfo(std::move(base)), buff(buff), lewdness(lewdness) {
+        : CardInfo(std::move(base)),
+          buff(buff),
+          stalking_checker(stalking_checker),
+          lewdness(lewdness),
+          power(power),
+          treasures(treasures),
+          undead(undead) {
     }
 };
 
@@ -93,15 +108,37 @@ public:
     ~SpellCard();
 };
 
-/*
-struct MonsterCard: Card {
+struct MonsterCard : Card {
 private:
-    int power{};
-    bool is_pursuer{};
-public:
+    int power_buff = 0;
+    int treasures_buff = 0;
+    bool is_buffed_flag = false;
+    std::vector<std::unique_ptr<Card>> storage;
 
+public:
+    MonsterCard(CardInfo *info) : Card(info) {
+    }
+
+    bool check_stalking(std::size_t target_id) const;
+    void apply_lewdness(std::size_t target_id);
+    void apply_buff();
+
+    void add_card_to_storage(std::unique_ptr<Card> card) {
+        storage.emplace_back(std::move(card));
+    }
+
+    int get_power() const {
+        return dynamic_cast<const MonsterCardInfo *>(info)->power + power_buff;
+    }
+
+    int get_treasures() const {
+        return dynamic_cast<const MonsterCardInfo *>(info)->treasures + treasures_buff;
+    }
+
+    bool is_buffed() const {
+        return is_buffed_flag;
+    }
 };
-*/
 
 }  // namespace meow::model
 

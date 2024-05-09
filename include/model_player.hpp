@@ -14,7 +14,7 @@ struct Player : Object {
     friend struct VirtualMachine;
 
 private:
-    int level_ = 1;
+    int level = 1;
     int power_buff = 0;
     int slip_away_buff = 0;
 
@@ -37,12 +37,20 @@ public:
     explicit Player(std::size_t user_id) : user_id(user_id) {
     }
 
-    int power() const {
-        return std::max(level_ + power_buff, 0);
+    int get_power() const {
+        return std::max(level + power_buff, 0);
     }
 
-    int level() const {
-        return level_;
+    int get_level() const {
+        return level;
+    }
+
+    void increse_level(int delta, bool force = false) {
+        level += delta;
+
+        if (!force) {
+            level = std::max(1, std::min(9, level));
+        }
     }
 
     void add_card_to_storage(std::unique_ptr<Card> card) {
