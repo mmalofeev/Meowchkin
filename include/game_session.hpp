@@ -4,8 +4,8 @@
 #include <memory>
 #include <stdexcept>
 #include <vector>
+#include "game_view.hpp"
 #include "shared_game_state.hpp"
-#include "game_view.hpp"n
 #include "virtual_machine.hpp"
 
 namespace meow::model {
@@ -22,9 +22,14 @@ public:
     SharedGameState shared_state;
     std::unique_ptr<GameState> current_state;
 
-    explicit GameSession(const std::vector<std::size_t> &users)
-        : shared_state(users), current_state(std::make_unique<InitState>(&shared_state)) {
+    explicit GameSession() {
+        Object::set_seed(0);
         VirtualMachine::get_instance().set_game_session_reference(this);
+    }
+
+    void init(const std::vector<std::size_t> &users) {
+        shared_state.set_player_list(users);
+        current_state = std::make_unique<InitState>(&shared_state);
     }
 
     void reset_game_view(std::shared_ptr<GameView> game_view_) {

@@ -7,12 +7,7 @@
 
 namespace meow::model {
 
-SharedGameState::SharedGameState(const std::vector<std::size_t> &users) {
-    Object::set_seed(0);
-    /*
-    немного костыль но я не знаю как сделать по другому.
-    возможно сюда надо будет подставить какой нибудь хеш вместо 0.
-    */
+void SharedGameState::set_player_list(const std::vector<std::size_t> &users) {
     for (std::size_t i = 0; i < users.size(); i++) {
         players.emplace_back(users[i]);
     }

@@ -13,7 +13,7 @@ private:
     std::size_t cur_turn = std::numeric_limits<std::size_t>::max();
 
 public:
-    SharedGameState(const std::vector<std::size_t> &users);
+    void set_player_list(const std::vector<std::size_t> &users);
 
     std::size_t get_current_user_id() const;
 

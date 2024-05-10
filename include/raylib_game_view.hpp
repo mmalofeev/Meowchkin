@@ -4,12 +4,12 @@
 #include <filesystem>
 #include <memory>
 #include "enum_array.hpp"
+#include "game_view.hpp"
 #include "gui_board.hpp"
 #include "gui_card_span.hpp"
 #include "gui_player_statistics_menu.hpp"
 #include "gui_text_chat.hpp"
 #include "gui_usernames_box.hpp"
-#include "game_view.hpp"
 #include "raygui.h"
 
 namespace meow {

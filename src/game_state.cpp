@@ -114,7 +114,9 @@ BrawlState::play_card(std::size_t user_id, std::size_t target_id, std::size_t ca
     // TODO
     if (card->info->type == CardType::MONSTER) {
         if (card->verify(player->obj_id, target_id)) {
-            add_monster(card_to_monster(player->drop_card_from_hand_by_id(card_obj_id)));
+            add_monster(
+                dynamic_unique_cast<MonsterCard>(player->drop_card_from_hand_by_id(card_obj_id))
+            );
         }
 
         return std::unique_ptr<BrawlState>(this);
@@ -250,7 +252,7 @@ std::unique_ptr<GameState> ManagementState::draw_card(std::size_t user_id) {
     }
 
     return std::make_unique<BrawlState>(
-        shared_state, player->obj_id, card_to_monster(std::move(card))
+        shared_state, player->obj_id, dynamic_unique_cast<MonsterCard>(std::move(card))
     );
 }
 

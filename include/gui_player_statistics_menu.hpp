@@ -44,8 +44,7 @@ public:
     EnumArray<StatisticKind, Statistic> menu_elements = {
         {StatisticKind::LEVEL, {"Level", 0}},
         {StatisticKind::STRENGTH, {"Strength", 0}},
-        {StatisticKind::BONUS, {"Bonus", 0}}
-    };
+        {StatisticKind::BONUS, {"Bonus", 0}}};
 
     void draw() {
         raylib::Vector2 cur_pos = m_borders.GetPosition();

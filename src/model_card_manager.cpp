@@ -10,12 +10,6 @@
 
 namespace meow {
 
-std::unique_ptr<model::MonsterCard> card_to_monster(std::unique_ptr<model::Card> card) {
-    std::unique_ptr<model::MonsterCard> monster(dynamic_cast<model::MonsterCard *>(card.get()));
-    card.release();
-    return monster;
-}
-
 CardManager::CardManager() {
     std::map<std::string, model::CardType> str_to_type{
         {"SPELL", model::CardType::SPELL},

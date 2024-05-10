@@ -8,7 +8,15 @@
 
 namespace meow {
 
-std::unique_ptr<model::MonsterCard> card_to_monster(std::unique_ptr<model::Card> card);
+template <typename To, typename From>
+std::unique_ptr<To> dynamic_unique_cast(std::unique_ptr<From> &&p) {
+    if (To *cast = dynamic_cast<To *>(p.get())) {
+        std::unique_ptr<To> result(cast);
+        p.release();
+        return result;
+    }
+    return std::unique_ptr<To>(nullptr);
+}
 
 struct CardManager {
 private:

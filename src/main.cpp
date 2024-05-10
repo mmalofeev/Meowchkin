@@ -38,7 +38,7 @@ private:
 
     network::Client &m_client = network::Client::get_instance();
     std::string m_client_name;
-    GameSession m_game_session;
+    model::GameSession m_game_session;
 
 public:
     Application()
@@ -52,8 +52,9 @@ public:
           m_mainmenu((*m_mainmenu_maker)()),
           m_gameview_maker(plugin_names[SceneType::GAME]),
           m_gameview((*m_gameview_maker)()),
-          m_scene_manager(std::make_unique<SceneManager>()),
-          m_game_session(std::dynamic_pointer_cast<GameView>(m_gameview)) {
+          m_scene_manager(std::make_unique<SceneManager>()) {
+        m_game_session.reset_game_view(std::dynamic_pointer_cast<GameView>(m_gameview));
+
         m_scene_manager->set_scene(SceneType::MAIN_MENU, m_mainmenu.get());
         m_scene_manager->set_scene(SceneType::GAME, m_gameview.get());
 
@@ -99,11 +100,20 @@ private:
         std::cout << "joining to port " << port << '\n';
         m_client.connect(std::string("localhost:") + port);
 
+        const auto &players = m_client.get_players_info();
+
         std::cout << "lobby:\n";
-        for (const auto &info : m_client.get_players_info()) {
+        for (const auto &info : players) {
             std::cout << '\t' << info.name << '\n';
         }
         m_gameview->attach_instances(&m_client, &m_window);
+
+        std::vector<std::size_t> users(players.size());
+        std::transform(
+            players.cbegin(), players.cend(), users.begin(),
+            [](const network::PlayerInfo &player) { return player.id; }
+        );
+        m_game_session.init(users);
     }
 
     void response() {

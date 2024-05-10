@@ -4,7 +4,7 @@
 namespace meow::model {
 
 struct Object {
-    friend struct SharedGameState;
+    friend struct GameSession;
 
 private:
     thread_local static inline std::size_t counter = 0;

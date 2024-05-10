@@ -20,15 +20,6 @@ find_package(Boost 1.71 REQUIRED filesystem)  # Required by Boost.DLL
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 
-#gtest
-enable_testing()
-find_package(GTest REQUIRED)
-include(GoogleTest)
-
-add_executable(tests tests/test_model.cpp src/shared_game_state.cpp src/model_card.cpp src/model_card_manager.cpp src/model_player.cpp src/virtual_machine.cpp  src/game_state.cpp)
-target_link_libraries(tests GTest::GTest GTest::Main)
-gtest_discover_tests(tests)
-
 # raylib
 find_package(raylib QUIET)
 if (NOT raylib_FOUND)
@@ -54,6 +45,15 @@ if (NOT raylib_cpp_FOUND)
     )
     FetchContent_MakeAvailable(raylib_cpp)
 endif ()
+
+#gtest
+enable_testing()
+find_package(GTest REQUIRED)
+include(GoogleTest)
+
+add_executable(tests src/scenes/scene.cpp tests/test_model.cpp src/shared_game_state.cpp src/model_card.cpp src/model_card_manager.cpp src/model_player.cpp src/virtual_machine.cpp  src/game_state.cpp)
+target_link_libraries(tests GTest::GTest GTest::Main ${Boost_LIBRARIES} ${CMAKE_DL_LIBS} raylib raylib_cpp)
+gtest_discover_tests(tests)
 
 add_library(mainmenu-scene SHARED src/scenes/main_menu_scene.cpp src/scenes/scene.cpp)
 target_link_libraries(mainmenu-scene ${Boost_LIBRARIES} ${CMAKE_DL_LIBS} raylib raylib_cpp)
