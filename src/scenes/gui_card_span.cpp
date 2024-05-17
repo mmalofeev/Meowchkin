@@ -33,8 +33,6 @@ void GuiCardSpan::add_card(std::string_view path_to_texture) {
     raylib::Image img, img2;
     try {
         img = meow::load_card_img(path_to_texture);
-        // img.Load(path_to_texture.data());
-        // img.Mipmaps();
     } catch (const raylib::RaylibException &) {
         img = raylib::Image::Color(GuiCard::width, GuiCard::height, raylib::Color::Green());
     }
@@ -162,21 +160,18 @@ void GuiCardSpan::draw_inspected_card(int window_width, int window_height) {
         return;
     }
 
-    static bool reset = true;
-    if (reset) {
+    if (reset_inspected_card_texture) {
         inspected_card_texture = raylib::Texture(inspected_card->orig_img);
-        reset = false;
+        reset_inspected_card_texture = false;
     }
     raylib::Color col{255, 255, 255, 255};
     const raylib::Vector2 pos{
         (window_width - inspected_card->orig_img.width) / 2.0f,
         (window_height - inspected_card->orig_img.height) / 2.0f
     };
-    // blinker(std::chrono::seconds(5), true);
     inspected_card_texture->Draw(pos, col);
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-        // inspected_card_texture = std::nullopt;
-        reset = true;
+        reset_inspected_card_texture = true;
         inspected_card = nullptr;
     }
 }

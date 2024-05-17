@@ -32,7 +32,7 @@ private:
         static constexpr int button_width = 300;
         static constexpr int button_height = 40;
 
-        enum class Button { CONTINUE, BACK_TO_LOBBY, QUIT, COUNT };  // TODO: settings
+        enum class Button { CONTINUE, BACK_TO_LOBBY, QUIT, COUNT };
         EnumArray<Button, const char *> button_labels = {
             {Button::CONTINUE, "Continue"},
             {Button::BACK_TO_LOBBY, "Back to lobby"},

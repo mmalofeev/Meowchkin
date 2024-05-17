@@ -18,6 +18,7 @@ class DropDownMenu;
 class GuiCardSpan : Noncopyable, WindowDependable<GuiCardSpan> {
     friend class DropDownMenu;
     friend class PlayerHandDDM;
+    friend class BrawlCardsDDM;
 
 private:
     struct RemovedGuiCard {
@@ -38,6 +39,7 @@ private:
     // on all instances!
     inline static bool something_dragged = false;
     inline static GuiCard *inspected_card = nullptr;
+    inline static bool reset_inspected_card_texture = true;
     inline static std::optional<raylib::Texture> inspected_card_texture;
 
 public:

@@ -2,25 +2,41 @@
 #include <boost/dll/alias.hpp>
 #include <chrono>
 #include <iostream>
-#include <limits>
-#include <ratio>
 #include <string_view>
 #include <variant>
-#include "RaylibException.hpp"
 #include "gui_card_loader.hpp"
 #include "gui_dice_roller.hpp"
 #include "paths_to_binaries.hpp"
 #include "raylib.h"
-#include "timed_state_machine.hpp"
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 
 namespace {
 
+constexpr float opts_button_width = 210;
+constexpr float opts_button_height = 70;
+
 template <typename... Ts>
 struct Overload : Ts... {
     using Ts::operator()...;
 };
+
+template <typename EnumT>
+    requires meow::CountableEnum<EnumT>
+EnumT draw_opts_menu(const meow::EnumArray<EnumT, std::string> &opts, raylib::Vector2 pos) {
+    EnumT ret = EnumT::COUNT;
+    for (std::size_t i = 0; i < opts.size(); ++i) {
+        if (GuiButton(
+                Rectangle{
+                    pos.x, pos.y + i * opts_button_height, opts_button_width, opts_button_height
+                },
+                opts[i].c_str()
+            )) {
+            ret = static_cast<EnumT>(i);
+        }
+    }
+    return ret;
+}
 
 }  // namespace
 
@@ -72,9 +88,9 @@ void meow::RaylibGameView::setup_pause_menu() {
         m_pause_menu_objects.button_rects[i].width = PauseMenuObjs::button_width;
         m_pause_menu_objects.button_rects[i].height = PauseMenuObjs::button_height;
         m_pause_menu_objects.button_rects[i].x =
-            (float)m_window->GetWidth() / 2 - (float)PauseMenuObjs::button_width / 2;
+            m_window->GetWidth() / 2.0f - PauseMenuObjs::button_width / 2.0f;
         m_pause_menu_objects.button_rects[i].y =
-            (float)m_window->GetHeight() / 2 + i * PauseMenuObjs::button_height;
+            m_window->GetHeight() / 2.0f + i * PauseMenuObjs::button_height;
     }
 }
 
@@ -135,6 +151,7 @@ void meow::RaylibGameView::draw_active_display_selector() {
     auto &texs = m_active_display_selector.button_texs;
     auto &pressed = m_active_display_selector.button_pressed;
 
+    float was = guiAlpha;
     GuiSetAlpha(0.3f);
     for (std::size_t i = 0; i < br.size(); ++i) {
         br[i].DrawRoundedLines(0.1, 4, 1, raylib::Color::RayWhite());
@@ -142,7 +159,7 @@ void meow::RaylibGameView::draw_active_display_selector() {
         texs[i].Draw(br[i].GetPosition());
         pressed[i] = GuiButton(br[i], "");
     }
-    GuiSetAlpha(1.0f);
+    GuiSetAlpha(was);
 
     using Button = ActiveDisplaySelector::Button;
     if (pressed[Button::BRAWL]) {
@@ -179,6 +196,21 @@ void meow::RaylibGameView::draw() {
             if (objs->player_hand.somethind_inspected()) {
                 m_blur.Draw();
             }
+
+            enum class bebra_enum { bebra1, bebra2, COUNT };
+            EnumArray<bebra_enum, std::string> bebra_arr{
+                {bebra_enum::bebra1, "bbbbeeebra1"}, {bebra_enum::bebra2, "bbbbeeebra2"}
+            };
+            float was = guiAlpha;
+            GuiSetAlpha(0.85);
+            if (auto x = draw_opts_menu(
+                    bebra_arr, {m_window->GetWidth() - opts_button_width,
+                                m_window->GetHeight() - opts_button_height * bebra_arr.size()}
+                );
+                x != bebra_enum::COUNT) {
+                std::cout << bebra_arr[x] << '\n';
+            }
+            GuiSetAlpha(was);
         },
         [this](PauseMenuObjs *objs) {
             m_blur.Draw();

@@ -24,13 +24,13 @@ private:
     GuiCardSpan m_opponent_cards;
 
 public:
-    static constexpr const int width = 1200;
-    static constexpr const int height = 700;
-    static constexpr const int offset_top = 60;
+    static constexpr int width = 1200;
+    static constexpr int height = 700;
+    static constexpr int offset_top = 60;
 
     GuiBoard()
-        : m_kitten_cards(std::make_unique<DropDownMenu>(&m_kitten_cards)),
-          m_opponent_cards(std::make_unique<DropDownMenu>(&m_opponent_cards)) {
+        : m_kitten_cards(std::make_unique<BrawlCardsDDM>(&m_kitten_cards)),
+          m_opponent_cards(std::make_unique<BrawlCardsDDM>(&m_opponent_cards)) {
     }
 
     void setup(raylib::Window *window, GuiCardSpan *hand, network::Client *client);
