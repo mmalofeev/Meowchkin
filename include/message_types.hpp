@@ -125,8 +125,7 @@ public:
             {"message", message},
             {"sender_player", sender_player},
             {"general", general},
-            {"target_player", target_player}
-        };
+            {"target_player", target_player}};
     }
 };
 }  // namespace meow::network

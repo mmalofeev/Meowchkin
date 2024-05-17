@@ -4,40 +4,40 @@
 #include <memory>
 #include <stdexcept>
 #include <vector>
-#include "game.hpp"
+#include "noncopyable.hpp"
 #include "game_view.hpp"
+#include "shared_game_state.hpp"
 #include "virtual_machine.hpp"
 
-namespace meow {
+namespace meow::model {
 
-struct GameSession {
+struct GameSession : Noncopyable {
+    friend struct VirtualMachine;
+
 private:
-    std::shared_ptr<GameView> game_view;
     std::size_t user_id{};
-
 public:
     //  пока GameSession не дописан game будет public для удобства тестирования.
-    model::Game game;
+    SharedGameState shared_state;
+    std::unique_ptr<GameState> current_state;
 
-    explicit GameSession(std::shared_ptr<GameView> game_view) : game_view(game_view) {
-        if (game_view == nullptr) {
-            throw std::runtime_error("invalid game_view ptr passed to game_session!");
+    explicit GameSession(std::initializer_list<std::shared_ptr<GameView>> l) {
+        Object::set_seed(0);
+        VirtualMachine::get_instance().set_game_session_reference(this);
+        
+        for (auto observer : l) {
+            shared_state.add_observer(observer);
         }
-        model::VirtualMachine::get_instance().set_game_reference(&game);
     }
 
-    void reset_game_view(std::shared_ptr<GameView> game_view_) {
-        game_view.reset();
-        game_view = game_view_;
+    void init(const std::vector<std::size_t> &users) {
+        shared_state.set_player_list(users);
+        current_state = std::make_unique<InitState>(&shared_state);
     }
 
-    /*
-    void notify_gameview(const network::Action &) {
-        observed->on_new_card_on_board();
-    }
-    */
+
 };
 
-}  // namespace meow
+}  // namespace meow::model
 
 #endif

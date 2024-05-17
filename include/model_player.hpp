@@ -14,7 +14,7 @@ struct Player : Object {
     friend struct VirtualMachine;
 
 private:
-    int level_ = 1;
+    int level = 1;
     int power_buff = 0;
     int slip_away_buff = 0;
 
@@ -22,31 +22,39 @@ private:
     int unused_smut = 1;
     int unused_breastplate = 1;
     int cards_after_turn_balance = 5;
-    const std::size_t max_cards_in_hand = 10;
+    static constexpr std::size_t max_cards_in_hand = 10;
 
     // оставил на потом
     // std::optional<Race> race_;
     // std::optional<Class> class_;
 
     std::vector<std::unique_ptr<Card>> hand;
-    std::set<std::unique_ptr<Card>> storage;
+    std::vector<std::unique_ptr<Card>> storage;
 
 public:
     const std::size_t user_id;
 
-    Player(std::size_t user_id) : user_id(user_id) {
+    explicit Player(std::size_t user_id) : user_id(user_id) {
     }
 
-    int power() const {
-        return std::max(level_ + power_buff, 0);
+    int get_power() const {
+        return std::max(level + power_buff, 0);
     }
 
-    int level() const {
-        return level_;
+    int get_level() const {
+        return level;
+    }
+
+    void increse_level(int delta, bool force = false) {
+        level += delta;
+
+        if (!force) {
+            level = std::max(1, std::min(9, level));
+        }
     }
 
     void add_card_to_storage(std::unique_ptr<Card> card) {
-        storage.insert(std::move(card));
+        storage.emplace_back(std::move(card));
     }
 
     void add_card_to_hand(std::unique_ptr<Card> card) {
@@ -56,6 +64,8 @@ public:
     }
 
     std::unique_ptr<Card> drop_card_from_hand_by_id(std::size_t obj_id);
+
+    std::unique_ptr<Card> drop_card_from_storage_by_id(std::size_t obj_id);
 
     const Card *get_card_from_hand_by_id(std::size_t obj_id) const;
 
