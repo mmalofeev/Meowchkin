@@ -8,33 +8,20 @@ using json = ::nlohmann::json;
 namespace meow::network {
 class Action {
 public:
-    bool is_played;
-    bool is_drowed;
-    bool is_threw;
+    enum class ActionType { EndTurn, RollDice, PlayedCard, DrawedCard, ThrewCard, Pass };
+
+    ActionType type;
     std::size_t card_id{};
     std::size_t target_player{};
     std::size_t sender_player{};
-    // TODO: remove once we will be able to have card by card_id!
-    std::string card_filename;
 
     Action(
-        bool is_played,
-        bool is_drowed,
-        bool is_threw,
-        int card_id,
+        ActionType type,
+        std::size_t card_id,
         std::size_t target_player,
         std::size_t sender_player
     )
-        : is_played(is_played),
-          is_drowed(is_drowed),
-          is_threw(is_threw),
-          card_id(card_id),
-          target_player(target_player),
-          sender_player(sender_player) {
-    }
-
-    Action(std::string_view card_filename, std::size_t target, std::size_t sender)
-        : card_filename(card_filename.data()), target_player(target), sender_player(sender) {
+        : type(type), card_id(card_id), target_player(target_player), sender_player(sender_player) {
     }
 
     explicit Action(const json &json) {
@@ -42,25 +29,20 @@ public:
     }
 
     void parse_from_json(const json &json) {
-        json.at("is_played").get_to(is_played);
-        json.at("is_drowed").get_to(is_drowed);
-        json.at("is_threw").get_to(is_threw);
+        json.at("action_type").get_to(type);
         json.at("card_id").get_to(card_id);
         json.at("target_player").get_to(target_player);
         json.at("sender_player").get_to(sender_player);
-        json.at("card_filename").get_to(card_filename);
     }
 
     [[nodiscard]] json to_json() const {
         return json{
             {"type", "Action"},
-            {"is_played", is_played},
-            {"is_drowed", is_drowed},
-            {"is_threw", is_threw},
+            {"action_type", type},
             {"card_id", card_id},
             {"target_player", target_player},
             {"sender_player", sender_player},
-            {"card_filename", card_filename}};
+        };
     }
 };
 

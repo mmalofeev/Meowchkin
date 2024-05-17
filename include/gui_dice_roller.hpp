@@ -34,7 +34,7 @@ random_integer(T low = std::numeric_limits<T>::min(), T high = std::numeric_limi
     return std::uniform_int_distribution<T>(low, high)(rd_generator);
 }
 
-[[nodiscard]] int play_dice_animation(
+[[nodiscard]] inline int play_dice_animation(
     raylib::Window *window,
     int low = 1,
     int high = 6,

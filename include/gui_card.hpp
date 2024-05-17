@@ -12,6 +12,8 @@ struct GuiCard {
     raylib::Rectangle border;
     raylib::Vector2 target_position;
     raylib::Texture texture;
+    raylib::Image orig_img;
+    // raylib::Texture big_texture;
     std::string filename;
 };
 

@@ -88,14 +88,75 @@ public:
 
         if (pressed[Button::DROP]) {
             m_parental_span->remove_card(m_card_iter);
-            m_card_iter = m_cards.end();
+        }
+        if (pressed[Button::INSPECT]) {
+            m_parental_span->inspected_card = &*m_card_iter;
         }
         if (something_pressed) {
             m_spawn_point = Vector2{-1, -1};
+            m_card_iter = m_cards.end();
+        }
+    }
+};
+
+class BrawlCardsDDM : public DropDownMenu {
+private:
+    static constexpr int button_width = 150;
+    static constexpr int button_height = 33;
+    enum class Button { INSPECT, COUNT };
+    static constexpr EnumArray<Button, Vector2> m_button_origins{
+        {Button::INSPECT, {0, 0}},
+
+    };
+    static constexpr EnumArray<Button, const char *> m_button_labels{
+        {Button::INSPECT, "Inspect"},
+    };
+
+public:
+    explicit BrawlCardsDDM(GuiCardSpan *parental_span) : DropDownMenu(parental_span) {
+    }
+
+    [[nodiscard]] bool mouse_in_menu() const noexcept override {
+        if (m_spawn_point.x < 0) {
+            return false;
+        }
+        const auto &arr = m_button_origins.data();
+        raylib::Rectangle rec = {
+            arr[0].x + m_spawn_point.x, arr[0].y + m_spawn_point.y, arr.back().x + button_width,
+            arr.back().y + button_height
+        };
+        return rec.CheckCollision(raylib::Mouse::GetPosition());
+    }
+
+    void draw() override {
+        if (m_card_iter == m_cards.end()) {
+            return;
+        }
+
+        EnumArray<Button, bool> pressed;
+        bool something_pressed = false;
+
+        GuiSetAlpha(0.85f);
+        for (std::size_t i = 0; i < m_button_origins.size(); i++) {
+            pressed[i] = GuiButton(
+                {m_button_origins[i].x + m_spawn_point.x, m_button_origins[i].y + m_spawn_point.y,
+                 button_width, button_height},
+                m_button_labels[i]
+            );
+            something_pressed = something_pressed || pressed[i];
+        }
+        GuiSetAlpha(1.0f);
+
+        if (pressed[Button::INSPECT]) {
+            m_parental_span->inspected_card = &*m_card_iter;
+        }
+        if (something_pressed) {
+            m_spawn_point = Vector2{-1, -1};
+            m_card_iter = m_cards.end();
         }
     }
 };
 
 }  // namespace meow
 
-#endif  // !GUI_CARD_SPAN_DROPDOWN_MENU_HPP_
+#endif  // GUI_CARD_SPAN_DROPDOWN_MENU_HPP_

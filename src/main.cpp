@@ -1,3 +1,5 @@
+#include <cstdlib>
+#include <exception>
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -5,7 +7,9 @@
 #include "client.hpp"
 #include "enum_array.hpp"
 #include "game_session.hpp"
+// #include "paths_to_binaries.hpp"
 #include "plugin.hpp"
+#include "raylib.h"
 #include "scene.hpp"
 #include "server.hpp"
 
@@ -18,8 +22,8 @@ constexpr std::size_t players_count = 1;
 
 class Application {
 private:
-    static constexpr int window_width = 1920;
-    static constexpr int window_height = 1080;
+    static constexpr unsigned window_width = 1920;
+    static constexpr unsigned window_height = 1080;
     static constexpr const char *window_title = "meow";
 
     static constexpr EnumArray<SceneType, std::pair<const char *, const char *>> plugin_names{
@@ -28,6 +32,9 @@ private:
     };
 
     raylib::Window m_window;
+    raylib::AudioDevice m_audio_device;
+    raylib::Music m_music;
+    // raylib::Shader m_loading_wheel_shader;
 
     using maker_scene_t = std::shared_ptr<Scene> (*)();
     Plugin<maker_scene_t> m_gameview_maker;
@@ -40,6 +47,8 @@ private:
     std::string m_client_name;
     model::GameSession m_game_session;
 
+    bool m_connected = false;
+
 public:
     Application()
         : m_window(
@@ -48,24 +57,27 @@ public:
               window_title,
               FLAG_MSAA_4X_HINT | FLAG_FULLSCREEN_MODE
           ),
+          // m_loading_wheel_shader("", path_to_loading_wheel_shader),
           m_mainmenu_maker(plugin_names[SceneType::MAIN_MENU]),
           m_mainmenu((*m_mainmenu_maker)()),
           m_gameview_maker(plugin_names[SceneType::GAME]),
           m_gameview((*m_gameview_maker)()),
           m_scene_manager(std::make_unique<SceneManager>()), 
-          m_game_session({std::dynamic_pointer_cast<GameView>(m_gameview)}) {
-
+          m_game_session({std::dynamic_pointer_cast<GameView>(m_gameview)})
+          m_music("bin/music/witcher-gwent.mp3") {
         m_scene_manager->set_scene(SceneType::MAIN_MENU, m_mainmenu.get());
         m_scene_manager->set_scene(SceneType::GAME, m_gameview.get());
 
         SetExitKey(0);
         m_window.SetTargetFPS(60);
         m_mainmenu->attach_instances(&m_client, &m_window);
+        // m_music.SetLooping(true);
+        // m_music.Play();
     }
 
-    // as client
     void run() {
         while (!m_window.ShouldClose() && m_scene_manager->active_scene()->running()) {
+            // m_music.Update();
             response();
             render();
         }
@@ -117,7 +129,6 @@ private:
     }
 
     void response() {
-        m_window.SetFocused();
         if (IsKeyDown(KEY_LEFT_SHIFT) && IsKeyPressed(KEY_R)) {
             m_mainmenu_maker.reload(plugin_names[SceneType::MAIN_MENU]);
             m_gameview_maker.reload(plugin_names[SceneType::GAME]);
@@ -133,28 +144,20 @@ private:
 
             m_scene_manager->set_scene(SceneType::MAIN_MENU, m_mainmenu.get());
             m_scene_manager->set_scene(SceneType::GAME, m_gameview.get());
-            //     m_main_menu.reload(plugin_names[SceneType::MAIN_MENU]);
-            //     m_main_menu->attach_instances(&m_client, &m_window);
-            //     m_scene_manager->set_scene(SceneType::MAIN_MENU, m_main_menu.get());
-            //
-            //     m_game_view.reload(plugin_names[SceneType::GAME]);
-            //     m_game_view->attach_instances(&m_client, &m_window);
-            //     m_scene_manager->set_scene(SceneType::GAME, m_game_view.get());
         }
 
-        static bool connected = false;
-        if (!connected) {
+        if (!m_connected) {
             if (auto msg = m_scene_manager->read_message(); msg) {
                 if (msg->find("join lobby") != std::string::npos) {
                     m_client_name = msg->substr(msg->find(':') + 1);
                     join_lobby();
-                    connected = true;
+                    m_connected = true;
                 } else if (msg->find("create lobby") != std::string::npos) {
                     m_client_name = msg->substr(msg->find(':') + 1);
                     std::thread(Application::run_server).detach();
                     network::Server::get_instance().wait_for_listening();
                     join_lobby();
-                    connected = true;
+                    m_connected = true;
                 }
             }
         }
