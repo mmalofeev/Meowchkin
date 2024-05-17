@@ -13,8 +13,8 @@ struct GuiCard {
     raylib::Vector2 target_position;
     raylib::Texture texture;
     raylib::Image orig_img;
-    // raylib::Texture big_texture;
     std::string filename;
+    std::size_t card_id = -1;
 };
 
 }  // namespace meow

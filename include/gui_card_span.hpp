@@ -7,6 +7,7 @@
 #include <optional>
 #include "gui_card.hpp"
 #include "gui_window_dependable.hpp"
+#include "model_card_manager.hpp"
 #include "noncopyable.hpp"
 #include "raygui.h"
 #include "raylib-cpp.hpp"
@@ -43,6 +44,8 @@ private:
     inline static std::optional<raylib::Texture> inspected_card_texture;
 
 public:
+    inline static CardManager *card_manager = nullptr;
+
     explicit GuiCardSpan(std::unique_ptr<DropDownMenu> ddm) : m_dropdown_menu(std::move(ddm)) {
     }
 
@@ -86,7 +89,7 @@ public:
     }
 
     void recalculate_card_rects() noexcept;
-    void add_card(std::string_view path_to_texture = "");
+    void add_card(std::size_t card_id);
     void add_card(GuiCard &&card);
     void remove_card();
     void remove_card(std::list<GuiCard>::iterator card_iter);
