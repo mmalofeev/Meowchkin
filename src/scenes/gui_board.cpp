@@ -16,6 +16,7 @@ void GuiBoard::setup(raylib::Window *window, GuiCardSpan *hand, network::Client 
     m_player_hand = hand;
     m_window = window;
     m_client = client;
+    // m_kitten_cards.card_manager = m_opponent_cards.card_manager = hand->card_manager
 
     const raylib::Vector2 offset = {(m_window->GetWidth() - width) / 2.0f, offset_top};
     m_rect = raylib::Rectangle(offset.x, offset.y, width, height);
@@ -42,7 +43,7 @@ void GuiBoard::setup(raylib::Window *window, GuiCardSpan *hand, network::Client 
 void GuiBoard::draw(float frame_time) {
     static int color1 = 0xFFFFFFED;
     static int color2 = 0xFFFFFFFF;
-    static auto bebra = make_timed_state_machine([this, frame_time](auto, auto){
+    static auto bebra = make_timed_state_machine([this, frame_time](auto, auto) {
         color1 = (int)(color1 + (color2 - color1) * frame_time);
     });
     if (m_player_hand->selected()) {
@@ -60,20 +61,19 @@ void GuiBoard::draw(float frame_time) {
     if (m_player_hand->selected().has_value() &&
         m_drop_card_rect.CheckCollision(m_player_hand->selected().value()->border)) {
         // m_active_cards.add_card(m_player_hand->pop_selected());
-        add_card(m_player_hand->pop_selected().filename);
+        add_card(m_player_hand->pop_selected().card_id);
     }
 
     m_kitten_cards.draw_cards(frame_time);
     m_opponent_cards.draw_cards(frame_time);
 }
 
-void GuiBoard::add_card(std::string_view card_filename) {
-    // m_active_cards.add_card(card_filename);
+void GuiBoard::add_card(std::size_t card_id) {
     for (auto &info : m_client->get_players_info()) {
         std::cout << "send to " << info.name << '\n';
-        m_client->send_action(
-            network::Action(card_filename.data(), info.id, m_client->get_id_of_client())
-        );
+        m_client->send_action(network::Action(
+            network::Action::ActionType::PlayedCard, card_id, info.id, m_client->get_id_of_client()
+        ));
     }
 }
 

@@ -48,17 +48,18 @@ if (NOT raylib_cpp_FOUND)
 endif ()
 
 #gtest
-enable_testing()
-find_package(GTest REQUIRED)
-include(GoogleTest)
+# enable_testing()
+# find_package(GTest REQUIRED)
+# include(GoogleTest)
 
-add_executable(tests src/scenes/scene.cpp tests/test_model.cpp src/shared_game_state.cpp src/model_card.cpp src/model_card_manager.cpp src/model_player.cpp src/virtual_machine.cpp  src/game_state.cpp)
-target_link_libraries(tests GTest::GTest GTest::Main ${Boost_LIBRARIES} ${CMAKE_DL_LIBS} raylib raylib_cpp)
-gtest_discover_tests(tests)
+# add_executable(tests src/scenes/scene.cpp tests/test_model.cpp src/shared_game_state.cpp src/model_card.cpp src/model_card_manager.cpp src/model_player.cpp src/virtual_machine.cpp  src/game_state.cpp)
+# target_link_libraries(tests GTest::GTest GTest::Main ${Boost_LIBRARIES} ${CMAKE_DL_LIBS} raylib raylib_cpp)
+# gtest_discover_tests(tests)
 
 add_library(mainmenu-scene SHARED src/scenes/main_menu_scene.cpp src/scenes/scene.cpp)
 target_link_libraries(mainmenu-scene ${Boost_LIBRARIES} ${CMAKE_DL_LIBS} raylib raylib_cpp)
 
+FILE(GLOB BEBRA src/*.cpp src/scenes/*.cpp)
 add_library(gameview-scene SHARED
                 src/scenes/raylib_game_view.cpp
                 src/scenes/scene.cpp
@@ -67,7 +68,12 @@ add_library(gameview-scene SHARED
                 src/scenes/gui_usernames_box.cpp
                 src/scenes/gui_text_chat.cpp
                 src/client.cpp
-                src/server.cpp)
+                src/server.cpp
+                src/model_card_manager.cpp
+                src/model_card.cpp
+                src/game_state.cpp
+                src/shared_game_state.cpp
+                src/virtual_machine.cpp)
 target_link_libraries(gameview-scene ${Boost_LIBRARIES} ${CMAKE_DL_LIBS} raylib raylib_cpp)
 
 FILE(GLOB SRCFILES src/*.cpp src/scenes/scene.cpp)

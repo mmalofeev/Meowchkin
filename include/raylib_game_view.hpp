@@ -80,7 +80,7 @@ public:
     void draw() override;
 
     /* Callbacks */
-    void on_card_add(std::string_view card_filename) override;
+    void on_card_add(std::size_t card_id) override;
     void on_card_remove(std::string_view card_filename) override;
     void on_turn_begin() override;
     void on_turn_end() override;

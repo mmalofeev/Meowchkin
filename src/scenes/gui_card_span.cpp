@@ -1,6 +1,7 @@
 #include "gui_card_span.hpp"
 #include <chrono>
 #include <cstdlib>
+#include <iostream>
 #include "gui_card_loader.hpp"
 #include "gui_card_span_dropdown_menu.hpp"
 #include "raylib.h"
@@ -29,8 +30,9 @@ void GuiCardSpan::recalculate_card_rects() noexcept {
     }
 }
 
-void GuiCardSpan::add_card(std::string_view path_to_texture) {
+void GuiCardSpan::add_card(std::size_t card_id) {
     raylib::Image img, img2;
+    std::string path_to_texture = card_manager->get_card_info_by_obj_id(card_id)->image;
     try {
         img = meow::load_card_img(path_to_texture);
     } catch (const raylib::RaylibException &) {
@@ -42,7 +44,7 @@ void GuiCardSpan::add_card(std::string_view path_to_texture) {
     tex.GenMipmaps();
     add_card(
         {raylib::Rectangle(m_window->GetWidth(), 0, 0, 0), raylib::Vector2(0), std::move(tex), img2,
-         path_to_texture.data()}
+         path_to_texture, card_id}
     );
 }
 
@@ -86,6 +88,7 @@ void GuiCardSpan::draw_cards(float frame_time) {
                             !m_dropdown_menu->mouse_in_menu())) {
         m_dropdown_menu->detach_card();
     }
+
     for (auto card_it = m_cards.begin(); card_it != m_cards.end(); card_it++) {
         if (card_it->border.CheckCollision(raylib::Mouse::GetPosition())) {
             if (can_be_dragged && m_selected == m_cards.end() &&

@@ -6,6 +6,7 @@
 #include <variant>
 #include "gui_card_loader.hpp"
 #include "gui_dice_roller.hpp"
+#include "model_card_manager.hpp"
 #include "paths_to_binaries.hpp"
 #include "raylib.h"
 #define RAYGUI_IMPLEMENTATION
@@ -57,6 +58,7 @@ void meow::RaylibGameView::on_instances_attach() {
     setup_pause_menu();
     setup_hand();
     setup_active_display_selector();
+    GuiCardSpan::card_manager = card_manager_ptr;
     m_gameplay_objects.board.setup(m_window, &m_gameplay_objects.player_hand, m_client);
     m_gameplay_objects.text_chat.set_window(m_window);
     m_gameplay_objects.usernames_box.set_window(m_window);
@@ -123,10 +125,10 @@ void meow::RaylibGameView::setup_active_display_selector() {
 void meow::RaylibGameView::setup_hand() {
     m_gameplay_objects.player_hand.set_window(m_window);
     m_gameplay_objects.player_hand.set_span_borders({m_window->GetPosition(), m_window->GetSize()});
-    for (int i = 0; i < 5; i++) {
-        const auto random_index = random_integer<std::size_t>(0, m_card_image_paths.size() - 1);
-        m_gameplay_objects.player_hand.add_card(m_card_image_paths[random_index].c_str());
-    }
+    // for (int i = 0; i < 5; i++) {
+    //     const auto random_index = random_integer<std::size_t>(0, m_card_image_paths.size() - 1);
+    //     m_gameplay_objects.player_hand.add_card(m_card_image_paths[random_index].c_str());
+    // }
 }
 
 void meow::RaylibGameView::draw_pause_menu() {
@@ -173,6 +175,8 @@ void meow::RaylibGameView::draw_active_display_selector() {
 }
 
 void meow::RaylibGameView::draw() {
+    using namespace meow::network;
+
     Overload active_display_visitor = {
         [this](GameplayObjs *objs) {
             objs->board.draw(m_window->GetFrameTime());
@@ -189,9 +193,13 @@ void meow::RaylibGameView::draw() {
                 objs->player_hand.remove_card();
             }
             if (GuiButton({40, 0, 40, 40}, "+") && objs->player_hand.card_count() < 10) {
-                const auto random_index =
-                    random_integer<std::size_t>(0, m_card_image_paths.size() - 1);
-                objs->player_hand.add_card(m_card_image_paths[random_index].c_str());
+                // const auto random_index =
+                //     random_integer<std::size_t>(0, m_card_image_paths.size() - 1);
+                // objs->player_hand.add_card(m_card_image_paths[random_index].c_str());
+                m_client->send_action(Action(
+                    Action::ActionType::DrawedCard, random_integer(0, 1),
+                    m_client->get_id_of_client(), -1
+                ));
             }
             if (objs->player_hand.somethind_inspected()) {
                 m_blur.Draw();
@@ -219,12 +227,33 @@ void meow::RaylibGameView::draw() {
         [](auto...) { throw std::runtime_error("unhandled type(s) in active display!"); }
     };
 
+    using ActionType = Action::ActionType;
     // FIXME
     if (auto action = m_client->receive_action(); action) {
-        if (random_integer(0, 1) == 0) {
-            m_gameplay_objects.board.m_kitten_cards.add_card(action->card_filename);
-        } else {
-            m_gameplay_objects.board.m_opponent_cards.add_card(action->card_filename);
+        // if (random_integer(0, 1) == 0) {
+        //     m_gameplay_objects.board.m_kitten_cards.add_card(filename);
+        // } else {
+        //     m_gameplay_objects.board.m_opponent_cards.add_card(filename);
+        // }
+        switch (action->type) {
+            case ActionType::DrawedCard: {
+                auto *info = card_manager_ptr->get_card_info_by_obj_id(action->card_id);
+                if (info == nullptr) {
+                    throw std::runtime_error("bad card id!");
+                }
+                m_gameplay_objects.player_hand.add_card(action->card_id);
+            } break;
+
+            case ActionType::PlayedCard: {
+                auto *info = card_manager_ptr->get_card_info_by_obj_id(action->card_id);
+                if (info == nullptr) {
+                    throw std::runtime_error("bad card id!");
+                }
+                m_gameplay_objects.board.m_kitten_cards.add_card(action->card_id);
+            } break;
+
+            default:
+                throw std::runtime_error("unhandled action type received!");
         }
     }
 
@@ -256,8 +285,8 @@ void meow::RaylibGameView::draw() {
 }
 
 /* Callbacks */
-void meow::RaylibGameView::on_card_add(std::string_view card_filename) {
-    m_gameplay_objects.board.add_card(card_filename);
+void meow::RaylibGameView::on_card_add(std::size_t card_id) {
+    m_gameplay_objects.board.add_card(card_id);
 }
 
 void meow::RaylibGameView::on_card_remove(std::string_view card_filename) {
