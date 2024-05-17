@@ -52,8 +52,8 @@ public:
           m_mainmenu((*m_mainmenu_maker)()),
           m_gameview_maker(plugin_names[SceneType::GAME]),
           m_gameview((*m_gameview_maker)()),
-          m_scene_manager(std::make_unique<SceneManager>()) {
-        m_game_session.reset_game_view(std::dynamic_pointer_cast<GameView>(m_gameview));
+          m_scene_manager(std::make_unique<SceneManager>()), 
+          m_game_session({std::dynamic_pointer_cast<GameView>(m_gameview)}) {
 
         m_scene_manager->set_scene(SceneType::MAIN_MENU, m_mainmenu.get());
         m_scene_manager->set_scene(SceneType::GAME, m_gameview.get());
@@ -126,7 +126,7 @@ private:
             m_mainmenu = (*m_mainmenu_maker)();
             m_gameview.reset();
             m_gameview = (*m_gameview_maker)();
-            m_game_session.reset_game_view(std::dynamic_pointer_cast<GameView>(m_gameview));
+            //m_game_session.reset_game_view(std::dynamic_pointer_cast<GameView>(m_gameview));
 
             m_mainmenu->attach_instances(&m_client, &m_window);
             m_gameview->attach_instances(&m_client, &m_window);

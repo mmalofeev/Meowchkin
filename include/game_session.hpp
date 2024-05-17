@@ -4,27 +4,30 @@
 #include <memory>
 #include <stdexcept>
 #include <vector>
+#include "noncopyable.hpp"
 #include "game_view.hpp"
 #include "shared_game_state.hpp"
 #include "virtual_machine.hpp"
 
 namespace meow::model {
 
-struct GameSession {
+struct GameSession : Noncopyable {
     friend struct VirtualMachine;
 
 private:
-    std::shared_ptr<GameView> game_view;
     std::size_t user_id{};
-
 public:
     //  пока GameSession не дописан game будет public для удобства тестирования.
     SharedGameState shared_state;
     std::unique_ptr<GameState> current_state;
 
-    explicit GameSession() {
+    explicit GameSession(std::initializer_list<std::shared_ptr<GameView>> l) {
         Object::set_seed(0);
         VirtualMachine::get_instance().set_game_session_reference(this);
+        
+        for (auto observer : l) {
+            shared_state.add_observer(observer);
+        }
     }
 
     void init(const std::vector<std::size_t> &users) {
@@ -32,16 +35,7 @@ public:
         current_state = std::make_unique<InitState>(&shared_state);
     }
 
-    void reset_game_view(std::shared_ptr<GameView> game_view_) {
-        game_view.reset();
-        game_view = game_view_;
-    }
 
-    /*
-    void notify_gameview(const network::Action &) {
-        observed->on_new_card_on_board();
-    }
-    */
 };
 
 }  // namespace meow::model

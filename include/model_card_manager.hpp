@@ -21,7 +21,7 @@ std::unique_ptr<To> dynamic_unique_cast(std::unique_ptr<From> &&p) {
 struct CardManager {
 private:
     std::vector<std::unique_ptr<model::CardInfo>> cards_instances;
-    mutable std::map<std::size_t, std::size_t> obj_id_to_card_id;
+    mutable std::unordered_map<std::size_t, std::size_t> obj_id_to_card_id;
     CardManager();
 
 public:

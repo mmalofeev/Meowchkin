@@ -218,9 +218,9 @@ std::unique_ptr<GameState>
 ManagementState::throw_card(std::size_t user_id, std::size_t card_obj_id) {
     Player *player = shared_state->get_player_by_user_id(user_id);
 
-    if ([[maybe_unused]] auto card = player->drop_card_from_hand_by_id(card_obj_id)) {
+    if (player->drop_card_from_hand_by_id(card_obj_id)) {
         return std::unique_ptr<ManagementState>(this);
-    } else if ([[maybe_unused]] auto card = player->drop_card_from_storage_by_id(card_obj_id)) {
+    } else if (player->drop_card_from_storage_by_id(card_obj_id)) {
         return std::unique_ptr<ManagementState>(this);
     }
 

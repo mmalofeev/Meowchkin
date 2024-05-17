@@ -13,7 +13,7 @@ void SharedGameState::set_player_list(const std::vector<std::size_t> &users) {
     }
 }
 
-std::size_t SharedGameState::get_player_position_by_user_id(std::size_t user_id) const {
+[[nodiscard]] std::size_t SharedGameState::get_player_position_by_user_id(std::size_t user_id) const {
     for (size_t i = 0; i < players.size(); i++) {
         if (players[i].user_id == user_id) {
             return i;
@@ -29,22 +29,22 @@ void SharedGameState::set_first_player_by_position(std::size_t position) {
     cur_turn = position;
 }
 
-std::size_t SharedGameState::get_current_user_id() const {
+[[nodiscard]] std::size_t SharedGameState::get_current_user_id() const {
     assert(cur_turn < players.size());
     return players[cur_turn].user_id;
 }
 
-std::size_t SharedGameState::get_number_of_players() const {
+[[nodiscard]] std::size_t SharedGameState::get_number_of_players() const {
     return players.size();
 }
 
-std::size_t SharedGameState::get_card_id_from_deck() {
+[[nodiscard]] std::size_t SharedGameState::get_card_id_from_deck() const {
     return get_object_based_random_integer<std::size_t>(
         0, CardManager::get_instance().get_number_of_cards() - 1
     );
 }
 
-Player *SharedGameState::get_player_by_user_id(std::size_t user_id) {
+[[nodiscard]] Player *SharedGameState::get_player_by_user_id(std::size_t user_id) {
     for (size_t i = 0; i < players.size(); i++) {
         if (players[i].user_id == user_id) {
             return &players[i];
@@ -54,7 +54,7 @@ Player *SharedGameState::get_player_by_user_id(std::size_t user_id) {
     return nullptr;
 }
 
-Player *SharedGameState::get_player_by_player_id(std::size_t player_id) {
+[[nodiscard]] Player *SharedGameState::get_player_by_player_id(std::size_t player_id) {
     for (size_t i = 0; i < players.size(); i++) {
         if (players[i].obj_id == player_id) {
             return &players[i];

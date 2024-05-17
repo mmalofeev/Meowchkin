@@ -12,7 +12,7 @@ TEST(ModelTest, CompileTest) {
     std::vector<std::size_t> users;
     users.push_back(1);
     users.push_back(2);
-    meow::model::GameSession session;
+    meow::model::GameSession session{};
     session.init(users);
 }
 
@@ -20,7 +20,7 @@ TEST(ModelTest, InitTest) {
     std::vector<std::size_t> users;
     users.push_back(1);
     users.push_back(2);
-    meow::model::GameSession session;
+    meow::model::GameSession session{};
     session.init(users);
 
     auto &players = session.shared_state.get_all_players();
@@ -76,7 +76,7 @@ TEST(ModelTest, BaseBrowlTest) {
     std::vector<std::size_t> users;
     users.push_back(1);
     users.push_back(2);
-    meow::model::GameSession session;
+    meow::model::GameSession session{};
     session.init(users);
 
     auto &players = session.shared_state.get_all_players();
@@ -132,7 +132,7 @@ TEST(ModelTest, PlaySpellsFromHandBrowlTest) {
     std::vector<std::size_t> users;
     users.push_back(1);
     users.push_back(2);
-    meow::model::GameSession session;
+    meow::model::GameSession session{};
     session.init(users);
 
     auto &players = session.shared_state.get_all_players();
