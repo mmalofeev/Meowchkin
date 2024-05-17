@@ -8,6 +8,7 @@ set(CMAKE_CXX_FLAGS ${suppressed_warnings})
 set(CMAKE_CXX_FLAGS_DEBUG_INIT "-g -fsanitize=address -fsanitize=undefined")
 set(CMAKE_CXX_FLAGS_RELEASE_INIT "-O2")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_COMPILER "/usr/bin/clang++")
 
 project(meowchkin)
 

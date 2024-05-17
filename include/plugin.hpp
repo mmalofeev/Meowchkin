@@ -15,8 +15,6 @@ private:
     T *m_ptr = nullptr;
 
 public:
-    Plugin() = default;
-
     Plugin(std::string_view name, std::string_view import_object) {
         reload(name, import_object);
     }

@@ -2,49 +2,75 @@
 #define RAYLIB_GAME_VIEW_HPP_
 
 #include <filesystem>
+#include <functional>
 #include <memory>
+#include <variant>
 #include "enum_array.hpp"
+#include "game_view.hpp"
 #include "gui_board.hpp"
 #include "gui_card_span.hpp"
 #include "gui_player_statistics_menu.hpp"
 #include "gui_text_chat.hpp"
 #include "gui_usernames_box.hpp"
-#include "game_view.hpp"
-#include "raygui.h"
+#include "timed_state_machine.hpp"
 
 namespace meow {
 
 class RaylibGameView : public GameView {
 private:
-    static constexpr int button_width = 300;
-    static constexpr int button_height = 40;
     inline static const raylib::Color background_color = raylib::Color(77, 120, 204, 255);
 
-    GuiBoard m_board;
-    GuiCardSpan m_player_hand;
-    GuiUsernamesBox m_usernames_box;
-    GuiTextChat m_text_chat;
-    GuiPlayerStatisticsMenu m_stats;
+    struct GameplayObjs {
+        GuiBoard board{};
+        GuiCardSpan player_hand{std::make_unique<PlayerHandDDM>(&player_hand)};
+        GuiUsernamesBox usernames_box{};
+        GuiTextChat text_chat{};
+        GuiPlayerStatisticsMenu stats{};
+    } m_gameplay_objects;
+
+    struct PauseMenuObjs {
+        static constexpr int button_width = 300;
+        static constexpr int button_height = 40;
+
+        enum class Button { CONTINUE, BACK_TO_LOBBY, QUIT, COUNT };
+        EnumArray<Button, const char *> button_labels = {
+            {Button::CONTINUE, "Continue"},
+            {Button::BACK_TO_LOBBY, "Back to lobby"},
+            {Button::QUIT, "Quit"},
+        };
+        EnumArray<Button, raylib::Rectangle> button_rects{};
+        EnumArray<Button, bool> button_pressed{};
+    } m_pause_menu_objects;
+
+    std::variant<GameplayObjs *, PauseMenuObjs *> m_active_display;
+
+    struct ActiveDisplaySelector {
+        static constexpr int button_width = 80;
+        static constexpr int button_height = 80;
+
+        enum class Button { BRAWL, STATS, CHAT, PAUSE, COUNT };
+        EnumArray<Button, const char *> button_texture_paths = {
+            {Button::BRAWL, "bin/imgs/brawl_button_texture.png"},
+            {Button::STATS, "bin/imgs/stats_button_texture.png"},
+            {Button::CHAT, "bin/imgs/chat_button_texture.png"},
+            {Button::PAUSE, "bin/imgs/pause_button_texture.png"},
+        };
+        EnumArray<Button, raylib::Texture> button_texs{};
+        EnumArray<Button, raylib::Rectangle> button_rects{};
+        EnumArray<Button, bool> button_pressed{};
+    } m_active_display_selector;
 
     /* background */
     raylib::Texture m_background;
     raylib::Texture m_blur;
 
-    /* pause menu */
-    enum class PauseButton { CONTINUE, BACK_TO_LOBBY, QUIT, COUNT };  // TODO: settings
-    EnumArray<PauseButton, const char *> m_pause_button_labels = {
-        {PauseButton::CONTINUE, "Continue"},
-        {PauseButton::BACK_TO_LOBBY, "Back to lobby"},
-        {PauseButton::QUIT, "Quit"},
-    };
-    EnumArray<PauseButton, raylib::Rectangle> m_pause_button_rects;
-    EnumArray<PauseButton, bool> m_pause_button_pressed;
-    bool m_should_draw_pause = false;
-
     /* misc */
     std::vector<std::filesystem::path> m_card_image_paths;
     bool m_show_chat = false;
-    bool m_something_dragged = false;
+    raylib::Texture m_on_levelup_texture;
+    std::function<void(std::chrono::milliseconds, bool)> m_levelup_blink_call =
+        make_timed_state_machine([this](auto, auto) { m_on_levelup_texture.Draw(); });
+    bool m_levelup_blink = false;
 
 protected:
     void on_instances_attach() override;
@@ -58,7 +84,7 @@ public:
     void on_card_remove(std::string_view card_filename) override;
     void on_turn_begin() override;
     void on_turn_end() override;
-    void on_levelup() override;  // maybe?..
+    void on_levelup() override;
     void on_card_receive() override;
     void on_item_equip() override;
     void on_item_loss() override;
@@ -72,8 +98,10 @@ public:
 private:
     void setup_background();
     void setup_pause_menu();
+    void setup_active_display_selector();
     void setup_hand();
     void draw_pause_menu();
+    void draw_active_display_selector();
 };
 
 }  // namespace meow
