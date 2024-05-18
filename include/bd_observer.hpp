@@ -1,12 +1,15 @@
 #ifndef MEOWCHKIN_BD_OBSERVER_HPP
 #define MEOWCHKIN_BD_OBSERVER_HPP
 #include <functional>
+#include "abstract_observer.hpp"
+#include "model_card_manager.hpp"
 #include "sqlite/sqlite3.h"
 
-class StatisticObserver {
+namespace meow {
+class StatisticObserver : Observer {
     sqlite3 *DB{nullptr};
 
-    int count() {
+    int count_existed_strings() {
         int cnt = 0;
         std::string sql = "SELECT COUNT(*) FROM card_usage";
         auto callback = [](void *data, int argc, char **argv, char **azColName) -> int {
@@ -22,19 +25,19 @@ class StatisticObserver {
         return cnt;
     }
 
-    std::vector<int> get_ids_of_cards() {
-        std::vector<int> ids(10);
-        for (int i = 0; i < 10; ++i) {
+    std::vector<int> get_ids_of_all_cards() {
+        std::vector<int> ids(CardManager::get_instance().get_number_of_cards());
+        for (int i = 0; i < CardManager::get_instance().get_number_of_cards(); ++i) {
             ids[i] = i;
         }
         return ids;
     }
 
     void init() {
-        if (count() != 0) {
+        if (count_existed_strings() != 0) {
             return;
         }
-        for (int id : get_ids_of_cards()) {
+        for (int id : get_ids_of_all_cards()) {
             std::string sql =
                 "INSERT INTO card_usage (card_id, count_of_usage)\n"
                 "VALUES (" +
@@ -49,6 +52,9 @@ class StatisticObserver {
         }
     }
 
+    std::size_t get_card_by_obj(std::size_t obj_id) {
+        return CardManager::get_instance().get_card_info_by_obj_id(obj_id)->card_id;
+    }
 
 public:
     StatisticObserver() {
@@ -77,7 +83,8 @@ public:
         }
     }
 
-    void increase_count_of_usage(int card_id) {
+    void on_item_equip(std::size_t obj_id) final {
+        std::size_t card_id = get_card_by_obj(obj_id);
         std::string sql =
             "UPDATE card_usage SET count_of_usage = count_of_usage + 1 WHERE card_id = " +
             std::to_string(card_id) + ";";
@@ -90,7 +97,8 @@ public:
         }
     }
 
-    std::vector<std::pair<int, int>> get_frequency_of_usage() {
+    std::vector<std::pair<int, int>> get_frequency_of_usage_items(
+    ) {                                              // in sorted by frequency order
         std::vector<std::pair<int, int>> frequency;  //{frequency, card_id}
         std::string query = "SELECT * FROM card_usage;";
         auto callback = [](void *data, int argc, char **argv, char **azColName) -> int {
@@ -101,7 +109,9 @@ public:
         char *errmsg;
         int exit = sqlite3_exec(DB, query.c_str(), callback, &frequency, &errmsg);
         if (exit) {
-            throw std::runtime_error("Failed get_frequency_of_usage: " + std::string(errmsg) + "\n");
+            throw std::runtime_error(
+                "Failed get_frequency_of_usage: " + std::string(errmsg) + "\n"
+            );
         }
         std::sort(frequency.begin(), frequency.end());
         return frequency;
@@ -111,5 +121,5 @@ public:
         sqlite3_close(DB);
     }
 };
-
+}  // namespace meow
 #endif  // MEOWCHKIN_BD_OBSERVER_HPP
