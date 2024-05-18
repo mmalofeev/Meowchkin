@@ -5,7 +5,7 @@
         "image": "",
         "openable": true,
         "storable": false,
-        "is_one_time": false,
+        "cost": 0,
         "verification": [
           "IS_DESK",
           "RETURN"
@@ -17,6 +17,27 @@
           "INCREASE_LEVEL_FORCE"
         ],
         "unwind": []
+      },
+      {
+        "type": "MONSTER",
+        "image": "",
+        "openable": true,
+        "storable": false,
+        "verification": [
+          "STACK_LOAD",
+          "0",
+          "RETURN"
+        ],
+        "buff": [],
+        "stalking_checker": [],
+        "lewdness": [
+          "STACK_LOAD",
+          "-2",
+          "INCREASE_LEVEL"
+        ],
+        "power": 2, 
+        "treasures": 1,
+        "undead": false
       }
     ]
 }

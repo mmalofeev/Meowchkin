@@ -11,33 +11,31 @@ namespace meow {
 template <class T>
 class Plugin : Noncopyable {
 private:
-    T *m_ptr = nullptr;
     boost::dll::shared_library m_library;
+    T *m_ptr = nullptr;
 
 public:
-    explicit Plugin() = default;
-
-    explicit Plugin(std::string_view name, std::string_view import_item) {
-        reload(name.data(), import_item.data());
+    Plugin(std::string_view name, std::string_view import_object) {
+        reload(name, import_object);
     }
 
-    explicit Plugin(const std::pair<std::string_view, std::string_view> &name_item) {
-        reload(name_item.first.data(), name_item.second.data());
+    explicit Plugin(std::pair<std::string_view, std::string_view> args) {
+        reload(args.first, args.second);
     }
 
-    void reload(const std::pair<std::string_view, std::string_view> &name_item) {
-        reload(name_item.first.data(), name_item.second.data());
+    void reload(std::pair<std::string_view, std::string_view> args) {
+        reload(args.first, args.second);
     }
 
-    void reload(std::string_view name, std::string_view import_item) {
+    void reload(std::string_view name, std::string_view import_object) {
         m_library.unload();
         m_ptr = nullptr;
         m_library.load(name.data(), boost::dll::load_mode::append_decorations);
-        if (!m_library.has(import_item.data())) {
-            throw std::runtime_error("DSo doesn't have import items!");
+        if (!m_library.has(import_object.data())) {
+            throw std::runtime_error("DSo doesn't have import object!");
         }
-        if (m_ptr = &m_library.get<T>(import_item.data()); !m_ptr) {
-            throw std::runtime_error("invalid object in DSo!");
+        if (m_ptr = &m_library.get<T>(import_object.data()); m_ptr == nullptr) {
+            throw std::runtime_error("invalid object in DSO!");
         }
     }
 
@@ -45,11 +43,23 @@ public:
         return m_ptr;
     }
 
-    [[nodiscard]] T *operator*() noexcept {
+    [[nodiscard]] const T *operator->() const noexcept {
         return m_ptr;
     }
 
+    [[nodiscard]] T &operator*() noexcept {
+        return *m_ptr;
+    }
+
+    [[nodiscard]] const T &operator*() const noexcept {
+        return *m_ptr;
+    }
+
     [[nodiscard]] T *get() noexcept {
+        return m_ptr;
+    }
+
+    [[nodiscard]] const T *get() const noexcept {
         return m_ptr;
     }
 };

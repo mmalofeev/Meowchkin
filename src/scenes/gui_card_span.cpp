@@ -1,4 +1,11 @@
 #include "gui_card_span.hpp"
+#include <chrono>
+#include <cstdlib>
+#include <iostream>
+#include "gui_card_loader.hpp"
+#include "gui_card_span_dropdown_menu.hpp"
+#include "raylib.h"
+#include "timed_state_machine.hpp"
 
 namespace meow {
 
@@ -23,27 +30,26 @@ void GuiCardSpan::recalculate_card_rects() noexcept {
     }
 }
 
-void GuiCardSpan::add_card(std::string_view path_to_texture) {
-    raylib::Image img;
+void GuiCardSpan::add_card(std::size_t card_id) {
+    raylib::Image img, img2;
+    std::string path_to_texture = card_manager->get_card_info_by_obj_id(card_id)->image;
     try {
-        img.Load(path_to_texture.data());
-        img.Resize(GuiCard::width, GuiCard::height);
-        img.Mipmaps();
+        img = meow::load_card_img(path_to_texture);
     } catch (const raylib::RaylibException &) {
         img = raylib::Image::Color(GuiCard::width, GuiCard::height, raylib::Color::Green());
     }
+    img2 = img;
+    img.Resize(GuiCard::width, GuiCard::height);
     raylib::Texture tex = raylib::Texture(img);
     tex.GenMipmaps();
-    add_card({
-        raylib::Rectangle(m_window->GetWidth(), 0, 0, 0),
-        raylib::Vector2(0),
-        std::move(tex),
-        path_to_texture.data()
-    });
+    add_card(
+        {raylib::Rectangle(m_window->GetWidth(), 0, 0, 0), raylib::Vector2(0), std::move(tex), img2,
+         path_to_texture, card_id}
+    );
 }
 
 void GuiCardSpan::add_card(GuiCard &&card) {
-    m_cards.push_back(std::move(card));
+    m_cards.emplace_back(std::move(card));
     m_card_gap -= 10;
     recalculate_card_rects();
 }
@@ -72,39 +78,44 @@ void GuiCardSpan::remove_card() {
     recalculate_card_rects();
 }
 
-void GuiCardSpan::draw_cards(float frame_time, bool can_be_dragged) {
+void GuiCardSpan::draw_cards(float frame_time) {
+    const bool can_be_dragged = !something_dragged;
     if (!can_be_dragged || raylib::Mouse::IsButtonReleased(MOUSE_BUTTON_LEFT)) {
         m_selected = m_cards.end();
     }
     if (!can_be_dragged || ((raylib::Mouse::IsButtonPressed(MOUSE_BUTTON_LEFT) ||
                              raylib::Mouse::IsButtonPressed(MOUSE_BUTTON_RIGHT)) &&
-                            !m_dropdown_menu.mouse_in_menu())) {
-        m_dropdown_menu.detach_card();
+                            !m_dropdown_menu->mouse_in_menu())) {
+        m_dropdown_menu->detach_card();
     }
+
     for (auto card_it = m_cards.begin(); card_it != m_cards.end(); card_it++) {
         if (card_it->border.CheckCollision(raylib::Mouse::GetPosition())) {
             if (can_be_dragged && m_selected == m_cards.end() &&
                 raylib::Mouse::IsButtonDown(MOUSE_BUTTON_LEFT) &&
-                !m_dropdown_menu.mouse_in_menu()) {
+                !m_dropdown_menu->mouse_in_menu()) {
                 m_selected = card_it;
-                m_dropdown_menu.detach_card();
-            } else if (can_be_dragged && m_selected == m_cards.end() && raylib::Mouse::IsButtonPressed(MOUSE_RIGHT_BUTTON)) {
-                m_dropdown_menu.attach_card(card_it, raylib::Mouse::GetPosition());
+                m_dropdown_menu->detach_card();
+            } else if (can_be_dragged && m_selected == m_cards.end() &&
+                       raylib::Mouse::IsButtonPressed(MOUSE_RIGHT_BUTTON)) {
+                m_dropdown_menu->attach_card(card_it, raylib::Mouse::GetPosition());
             }
         }
     }
 
     // ratio is for texture; maybe i should store ratio as class member
     const double ratio = std::sqrt(m_span_borders.height / m_window->GetHeight());
-    for (auto card_it = m_cards.begin(); card_it != m_cards.end(); card_it++) {
+    for (auto card_it = m_cards.begin(); card_it != m_cards.end(); ++card_it) {
         if (card_it == m_selected) {
             continue;
         }
+
         if (m_selected == m_cards.end()) {
             card_it->border.DrawRounded(0.1f, 4, raylib::Color(0x004400FF));
         } else {
             card_it->border.DrawRounded(0.1f, 4, raylib::Color(0x00440088));
         }
+
         card_it->texture.Draw(
             card_it->border.GetPosition(), 0, ratio, raylib::Color(255, 255, 255, 200)
         );
@@ -143,7 +154,29 @@ void GuiCardSpan::draw_cards(float frame_time, bool can_be_dragged) {
             card_it = m_removed_cards.erase(card_it);
         }
     }
-    m_dropdown_menu.draw();
+    m_dropdown_menu->draw();
+    something_dragged = m_selected != m_cards.end();
+}
+
+void GuiCardSpan::draw_inspected_card(int window_width, int window_height) {
+    if (inspected_card == nullptr) {
+        return;
+    }
+
+    if (reset_inspected_card_texture) {
+        inspected_card_texture = raylib::Texture(inspected_card->orig_img);
+        reset_inspected_card_texture = false;
+    }
+    raylib::Color col{255, 255, 255, 255};
+    const raylib::Vector2 pos{
+        (window_width - inspected_card->orig_img.width) / 2.0f,
+        (window_height - inspected_card->orig_img.height) / 2.0f
+    };
+    inspected_card_texture->Draw(pos, col);
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        reset_inspected_card_texture = true;
+        inspected_card = nullptr;
+    }
 }
 
 }  // namespace meow
