@@ -101,7 +101,13 @@ public:
         remove_card(it);
     }
 
-    void remove_card(std::size_t card_id);
+    void remove_card(std::size_t card_id) {
+        auto it = std::find_if(m_cards.begin(), m_cards.end(), [card_id](const GuiCard &c) {
+            return c.card_id == card_id;
+        });
+        remove_card(it);
+    }
+
     void draw_cards(float frame_time);
     static void draw_inspected_card(int window_width, int window_height);
 };
