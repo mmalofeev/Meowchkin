@@ -267,10 +267,7 @@ void meow::RaylibGameView::draw() {
     std::visit(active_display_visitor, m_active_display);
 
     if (IsKeyPressed(KEY_SPACE)) {
-        on_levelup();
-    }
-    if (IsKeyPressed(KEY_ENTER)) {
-        on_turn_begin();
+        on_levelup(m_client->get_id_of_client());
     }
 
     if (IsKeyPressed(KEY_ESCAPE)) {
@@ -284,41 +281,38 @@ void meow::RaylibGameView::draw() {
     m_levelup_blink = false;
 }
 
-/* Callbacks */
-void meow::RaylibGameView::on_card_add(std::size_t card_id) {
+void meow::RaylibGameView::on_card_add_on_board(std::size_t card_id) {
     m_gameplay_objects.board.add_card(card_id);
 }
 
-void meow::RaylibGameView::on_card_remove(std::string_view card_filename) {
-    m_gameplay_objects.board.remove_card(card_filename);
+void meow::RaylibGameView::on_card_remove_from_board(std::size_t card_id) {
+    m_gameplay_objects.board.remove_card(card_id);
 }
 
-void meow::RaylibGameView::on_turn_begin() {
+void meow::RaylibGameView::on_turn_begin(std::size_t user_id) {
 }
 
-void meow::RaylibGameView::on_turn_end() {
+void meow::RaylibGameView::on_turn_end(std::size_t user_id) {
 }
 
-void meow::RaylibGameView::on_levelup() {
-    // ++m_gameplay_objects.stats.menu_elements[GuiPlayerStatisticsMenu::StatisticKind::LEVEL].value;
-    // m_gameplay_objects.stats.blink = true;
-    // m_gameplay_objects.stats.blink_color = raylib::Color(0, 200, 0, 180);
+void meow::RaylibGameView::on_levelup(std::size_t user_id) {
+}
+
+void meow::RaylibGameView::on_card_receive(std::size_t user_id) {
+    ++m_gameplay_objects.stats.menu_elements[GuiPlayerStatisticsMenu::StatisticKind::LEVEL].value;
     m_levelup_blink = true;
 }
 
-void meow::RaylibGameView::on_card_receive() {
+void meow::RaylibGameView::on_item_equip(std::size_t user_id) {
 }
 
-void meow::RaylibGameView::on_item_equip() {
+void meow::RaylibGameView::on_item_loss(std::size_t user_id) {
 }
 
-void meow::RaylibGameView::on_item_loss() {
+void meow::RaylibGameView::on_monster_elimination(std::size_t user_id) {
 }
 
-void meow::RaylibGameView::on_monster_elimination() {
-}
-
-void meow::RaylibGameView::on_being_cursed() {
+void meow::RaylibGameView::on_being_cursed(std::size_t user_id) {
 }
 
 BOOST_DLL_ALIAS(meow::RaylibGameView::make_raylib_gameview, make_gameview)

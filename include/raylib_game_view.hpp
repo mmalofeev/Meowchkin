@@ -80,17 +80,29 @@ public:
     void draw() override;
 
     /* Callbacks */
-    void on_card_add(std::size_t card_id) override;
-    void on_card_remove(std::string_view card_filename) override;
-    void on_turn_begin() override;
-    void on_turn_end() override;
-    void on_levelup() override;
-    void on_card_receive() override;
-    void on_item_equip() override;
-    void on_item_loss() override;
-    void on_monster_elimination() override;
-    void on_being_cursed() override;
+    void on_card_add_on_board(std::size_t card_id) override;
+    void on_card_remove_from_board(std::size_t card_id) override;
+    void on_turn_begin(std::size_t user_id) override;
+    void on_turn_end(std::size_t user_id) override;
+    void on_levelup(std::size_t user_id) override;
+    void on_card_receive(std::size_t user_id) override;
+    void on_item_equip(std::size_t user_id) override;
+    void on_item_loss(std::size_t user_id) override;
+    void on_monster_elimination(std::size_t user_id) override;  // which player killed monster
+    void on_being_cursed(std::size_t user_id) override;         // which player is cursed
 
+
+    // void on_card_add(std::size_t card_id) override;
+    // void on_card_remove(std::string_view card_filename) override;
+    // void on_turn_begin() override;
+    // void on_turn_end() override;
+    // void on_levelup() override;
+    // void on_card_receive() override;
+    // void on_item_equip() override;
+    // void on_item_loss() override;
+    // void on_monster_elimination() override;
+    // void on_being_cursed() override;
+    //
     static std::shared_ptr<RaylibGameView> make_raylib_gameview() {
         return std::make_shared<RaylibGameView>();
     }

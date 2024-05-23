@@ -2,7 +2,7 @@
     "cards": [
       {
         "type": "SPELL",
-        "image": "",
+        "image": "bin/imgs/cards/ai_generated/card3.png",
         "openable": true,
         "storable": false,
         "cost": 0,

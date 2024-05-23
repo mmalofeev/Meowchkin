@@ -37,8 +37,8 @@ public:
     void draw(float frame_time);
     void add_card(std::size_t card_id);
 
-    void remove_card(std::string_view card_filename) {
-        m_kitten_cards.remove_card(card_filename);
+    void remove_card(std::size_t card_id) {
+        m_kitten_cards.remove_card(card_id);
     }
 };
 
