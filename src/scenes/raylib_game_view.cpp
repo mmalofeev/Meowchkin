@@ -29,8 +29,7 @@ EnumT draw_opts_menu(const meow::EnumArray<EnumT, std::string> &opts, raylib::Ve
     for (std::size_t i = 0; i < opts.size(); ++i) {
         if (GuiButton(
                 Rectangle{
-                    pos.x, pos.y + i * opts_button_height, opts_button_width, opts_button_height
-                },
+                    pos.x, pos.y + i * opts_button_height, opts_button_width, opts_button_height},
                 opts[i].c_str()
             )) {
             ret = static_cast<EnumT>(i);
@@ -207,8 +206,7 @@ void meow::RaylibGameView::draw() {
 
             enum class bebra_enum { bebra1, bebra2, COUNT };
             EnumArray<bebra_enum, std::string> bebra_arr{
-                {bebra_enum::bebra1, "bbbbeeebra1"}, {bebra_enum::bebra2, "bbbbeeebra2"}
-            };
+                {bebra_enum::bebra1, "bbbbeeebra1"}, {bebra_enum::bebra2, "bbbbeeebra2"}};
             float was = guiAlpha;
             GuiSetAlpha(0.85);
             if (auto x = draw_opts_menu(
@@ -224,38 +222,7 @@ void meow::RaylibGameView::draw() {
             m_blur.Draw();
             draw_pause_menu();
         },
-        [](auto...) { throw std::runtime_error("unhandled type(s) in active display!"); }
-    };
-
-    using ActionType = Action::ActionType;
-    // FIXME
-    if (auto action = m_client->receive_action(); action) {
-        // if (random_integer(0, 1) == 0) {
-        //     m_gameplay_objects.board.m_kitten_cards.add_card(filename);
-        // } else {
-        //     m_gameplay_objects.board.m_opponent_cards.add_card(filename);
-        // }
-        switch (action->type) {
-            case ActionType::DrawedCard: {
-                auto *info = card_manager_ptr->get_card_info_by_obj_id(action->card_id);
-                if (info == nullptr) {
-                    throw std::runtime_error("bad card id!");
-                }
-                m_gameplay_objects.player_hand.add_card(action->card_id);
-            } break;
-
-            case ActionType::PlayedCard: {
-                auto *info = card_manager_ptr->get_card_info_by_obj_id(action->card_id);
-                if (info == nullptr) {
-                    throw std::runtime_error("bad card id!");
-                }
-                m_gameplay_objects.board.m_kitten_cards.add_card(action->card_id);
-            } break;
-
-            default:
-                throw std::runtime_error("unhandled action type received!");
-        }
-    }
+        [](auto...) { throw std::runtime_error("unhandled type(s) in active display!"); }};
 
     if (auto chat_message = m_client->receive_chat_message(); chat_message) {
         std::cout << "received from " << chat_message->sender_player << ": "
@@ -296,11 +263,12 @@ void meow::RaylibGameView::on_turn_end(std::size_t user_id) {
 }
 
 void meow::RaylibGameView::on_levelup(std::size_t user_id) {
-}
-
-void meow::RaylibGameView::on_card_receive(std::size_t user_id) {
     ++m_gameplay_objects.stats.menu_elements[GuiPlayerStatisticsMenu::StatisticKind::LEVEL].value;
     m_levelup_blink = true;
+}
+
+void meow::RaylibGameView::on_card_receive(std::size_t user_id, size_t card_id) {
+    m_gameplay_objects.player_hand.add_card(card_id);
 }
 
 void meow::RaylibGameView::on_item_equip(std::size_t user_id) {

@@ -6,6 +6,7 @@
 #include "model_player.hpp"
 #include "model_random.hpp"
 #include "shared_game_state.hpp"
+#include "virtual_machine.hpp"
 
 namespace meow::model {
 
@@ -158,7 +159,7 @@ std::unique_ptr<GameState> BrawlState::pass(std::size_t user_id) {
         for (auto hero_id : heroes) {
             for (size_t i = 0; i < treasures_pool; i++) {
                 shared_state->get_player_by_player_id(hero_id)->add_card_to_hand(
-                    CardManager::get_instance().get_card(shared_state->get_card_id_from_deck())
+                    CardManager::get_instance().create_card(shared_state->get_card_id_from_deck())
                 );
             }
             shared_state->get_player_by_player_id(hero_id)->increse_level(1, true);
@@ -234,7 +235,7 @@ std::unique_ptr<GameState> ManagementState::draw_card(std::size_t user_id) {
     }
     Player *player = shared_state->get_player_by_user_id(user_id);
 
-    auto card = CardManager::get_instance().get_card(shared_state->get_card_id_from_deck());
+    auto card = CardManager::get_instance().create_card(shared_state->get_card_id_from_deck());
 
     if (card->info->type != CardType::MONSTER) {
         if (card->info->openable) {
@@ -282,13 +283,16 @@ std::unique_ptr<GameState> InitState::roll_dice(std::size_t user_id) {
             position_of_first_best_result = i;
         }
     }
-
+    //
     shared_state->set_first_player_by_position(position_of_first_best_result);
     for (auto &player : shared_state->get_all_players()) {
         for (size_t i = 0; i < init_hand_size; i++) {
-            player.add_card_to_hand(
-                CardManager::get_instance().get_card(shared_state->get_card_id_from_deck())
-            );
+            auto card =
+                CardManager::get_instance().create_card(shared_state->get_card_id_from_deck());
+            for (auto &observer : VirtualMachine::get_instance().get_observers()) {
+                observer->on_card_receive(user_id, card->obj_id);
+            }
+            player.add_card_to_hand(std::move(card));
         }
     }
 
