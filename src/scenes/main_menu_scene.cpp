@@ -21,8 +21,7 @@ private:
         {Button::JOIN_LOBBY, "Join lobby"},
         {Button::CREATE_LOBBY, "Create lobby"},
         {Button::ENTER_NAME, "Enter name"},
-        {Button::QUIT, "Quit"}
-    };
+        {Button::QUIT, "Quit"}};
     EnumArray<Button, Rectangle> m_button_rects;
     EnumArray<Button, bool> m_button_pressed;
     raylib::Texture m_background;

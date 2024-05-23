@@ -123,8 +123,7 @@ public:
         const auto &arr = m_button_origins.data();
         raylib::Rectangle rec = {
             arr[0].x + m_spawn_point.x, arr[0].y + m_spawn_point.y, arr.back().x + button_width,
-            arr.back().y + button_height
-        };
+            arr.back().y + button_height};
         return rec.CheckCollision(raylib::Mouse::GetPosition());
     }
 

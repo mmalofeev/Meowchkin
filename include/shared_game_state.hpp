@@ -1,11 +1,10 @@
 #ifndef SHARED_GAME_STATE_HPP_
 #define SHARED_GAME_STATE_HPP_
 #include <limits>
+#include <memory>
 #include <vector>
 #include "game_state.hpp"
 #include "model_player.hpp"
-#include "game_view.hpp"
-#include <memory>
 
 namespace meow::model {
 
@@ -13,7 +12,6 @@ struct SharedGameState {
 private:
     std::vector<Player> players;
     std::size_t cur_turn = std::numeric_limits<std::size_t>::max();
-    std::vector<std::shared_ptr<GameView>> observers;
 
 public:
     void set_player_list(const std::vector<std::size_t> &users);
@@ -37,10 +35,6 @@ public:
     void end_turn();
 
     bool is_end() const;
-
-    void add_observer(std::shared_ptr<GameView> observer) {
-        observers.emplace_back(observer);
-    }
 };
 
 }  // namespace meow::model

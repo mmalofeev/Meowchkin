@@ -30,7 +30,7 @@ public:
         return instance;
     }
 
-    std::unique_ptr<model::Card> get_card(std::size_t card_id) const;
+    std::unique_ptr<model::Card> create_card(std::size_t card_id) const;
     const model::CardInfo *get_card_info_by_obj_id(std::size_t obj_id) const;
     std::size_t get_number_of_cards() const;
     void delete_obj_id(std::size_t obj_id);
