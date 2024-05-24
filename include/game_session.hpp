@@ -39,36 +39,42 @@ public:
 
     bool handle_action(const network::Action &action) {
         using network::Action;
+        std::unique_ptr<GameState> next_state;
         switch (action.type) {
             case (Action::ActionType::EndTurn): {
-                return static_cast<bool>(current_state->end_turn(action.sender_player));
+                next_state = current_state->end_turn(action.sender_player);
             } break;
             case (Action::ActionType::RollDice): {
-                return static_cast<bool>(current_state->roll_dice(action.sender_player));
+                next_state = current_state->roll_dice(action.sender_player);
             } break;
             case (Action::ActionType::PlayedCard): {
-                return static_cast<bool>(current_state->play_card(
+                next_state = current_state->play_card(
                     action.sender_player, action.target_player, action.card_id
-                ));
-            } break;
-            case (Action::ActionType::DrawedCard): {
-                return static_cast<bool>(current_state->draw_card(action.sender_player));
-            } break;
-            case (Action::ActionType::ThrewCard): {
-                return static_cast<bool>(
-                    current_state->throw_card(action.sender_player, action.card_id)
                 );
             } break;
+            case (Action::ActionType::DrawedCard): {
+                next_state = current_state->draw_card(action.sender_player);
+            } break;
+            case (Action::ActionType::ThrewCard): {
+                next_state = current_state->throw_card(action.sender_player, action.card_id);
+            } break;
             case (Action::ActionType::Pass): {
-                return static_cast<bool>(current_state->end_turn(action.sender_player));
+                next_state = current_state->end_turn(action.sender_player);
             } break;
             default: {
                 assert(false);
-                return false;
             } break;
         }
 
-        return false;
+        if (!next_state) {
+            return false;
+        }
+
+        if (current_state.get() != next_state.get()) {
+            current_state = std::move(next_state);
+        }
+
+        return true;
     }
 
     ~GameSession() {
