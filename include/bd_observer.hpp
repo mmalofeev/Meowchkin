@@ -6,6 +6,18 @@
 #include "sqlite/sqlite3.h"
 
 namespace meow {
+struct UsageItemInfo {
+    int frequency;
+    int card_id;
+
+    UsageItemInfo(int freq, int id) : frequency(freq), card_id(id) {
+    }
+};
+
+bool operator<(const UsageItemInfo &a, const UsageItemInfo &b) {
+    return a.frequency > b.frequency;
+}
+
 class StatisticObserver : Observer {
     sqlite3 *DB{nullptr};
 
@@ -97,9 +109,8 @@ public:
         }
     }
 
-    std::vector<std::pair<int, int>> get_frequency_of_usage_items(
-    ) {                                              // in sorted by frequency order
-        std::vector<std::pair<int, int>> frequency;  //{frequency, card_id}
+    std::vector<UsageItemInfo> get_frequency_of_usage_items() {
+        std::vector<UsageItemInfo> frequency;
         std::string query = "SELECT * FROM card_usage;";
         auto callback = [](void *data, int argc, char **argv, char **azColName) -> int {
             auto *frequency = static_cast<std::vector<std::pair<int, int>> *>(data);
