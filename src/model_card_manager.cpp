@@ -68,7 +68,7 @@ CardManager::CardManager() {
     }
 }
 
-std::unique_ptr<model::Card> CardManager::get_card(std::size_t card_id) const {
+std::unique_ptr<model::Card> CardManager::create_card(std::size_t card_id) const {
     switch (cards_instances.at(card_id)->type) {
         case model::CardType::ITEM:
         case model::CardType::SPELL: {

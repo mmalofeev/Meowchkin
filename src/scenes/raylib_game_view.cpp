@@ -31,8 +31,7 @@ EnumT draw_opts_menu(const meow::EnumArray<EnumT, std::string> &opts, raylib::Ve
     for (std::size_t i = 0; i < opts.size(); ++i) {
         if (GuiButton(
                 Rectangle{
-                    pos.x, pos.y + i * opts_button_height, opts_button_width, opts_button_height
-                },
+                    pos.x, pos.y + i * opts_button_height, opts_button_width, opts_button_height},
                 opts[i].c_str()
             )) {
             ret = static_cast<EnumT>(i);
@@ -277,7 +276,6 @@ void meow::RaylibGameView::draw() {
             default:
                 throw std::runtime_error("unhandled action type received!");
         }
-    }
 
     if (auto chat_message = m_client->receive_chat_message(); chat_message) {
         std::cout << "received from " << chat_message->sender_player << ": "
