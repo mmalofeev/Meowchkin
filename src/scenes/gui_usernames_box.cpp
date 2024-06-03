@@ -1,33 +1,28 @@
 #include "gui_usernames_box.hpp"
-#include "Mouse.hpp"
 #include "paths_to_binaries.hpp"
-#include "raylib.h"
 
-void meow::GuiUsernamesBox::add_username(std::pair<std::size_t, std::string_view> user_info) {
-    m_usernames.emplace(user_info);
+void meow::GuiUsernamesBox::add_username(std::string_view username) {
+    m_usernames.push_back(username.data());
     m_boxes.emplace_back(
         m_border.x, m_border.height + padding * (m_boxes.size() + 1), width, single_height
     );
     m_border.height += single_height;
+    // m_border.height = m_boxes.back().y + m_boxes.back().height - m_boxes.begin()->y;
 }
 
-void meow::GuiUsernamesBox::draw(std::size_t current_user_turn) {
+void meow::GuiUsernamesBox::draw() const {
+    std::size_t i = 0;
     static const raylib::Color colors[] = {0x2F3C7EAA, 0x3B3FEEAA, 0x2F3C7EAA, 0xFBEAEBAA};
     static const raylib::Font font = raylib::LoadFont(gui_font_path);
-
-    auto it = m_usernames.begin();
     for (const auto &box : m_boxes) {
         box.DrawGradientH(colors[0], colors[1]);
-        raylib::Color c =
-            active_user == it->first ? raylib::Color::Green() : raylib::Color::Red();
-        box.DrawLines(c, 1);
-        if (box.CheckCollision(raylib::Mouse::GetPosition()) &&
-            raylib::Mouse::IsButtonPressed(MOUSE_BUTTON_LEFT)) {
-            active_user = it->first;
-        }
-        raylib::DrawTextEx(font, it++->second, {box.x, box.y}, 16, 1, raylib::Color::RayWhite());
+        box.DrawLines(raylib::Color::Green(), 1);
+        raylib::DrawTextEx(
+            font, m_usernames[i++], {box.x, box.y}, 16, 1, raylib::Color::RayWhite()
+        );
     }
-
+    // m_border.DrawRoundedLines(0.2, 3, 2, raylib::Color::Green());
+    // m_border.DrawLines(raylib::Color::Green());
     raylib::Rectangle(
         m_boxes.begin()->GetPosition(),
         m_boxes.back().GetPosition() + m_boxes.back().GetSize() - raylib::Vector2(0, padding)
