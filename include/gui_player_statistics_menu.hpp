@@ -2,58 +2,40 @@
 #define GUI_PLAYER_STATISTICS_MENU_HPP_
 
 #include <string>
-#include <unordered_map>
-#include <vector>
 #include "enum_array.hpp"
+#include "gui_board.hpp"
 #include "raygui.h"
 #include "raylib-cpp.hpp"
 
 namespace meow {
 
-class GuiPlayerStatisticsMenu {
-    static constexpr float width = 150.0f;
-    static constexpr float height = 50.0f;
+struct GuiPlayerStatisticsMenu {
+    // std::function<void(std::chrono::milliseconds, bool, raylib::Color)> blinker =
+    //     make_timed_state_machine([this](auto start_time, auto end_time, raylib::Color color) {
+    //         float c = (float)(end_time - std::chrono::steady_clock::now()).count() /
+    //                   (end_time - start_time).count();
+    //         c *= c;
+    //         m_borders.Draw(raylib::Color(color.r * c, color.g * c, color.b * c, color.a * c));
+    //     });
+    //
 
-public:
-    enum class StatisticKind { LEVEL, STRENGTH, BONUS, MONSTER_STRENGTH, COUNT };
+    static constexpr int stat_screen_height = GuiBoard::height;
+    static constexpr int stat_screen_width = GuiBoard::width;
+    static constexpr int offset_top = GuiBoard::offset_top;
+
+    enum class StatisticKind { LEVEL, STRENGTH, BONUS, COUNT };
 
     struct Statistic {
         std::string name;
         int value;
     };
 
-    using element_t = EnumArray<StatisticKind, Statistic>;
-    std::unordered_map<std::size_t, element_t> elements;
+    EnumArray<StatisticKind, Statistic> menu_elements = {
+        {StatisticKind::LEVEL, {"Level", 0}},
+        {StatisticKind::STRENGTH, {"Strength", 0}},
+        {StatisticKind::BONUS, {"Bonus", 0}}};
 
-private:
-    std::vector<std::pair<raylib::Rectangle, raylib::Rectangle>> m_rects;
-    raylib::Rectangle m_whole_rect;
-
-public:
-    GuiPlayerStatisticsMenu()
-        : m_rects(element_t::size()), m_whole_rect(0, 0, 2 * width, element_t::size() * height) {
-        for (std::size_t i = 0; i < m_rects.size(); ++i) {
-            m_rects[i].first = raylib::Rectangle{0, i * height, width, height};
-            m_rects[i].second = raylib::Rectangle{width, i * height, width, height};
-        }
-    }
-
-    void draw(std::size_t observed_player) {
-        m_whole_rect.Draw(raylib::Color(0x00000088));
-        auto &elements_ = elements.at(observed_player);
-        for (std::size_t i = 0; i < element_t::size(); ++i) {
-            m_rects[i].first.DrawLines(raylib::Color::Gray());
-            raylib::DrawText(
-                elements_[i].name, m_rects[i].first.x, m_rects[i].first.y, 20,
-                raylib::Color::White()
-            );
-
-            m_rects[i].second.DrawLines(raylib::Color::Gray());
-            raylib::DrawText(
-                std::to_string(elements_[i].value), m_rects[i].second.x, m_rects[i].second.y, 20,
-                raylib::Color::White()
-            );
-        }
+    void draw() {
     }
 };
 
