@@ -6,6 +6,8 @@
 #include <variant>
 #include "gui_card_loader.hpp"
 #include "gui_dice_roller.hpp"
+#include "gui_player_statistics_menu.hpp"
+#include "message_types.hpp"
 #include "model_card_manager.hpp"
 #include "paths_to_binaries.hpp"
 #include "raylib.h"
@@ -14,8 +16,8 @@
 
 namespace {
 
-constexpr float opts_button_width = 210;
-constexpr float opts_button_height = 70;
+constexpr float opts_button_width = 210.0f;
+constexpr float opts_button_height = 70.0f;
 
 template <typename... Ts>
 struct Overload : Ts... {
@@ -62,10 +64,17 @@ void meow::RaylibGameView::on_instances_attach() {
     m_gameplay_objects.board.setup(m_window, &m_gameplay_objects.player_hand, m_client);
     m_gameplay_objects.text_chat.set_window(m_window);
     m_gameplay_objects.usernames_box.set_window(m_window);
+    m_gameplay_objects.usernames_box.active_user = m_client->get_id_of_client();
 
     for (const auto &info : m_client->get_players_info()) {
-        m_gameplay_objects.usernames_box.add_username(info.name);
-    }
+        m_gameplay_objects.usernames_box.add_username({info.id, info.name});
+        m_gameplay_objects.stats.elements[info.id] = {
+            {GuiPlayerStatisticsMenu::StatisticKind::LEVEL, {"Level", 0}},
+            {GuiPlayerStatisticsMenu::StatisticKind::STRENGTH, {"Strength", 0}},
+            {GuiPlayerStatisticsMenu::StatisticKind::BONUS, {"Bonus", 0}},
+            {GuiPlayerStatisticsMenu::StatisticKind::MONSTER_STRENGTH, {"Monster\nstrength", 0}}
+        };
+    };
 }
 
 void meow::RaylibGameView::setup_background() {
@@ -82,7 +91,11 @@ void meow::RaylibGameView::setup_background() {
     raylib::Image blur = raylib::Image::GradientRadial(
         m_window->GetWidth(), m_window->GetHeight(), 0, raylib::Color::Blank(), {0, 0, 0, 100}
     );
+    raylib::Image blur2 = raylib::Image::GradientRadial(
+        m_window->GetWidth(), m_window->GetHeight(), 0, raylib::Color::Blank(), { 0, 228, 48, 100 }
+    );
     m_blur.Load(blur);
+    m_on_levelup_blur_texture.Load(blur2);
 }
 
 void meow::RaylibGameView::setup_pause_menu() {
@@ -176,59 +189,66 @@ void meow::RaylibGameView::draw_active_display_selector() {
 
 void meow::RaylibGameView::draw() {
     using namespace meow::network;
+    using ActionType = Action::ActionType;
 
-    Overload active_display_visitor = {
-        [this](GameplayObjs *objs) {
-            objs->board.draw(m_window->GetFrameTime());
+    const bool my_turn = m_active_turn[m_client->get_id_of_client()];
+    static const Overload active_display_visitor = {
+        [this, my_turn](GameplayObjs *objs) {
+            std::size_t id = objs->usernames_box.active_user;
+
+            objs->board.draw(id, m_window->GetFrameTime());
             objs->player_hand.draw_cards(m_window->GetFrameTime());
-            objs->usernames_box.draw();
+            objs->usernames_box.draw(m_client->get_id_of_client());
             if (m_show_chat) {
                 objs->text_chat.draw(*m_client);
             }
-            objs->stats.draw();  // TODO: move to separate object
+            objs->stats.draw(id);
             draw_active_display_selector();
             GuiCardSpan::draw_inspected_card(m_window->GetWidth(), m_window->GetHeight());
 
-            if (GuiButton({0, 0, 40, 40}, "-") && objs->player_hand.card_count() > 0) {
+            if (GuiButton({0, m_window->GetHeight() - 40.0f, 40, 40}, "-") &&
+                objs->player_hand.card_count() > 0) {
                 objs->player_hand.remove_card();
             }
-            if (GuiButton({40, 0, 40, 40}, "+") && objs->player_hand.card_count() < 10) {
+            if (GuiButton({40, m_window->GetHeight() - 40.0f, 40, 40}, "+") &&
+                objs->player_hand.card_count() < 10) {
                 // const auto random_index =
                 //     random_integer<std::size_t>(0, m_card_image_paths.size() - 1);
                 // objs->player_hand.add_card(m_card_image_paths[random_index].c_str());
                 m_client->send_action(Action(
-                    Action::ActionType::DrawedCard, random_integer(0, 1),
-                    m_client->get_id_of_client(), -1
+                    ActionType::DrawedCard, random_integer(0, 1), m_client->get_id_of_client(), -1
                 ));
             }
             if (objs->player_hand.somethind_inspected()) {
                 m_blur.Draw();
             }
 
-            enum class bebra_enum { bebra1, bebra2, COUNT };
-            EnumArray<bebra_enum, std::string> bebra_arr{
-                {bebra_enum::bebra1, "bbbbeeebra1"}, {bebra_enum::bebra2, "bbbbeeebra2"}
-            };
-            float was = guiAlpha;
-            GuiSetAlpha(0.85);
-            if (auto x = draw_opts_menu(
-                    bebra_arr, {m_window->GetWidth() - opts_button_width,
-                                m_window->GetHeight() - opts_button_height * bebra_arr.size()}
-                );
-                x != bebra_enum::COUNT) {
-                std::cout << bebra_arr[x] << '\n';
+            if (my_turn) {
+                enum class turns { end_turn, COUNT };
+                EnumArray<turns, std::string> turn_opts{{turns::end_turn, "End turn"}};
+                float was = guiAlpha;
+                GuiSetAlpha(0.85);
+                if (auto x = draw_opts_menu(
+                        turn_opts, {m_window->GetWidth() - opts_button_width,
+                                    m_window->GetHeight() - opts_button_height * turn_opts.size()}
+                    );
+                    x != turns::COUNT) {
+                    m_client->send_action(
+                        Action(ActionType::EndTurn, -1, m_client->get_id_of_client(), -1)
+                    );
+                }
+                GuiSetAlpha(was);
             }
-            GuiSetAlpha(was);
         },
+
         [this](PauseMenuObjs *objs) {
             m_blur.Draw();
             draw_pause_menu();
         },
+
         [](auto...) { throw std::runtime_error("unhandled type(s) in active display!"); }
     };
 
-    using ActionType = Action::ActionType;
-    // FIXME
     if (auto action = m_client->receive_action(); action) {
         // if (random_integer(0, 1) == 0) {
         //     m_gameplay_objects.board.m_kitten_cards.add_card(filename);
@@ -237,20 +257,22 @@ void meow::RaylibGameView::draw() {
         // }
         switch (action->type) {
             case ActionType::DrawedCard: {
-                auto *info = card_manager_ptr->get_card_info_by_obj_id(action->card_id);
-                if (info == nullptr) {
-                    throw std::runtime_error("bad card id!");
-                }
-                m_gameplay_objects.player_hand.add_card(action->card_id);
+                on_card_receive(action->target_player, action->card_id);
             } break;
 
             case ActionType::PlayedCard: {
-                auto *info = card_manager_ptr->get_card_info_by_obj_id(action->card_id);
-                if (info == nullptr) {
-                    throw std::runtime_error("bad card id!");
-                }
-                m_gameplay_objects.board.m_kitten_cards.add_card(action->card_id);
+                // auto *info = card_manager_ptr->get_card_info_by_obj_id(action->card_id);
+                // if (info == nullptr) {
+                //     throw std::runtime_error("bad card id!");
+                // }
+                // m_gameplay_objects.board.m_kitten_cards.at(action->target_player)
+                //     .add_card(action->card_id);
+                on_card_add_on_board(0, 1, 0, action->sender_player);
             } break;
+
+            case ActionType::EndTurn: {
+            } break;
+                // case ActionType::PlayedCard: {}
 
             default:
                 throw std::runtime_error("unhandled action type received!");
@@ -267,7 +289,7 @@ void meow::RaylibGameView::draw() {
     std::visit(active_display_visitor, m_active_display);
 
     if (IsKeyPressed(KEY_SPACE)) {
-        on_levelup(m_client->get_id_of_client());
+        on_level_change(m_client->get_id_of_client(), 1);
     }
 
     if (IsKeyPressed(KEY_ESCAPE)) {
@@ -278,11 +300,28 @@ void meow::RaylibGameView::draw() {
         }
     }
     m_levelup_blink_call(std::chrono::milliseconds(1000), m_levelup_blink);
-    m_levelup_blink = false;
 }
 
-void meow::RaylibGameView::on_card_add_on_board(std::size_t card_id) {
-    m_gameplay_objects.board.add_card(card_id);
+void meow::RaylibGameView::on_card_add_on_board(
+    std::size_t card_id,
+    bool protogonist_sided,
+    int bonus,
+    std::size_t user_id
+) {
+    // m_gameplay_objects.board.add_card(card_id);
+    if (protogonist_sided) {
+        m_gameplay_objects.board.m_kitten_cards[user_id].add_card(card_id);
+        m_gameplay_objects.stats.elements[user_id][GuiPlayerStatisticsMenu::StatisticKind::BONUS]
+            .value += bonus;
+        m_gameplay_objects.stats.elements[user_id][GuiPlayerStatisticsMenu::StatisticKind::STRENGTH]
+            .value += bonus;
+    } else {
+        m_gameplay_objects.board.m_opponent_cards.add_card(card_id);
+        for (auto &e : m_gameplay_objects.stats.elements) {
+            e.second[GuiPlayerStatisticsMenu::StatisticKind::BONUS].value += bonus;
+            e.second[GuiPlayerStatisticsMenu::StatisticKind::STRENGTH].value += bonus;
+        }
+    }
 }
 
 void meow::RaylibGameView::on_card_remove_from_board(std::size_t card_id) {
@@ -290,29 +329,43 @@ void meow::RaylibGameView::on_card_remove_from_board(std::size_t card_id) {
 }
 
 void meow::RaylibGameView::on_turn_begin(std::size_t user_id) {
+    m_active_turn[user_id] = true;
 }
 
 void meow::RaylibGameView::on_turn_end(std::size_t user_id) {
+    m_active_turn[user_id] = false;
 }
 
-void meow::RaylibGameView::on_levelup(std::size_t user_id) {
+void meow::RaylibGameView::on_level_change(std::size_t user_id, int delta) {
+    m_gameplay_objects.stats.elements[user_id][GuiPlayerStatisticsMenu::StatisticKind::LEVEL]
+        .value += delta;
+    m_gameplay_objects.stats.elements[user_id][GuiPlayerStatisticsMenu::StatisticKind::STRENGTH]
+        .value += delta;
+    if (delta > 0) {
+        m_levelup_blink = true;
+    }
 }
 
-void meow::RaylibGameView::on_card_receive(std::size_t user_id) {
-    ++m_gameplay_objects.stats.menu_elements[GuiPlayerStatisticsMenu::StatisticKind::LEVEL].value;
-    m_levelup_blink = true;
+void meow::RaylibGameView::on_card_receive(std::size_t user_id, std::size_t card_id) {
+    if (user_id == m_client->get_id_of_client()) {
+        m_gameplay_objects.player_hand.add_card(card_id);
+    }
 }
 
-void meow::RaylibGameView::on_item_equip(std::size_t user_id) {
-}
-
-void meow::RaylibGameView::on_item_loss(std::size_t user_id) {
+void meow::RaylibGameView::on_item_loss(std::size_t user_id, std::size_t card_id) {
 }
 
 void meow::RaylibGameView::on_monster_elimination(std::size_t user_id) {
 }
 
 void meow::RaylibGameView::on_being_cursed(std::size_t user_id) {
+}
+
+void meow::RaylibGameView::on_dice_roll() {
+    m_client->send_action(network::Action(
+        network::Action::ActionType::RollDice, 0, m_client->get_id_of_client(),
+        m_client->get_id_of_client()
+    ));
 }
 
 BOOST_DLL_ALIAS(meow::RaylibGameView::make_raylib_gameview, make_gameview)

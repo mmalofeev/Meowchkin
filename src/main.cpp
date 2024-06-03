@@ -18,7 +18,7 @@ namespace meow {
 
 namespace network {
 constexpr const char *port_file = "port.txt";
-constexpr std::size_t players_count = 1;
+constexpr std::size_t players_count = 2;
 }  // namespace network
 
 class Application {
@@ -142,6 +142,8 @@ private:
             m_gameview = (*m_gameview_maker)();
             // m_game_session.reset_game_view(std::dynamic_pointer_cast<GameView>(m_gameview));
 
+            std::dynamic_pointer_cast<GameView>(m_gameview)->card_manager_ptr =
+                &CardManager::get_instance();
             m_mainmenu->attach_instances(&m_client, &m_window);
             m_gameview->attach_instances(&m_client, &m_window);
 

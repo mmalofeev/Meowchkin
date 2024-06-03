@@ -67,7 +67,7 @@ public:
         return m_data;
     }
 
-    [[nodiscard]] std::size_t size() const {
+    [[nodiscard]] static constexpr std::size_t size() {
         return N;
     }
 };
