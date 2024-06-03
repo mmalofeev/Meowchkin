@@ -2,7 +2,7 @@
 #define RAYLIB_GAME_VIEW_HPP_
 
 #include <filesystem>
-#include <functional>
+#include <limits>
 #include <memory>
 #include <variant>
 #include "enum_array.hpp"
@@ -68,9 +68,17 @@ private:
     std::vector<std::filesystem::path> m_card_image_paths;
     bool m_show_chat = false;
     raylib::Texture m_on_levelup_texture;
-    std::function<void(std::chrono::milliseconds, bool)> m_levelup_blink_call =
-        make_timed_state_machine([this](auto, auto) { m_on_levelup_texture.Draw(); });
+    raylib::Texture m_on_levelup_blur_texture;
+    state_machine_function_t m_levelup_blink_call = make_timed_state_machine([this](auto, auto) {
+        m_on_levelup_blur_texture.Draw();
+        m_on_levelup_texture.Draw(
+            (m_window->GetWidth() - m_on_levelup_texture.width) / 2,
+            (m_window->GetHeight() - m_on_levelup_texture.height) / 2
+        );
+        // m_blur.Draw(0, 0, raylib::Color::Green());
+    });
     bool m_levelup_blink = false;
+    std::unordered_map<std::size_t, bool> m_active_turn;
 
 protected:
     void on_instances_attach() override;
@@ -80,28 +88,22 @@ public:
     void draw() override;
 
     /* Callbacks */
-    void on_card_add_on_board(std::size_t card_id) override;
+    void on_card_add_on_board(
+        std::size_t card_id,
+        bool protogonist_sided,
+        int bonus = 0,
+        std::size_t user_id = std::numeric_limits<std::size_t>::max()
+    ) override;
     void on_card_remove_from_board(std::size_t card_id) override;
     void on_turn_begin(std::size_t user_id) override;
     void on_turn_end(std::size_t user_id) override;
-    void on_levelup(std::size_t user_id) override;
+    void on_level_change(std::size_t user_id, int delta) override;
     void on_card_receive(std::size_t user_id, std::size_t card_id) override;
-    void on_item_equip(std::size_t user_id) override;
-    void on_item_loss(std::size_t user_id) override;
+    void on_item_loss(std::size_t user_id, std::size_t card_id) override;
     void on_monster_elimination(std::size_t user_id) override;  // which player killed monster
     void on_being_cursed(std::size_t user_id) override;         // which player is cursed
+    void on_dice_roll() override;
 
-    // void on_card_add(std::size_t card_id) override;
-    // void on_card_remove(std::string_view card_filename) override;
-    // void on_turn_begin() override;
-    // void on_turn_end() override;
-    // void on_levelup() override;
-    // void on_card_receive() override;
-    // void on_item_equip() override;
-    // void on_item_loss() override;
-    // void on_monster_elimination() override;
-    // void on_being_cursed() override;
-    //
     static std::shared_ptr<RaylibGameView> make_raylib_gameview() {
         return std::make_shared<RaylibGameView>();
     }

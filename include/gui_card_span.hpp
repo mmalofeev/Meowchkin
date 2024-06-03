@@ -46,7 +46,14 @@ private:
 public:
     inline static CardManager *card_manager = nullptr;
 
+    GuiCardSpan() = default;
+
     explicit GuiCardSpan(std::unique_ptr<DropDownMenu> ddm) : m_dropdown_menu(std::move(ddm)) {
+    }
+
+    GuiCardSpan &operator=(std::unique_ptr<DropDownMenu> ddm) {
+        m_dropdown_menu = std::move(ddm);
+        return *this;
     }
 
     [[nodiscard]] bool somethind_inspected() const {

@@ -55,6 +55,10 @@ void GuiCardSpan::add_card(GuiCard &&card) {
 }
 
 void GuiCardSpan::remove_card(std::list<GuiCard>::iterator card_iter) {
+    if (card_iter == m_cards.end()) {
+        return;
+    }
+
     m_removed_cards.push_back({std::move(*card_iter), 0});
     m_removed_cards.back().card.target_position =
         raylib::Vector2(-GuiCard::width, -GuiCard::height);
