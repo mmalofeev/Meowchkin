@@ -3,6 +3,28 @@
 
 namespace meow::model {
 
+void Player::increse_level(int delta, bool force) {
+    int last_value = level;
+    level += delta;
+
+    if (!force) {
+        level = std::max(1, std::min(9, level));
+    }
+ 
+    for (auto &observer : VirtualMachine::get_instance().get_observers()) {
+        observer->on_level_change(user_id, level - last_value);
+    }
+}
+
+void Player::add_card_to_hand(std::unique_ptr<Card> card) {
+    if (hand.size() < max_cards_in_hand) {
+        hand.emplace_back(std::move(card));
+        for (auto &observer : VirtualMachine::get_instance().get_observers()) {
+            observer->on_card_receive(user_id, hand.back()->obj_id);
+        }
+    }
+}
+
 bool Player::play_card_by_id(std::size_t card_obj_id, std::size_t target_id) {
     assert(get_card_from_hand_by_id(card_obj_id) != nullptr);
     if (!(get_card_from_hand_by_id(card_obj_id)->verify(obj_id, target_id))) {

@@ -91,7 +91,6 @@ public:
     void on_card_add_on_board(
         std::size_t card_id,
         bool protogonist_sided,
-        int bonus = 0,
         std::size_t user_id = std::numeric_limits<std::size_t>::max()
     ) override;
     void on_card_remove_from_board(std::size_t card_id) override;

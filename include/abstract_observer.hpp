@@ -8,10 +8,9 @@ namespace meow {
 class Observer {
 public:
     virtual void on_card_add_on_board(
-        std::size_t card_id,
-        bool protogonist_sided,  // bonus to protogonist or opponent
-        int bonus,
-        std::size_t user_id_applyied  // id of player who gets bonus
+        std::size_t card_id, // type in CardInfo
+        bool protogonist_sided,
+        std::size_t user_id
     ) {
     }
   
@@ -35,9 +34,10 @@ public:
   
     virtual void on_monster_elimination(std::size_t user_id) {  // which player killed monster
     }
+
     virtual void on_being_cursed(std::size_t user_id) {  // which player is cursed
     }
-  
+    // result??? TODO
     virtual void on_dice_roll() {
     }
   

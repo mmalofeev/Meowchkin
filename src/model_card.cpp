@@ -4,6 +4,14 @@
 
 namespace meow::model {
 
+void Card::apply(std::size_t player_id, std::size_t target_id) {
+    on_board = true;
+    //TODO
+    //for (auto &observer : VirtualMachine::get_instance().get_observers()) {
+    //    observer->on_card_add_on_board(obj_id);
+    //}
+};
+
 bool Card::verify(std::size_t player_id, std::size_t target_id) const {
     assert(info != nullptr);
     if (info->verification.empty()) {
@@ -15,12 +23,18 @@ bool Card::verify(std::size_t player_id, std::size_t target_id) const {
 
 Card::~Card() {
     CardManager::get_instance().delete_obj_id(obj_id);
+    if (on_board) {
+        for (auto &observer : VirtualMachine::get_instance().get_observers()) {
+            observer->on_card_remove_from_board(obj_id);
+        }
+    }
 }
 
 void SpellCard::apply(std::size_t player_id, std::size_t target_id) {
     VirtualMachine::get_instance().set_args(player_id, target_id);
     VirtualMachine::get_instance().execute(dynamic_cast<const SpellCardInfo *>(info)->action);
     applied = true;
+    Card::apply(player_id, target_id);
 }
 
 SpellCard::~SpellCard() {

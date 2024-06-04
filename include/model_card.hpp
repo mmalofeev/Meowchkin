@@ -82,6 +82,9 @@ public:
 };
 
 struct Card : Object {
+protected:
+    bool on_board = false;
+
 public:
     const CardInfo *info;
 
@@ -89,7 +92,8 @@ public:
     }
 
     bool verify(std::size_t player_id, std::size_t target_id) const;
-    virtual void apply(std::size_t player_id, std::size_t target_id){};
+    //use when card is played on board
+    virtual void apply(std::size_t player_id, std::size_t target_id);
 
     virtual ~Card();
 };

@@ -274,9 +274,10 @@ void meow::RaylibGameView::draw() {
 void meow::RaylibGameView::on_card_add_on_board(
     std::size_t card_id,
     bool protogonist_sided,
-    int bonus,
     std::size_t user_id
 ) {
+    //TODO
+    /*
     if (protogonist_sided) {
         m_gameplay_objects.board.m_kitten_cards[user_id].add_card(card_id);
         m_gameplay_objects.stats.elements[user_id][GuiPlayerStatisticsMenu::StatisticKind::BONUS]
@@ -290,6 +291,7 @@ void meow::RaylibGameView::on_card_add_on_board(
             e.second[GuiPlayerStatisticsMenu::StatisticKind::STRENGTH].value += bonus;
         }
     }
+    */
 }
 
 void meow::RaylibGameView::on_card_remove_from_board(std::size_t card_id) {

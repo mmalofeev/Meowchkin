@@ -14,10 +14,7 @@ namespace meow::model {
 
 struct GameSession : Noncopyable {
     friend struct VirtualMachine;
-
 private:
-    std::size_t user_id{};
-
 public:
     //  пока GameSession не дописан game будет public для удобства тестирования.
     SharedGameState shared_state;
@@ -75,6 +72,10 @@ public:
         }
 
         return true;
+    }
+
+    std::size_t get_player_id_by_user_id(std::size_t user_id) {
+        return shared_state.get_player_by_user_id(user_id)->obj_id;
     }
 
     ~GameSession() {
