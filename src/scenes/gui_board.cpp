@@ -79,6 +79,7 @@ void GuiBoard::draw(std::size_t observed_player, float frame_time) {
 void GuiBoard::add_card(std::size_t card_id) {
     for (const auto &info : m_client->get_players_info()) {
         std::cout << "send to " << info.name << '\n';
+        //TODO
         m_client->send_action(network::Action(
             network::Action::ActionType::PlayedCard, card_id, info.id, m_client->get_id_of_client()
         ));
