@@ -8,6 +8,7 @@
 #include "enum_array.hpp"
 #include "game_session.hpp"
 // #include "paths_to_binaries.hpp"
+#include "game_view.hpp"
 #include "model_card_manager.hpp"
 #include "plugin.hpp"
 #include "raylib.h"
@@ -18,7 +19,7 @@ namespace meow {
 
 namespace network {
 constexpr const char *port_file = "port.txt";
-constexpr std::size_t players_count = 1;
+constexpr std::size_t players_count = 2;
 }  // namespace network
 
 class Application {
@@ -80,7 +81,9 @@ public:
 
     void run() {
         while (!m_window.ShouldClose() && m_scene_manager->active_scene()->running()) {
-            // m_music.Update();
+            if (auto action = m_client.receive_action(); action) {
+                m_game_session.handle_action(*action);
+            }
             response();
             render();
         }

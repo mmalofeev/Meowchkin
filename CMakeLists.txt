@@ -52,8 +52,8 @@ enable_testing()
 include(FetchContent)
 
 FetchContent_Declare(
-        googletest
-        URL https://github.com/google/googletest/archive/release-1.12.0.zip
+    googletest
+    URL https://github.com/google/googletest/archive/release-1.12.0.zip
 )
 FetchContent_GetProperties(googletest)
 if(NOT googletest_POPULATED)

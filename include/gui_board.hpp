@@ -2,6 +2,7 @@
 #define GUI_BOARD_HPP
 
 #include <memory>
+#include <unordered_map>
 #include "client.hpp"
 #include "gui_card_span.hpp"
 #include "gui_card_span_dropdown_menu.hpp"
@@ -20,7 +21,7 @@ private:
     raylib::Rectangle m_rect;
     raylib::Texture m_texture;
     raylib::Rectangle m_drop_card_rect;
-    GuiCardSpan m_kitten_cards;
+    std::unordered_map<std::size_t, GuiCardSpan> m_kitten_cards;
     GuiCardSpan m_opponent_cards;
 
 public:
@@ -28,17 +29,15 @@ public:
     static constexpr int height = 700;
     static constexpr int offset_top = 60;
 
-    GuiBoard()
-        : m_kitten_cards(std::make_unique<BrawlCardsDDM>(&m_kitten_cards)),
-          m_opponent_cards(std::make_unique<BrawlCardsDDM>(&m_opponent_cards)) {
+    GuiBoard() : m_opponent_cards(std::make_unique<BrawlCardsDDM>(&m_opponent_cards)) {
     }
 
     void setup(raylib::Window *window, GuiCardSpan *hand, network::Client *client);
-    void draw(float frame_time);
+    void draw(std::size_t observed_player, float frame_time);
     void add_card(std::size_t card_id);
 
-    void remove_card(std::string_view card_filename) {
-        m_kitten_cards.remove_card(card_filename);
+    void remove_card(std::size_t card_id) {
+        m_opponent_cards.remove_card(card_id);
     }
 };
 

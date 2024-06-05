@@ -13,7 +13,8 @@ void SharedGameState::set_player_list(const std::vector<std::size_t> &users) {
     }
 }
 
-[[nodiscard]] std::size_t SharedGameState::get_player_position_by_user_id(std::size_t user_id) const {
+[[nodiscard]] std::size_t SharedGameState::get_player_position_by_user_id(std::size_t user_id
+) const {
     for (size_t i = 0; i < players.size(); i++) {
         if (players[i].user_id == user_id) {
             return i;

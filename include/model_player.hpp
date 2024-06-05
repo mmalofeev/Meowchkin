@@ -45,23 +45,13 @@ public:
         return level;
     }
 
-    void increse_level(int delta, bool force = false) {
-        level += delta;
-
-        if (!force) {
-            level = std::max(1, std::min(9, level));
-        }
-    }
+    void increse_level(int delta, bool force = false);
 
     void add_card_to_storage(std::unique_ptr<Card> card) {
         storage.emplace_back(std::move(card));
     }
 
-    void add_card_to_hand(std::unique_ptr<Card> card) {
-        if (hand.size() < max_cards_in_hand) {
-            hand.emplace_back(std::move(card));
-        }
-    }
+    void add_card_to_hand(std::unique_ptr<Card> card);
 
     std::unique_ptr<Card> drop_card_from_hand_by_id(std::size_t obj_id);
 
