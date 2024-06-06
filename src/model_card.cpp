@@ -1,15 +1,17 @@
 #include "model_card.hpp"
 #include "model_card_manager.hpp"
 #include "virtual_machine.hpp"
+#include <iostream>
 
 namespace meow::model {
 
 void Card::apply(std::size_t player_id, std::size_t target_id) {
     on_board = true;
-    //TODO
-    //for (auto &observer : VirtualMachine::get_instance().get_observers()) {
-    //    observer->on_card_add_on_board(obj_id);
-    //}
+    auto target_info = CardManager::get_instance().get_card_info_by_obj_id(target_id);
+    bool protogonist_sided = (info->type == CardType::MONSTER || (target_info != nullptr && target_info->type == CardType::MONSTER));
+    for (auto &observer : VirtualMachine::get_instance().get_observers()) {
+        observer->on_card_add_on_board(obj_id, 0, VirtualMachine::get_instance().get_user_id_by_player_id(player_id));
+    }
 };
 
 bool Card::verify(std::size_t player_id, std::size_t target_id) const {

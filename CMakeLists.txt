@@ -8,7 +8,6 @@ set(CMAKE_CXX_FLAGS ${suppressed_warnings})
 set(CMAKE_CXX_FLAGS_DEBUG_INIT "-g -fsanitize=address -fsanitize=undefined")
 set(CMAKE_CXX_FLAGS_RELEASE_INIT "-O2")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_CXX_COMPILER "/usr/bin/clang++")
 
 project(meowchkin)
 
@@ -62,15 +61,15 @@ if(NOT googletest_POPULATED)
 endif()
 
 #SQLite
-find_package(SQLite3 QUIET)
-if (NOT SQLITE3_FOUND)
-    include(FetchContent)
-    FetchContent_Declare(
-            sqlite3
-            URL https://www.sqlite.org/2023/sqlite-amalgamation-3410100.zip
-    )
-    FetchContent_MakeAvailable(sqlite3)
-endif ()
+#find_package(SQLite3 QUIET)
+#if (NOT SQLITE3_FOUND)
+#    include(FetchContent)
+#    FetchContent_Declare(
+#            sqlite3
+#            URL https://www.sqlite.org/2023/sqlite-amalgamation-3410100.zip
+#    )
+#    FetchContent_MakeAvailable(sqlite3)
+#endif ()
 
 add_executable(tests src/scenes/scene.cpp tests/test_model.cpp src/shared_game_state.cpp src/model_card.cpp src/model_card_manager.cpp src/model_player.cpp src/virtual_machine.cpp  src/game_state.cpp)
 target_link_libraries(tests gtest gtest_main ${Boost_LIBRARIES} ${CMAKE_DL_LIBS} raylib raylib_cpp)
@@ -98,4 +97,4 @@ target_link_libraries(gameview-scene ${Boost_LIBRARIES} ${CMAKE_DL_LIBS} raylib 
 
 FILE(GLOB SRCFILES src/*.cpp src/scenes/scene.cpp)
 add_executable(meowchkin ${SRCFILES})
-target_link_libraries(meowchkin ${Boost_LIBRARIES} ${CMAKE_DL_LIBS} raylib raylib_cpp sqlite3)
+target_link_libraries(meowchkin ${Boost_LIBRARIES} ${CMAKE_DL_LIBS} raylib raylib_cpp)

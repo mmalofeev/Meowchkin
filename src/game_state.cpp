@@ -242,28 +242,35 @@ ManagementState::throw_card(std::size_t user_id, std::size_t card_obj_id) {
 }
 
 std::unique_ptr<GameState> ManagementState::draw_card(std::size_t user_id) {
+    std::cout << __FILE__ << " " << __LINE__ << std::endl;
+    std::cout << shared_state->get_current_user_id() << " " << user_id << std::endl;
     if (shared_state->get_current_user_id() != user_id) {
         return nullptr;
     }
     Player *player = shared_state->get_player_by_user_id(user_id);
+    std::cout << __FILE__ << " " << __LINE__ << std::endl;
 
     auto card = CardManager::get_instance().create_card(shared_state->get_card_id_from_deck());
 
     if (card->info->type != CardType::MONSTER) {
         if (card->info->openable) {
             if (card->verify(player->obj_id, player->obj_id)) {
+                std::cout << __FILE__ << " " << __LINE__ << std::endl;
                 card->apply(player->obj_id, player->obj_id);
             } else {
                 assert(false);
                 return nullptr;
             }
         } else {
+            std::cout << __FILE__ << " " << __LINE__ << std::endl;
             player->add_card_to_hand(std::move(card));
         }
         // TODO
         return std::make_unique<PostManagementState>(shared_state);
     }
 
+    std::cout << __FILE__ << " " << __LINE__ << std::endl;
+    card->apply(player->obj_id, player->obj_id);
     return std::make_unique<BrawlState>(
         shared_state, player->obj_id, dynamic_unique_cast<MonsterCard>(std::move(card))
     );
@@ -294,7 +301,6 @@ std::unique_ptr<GameState> InitState::roll_dice(std::size_t user_id) {
     }
     */
 
-    std::cout << __LINE__ << std::endl;
     if (static_cast<std::size_t>(move_count) < results.size()) {
         return std::unique_ptr<InitState>(this);
     }
@@ -306,7 +312,6 @@ std::unique_ptr<GameState> InitState::roll_dice(std::size_t user_id) {
         }
     }
     
-    std::cout << __LINE__ << std::endl;
     shared_state->set_first_player_by_position(position_of_first_best_result);
     for (auto &player : shared_state->get_all_players()) {
         for (size_t i = 0; i < init_hand_size; i++) {
@@ -316,7 +321,6 @@ std::unique_ptr<GameState> InitState::roll_dice(std::size_t user_id) {
         }
     }
     
-    std::cout << __LINE__ << std::endl;
     for (auto &observer : VirtualMachine::get_instance().get_observers()) {
         observer->on_turn_begin(shared_state->get_current_user_id());
     }

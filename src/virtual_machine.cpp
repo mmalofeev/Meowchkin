@@ -8,6 +8,10 @@
 
 namespace meow::model {
 
+std::size_t VirtualMachine::get_user_id_by_player_id(std::size_t player_id) {
+    return game_session->shared_state.get_player_by_player_id(player_id)->user_id;
+}
+
 void VirtualMachine::increse_level(bool force = false) {
     int delta = st.top();
     st.pop();
