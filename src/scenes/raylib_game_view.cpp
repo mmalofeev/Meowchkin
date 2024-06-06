@@ -94,7 +94,7 @@ void meow::RaylibGameView::on_instances_attach() {
         };
     }
 
-    std::cout << __LINE__ << std::endl;
+    dbg;
     m_client->send_action(
         network::Action(network::Action::ActionType::RollDice, -1, -1, m_client->get_id_of_client())
     );

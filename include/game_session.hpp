@@ -66,9 +66,10 @@ public:
         if (!next_state) {
             return false;
         }
-
         if (current_state.get() != next_state.get()) {
             current_state = std::move(next_state);
+        } else {
+            next_state.release();
         }
 
         return true;
