@@ -15,7 +15,7 @@ class GuiPlayerStatisticsMenu {
     static constexpr float height = 50.0f;
 
 public:
-    enum class StatisticKind { LEVEL, STRENGTH, BONUS, MONSTER_STRENGTH, COUNT };
+    enum class StatisticKind { LEVEL, STRENGTH, BONUS, MONSTER_STRENGTH, LAST_DICE_ROLL, COUNT };
 
     struct Statistic {
         std::string name;
@@ -31,10 +31,10 @@ private:
 
 public:
     GuiPlayerStatisticsMenu()
-        : m_rects(element_t::size()), m_whole_rect(0, 0, 2 * width, element_t::size() * height) {
+        : m_rects(element_t::size()), m_whole_rect(0, 0, 1.5f * width, element_t::size() * height) {
         for (std::size_t i = 0; i < m_rects.size(); ++i) {
             m_rects[i].first = raylib::Rectangle{0, i * height, width, height};
-            m_rects[i].second = raylib::Rectangle{width, i * height, width, height};
+            m_rects[i].second = raylib::Rectangle{width, i * height, width / 2.0f, height};
         }
     }
 

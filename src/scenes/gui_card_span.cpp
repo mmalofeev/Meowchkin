@@ -33,35 +33,36 @@ void GuiCardSpan::recalculate_card_rects() noexcept {
 
 void GuiCardSpan::add_card(std::size_t card_id) {
     raylib::Image img, img2;
-    std::cout << __FILE__ << __LINE__ << std::endl;
+    dbg;
+    // auto card = card_manager->create_card(0);
+    dbg;
+    // std::string path_to_texture = card_manager->get_card_info_by_obj_id(card->obj_id)->image;
     std::string path_to_texture = card_manager->get_card_info_by_obj_id(card_id)->image;
+    dbg;
     std::cout << path_to_texture << '\n' << __LINE__ << std::endl;
     try {
         img = meow::load_card_img(path_to_texture);
     } catch (const raylib::RaylibException &) {
         img = raylib::Image::Color(GuiCard::width, GuiCard::height, raylib::Color::Green());
     }
-    std::cout << __LINE__ << std::endl;
     img2 = img;
-    std::cout << __LINE__ << std::endl;
     img.Resize(GuiCard::width, GuiCard::height);
-    std::cout << __LINE__ << std::endl;
     raylib::Texture tex = raylib::Texture(img);
-    std::cout << __LINE__ << std::endl;
     tex.GenMipmaps();
-    std::cout << __LINE__ << std::endl;
+    dbg;
+    std::cout << "card span size was " << m_cards.size() << std::endl;
     add_card(
         {raylib::Rectangle(m_window->GetWidth(), 0, 0, 0), raylib::Vector2(0), std::move(tex), img2,
          path_to_texture, card_id}
     );
-    std::cout << __LINE__ << std::endl;
 }
 
 void GuiCardSpan::add_card(GuiCard &&card) {
-    std::cout << __LINE__ << std::endl;
     m_cards.emplace_back(std::move(card));
     m_card_gap -= 10;
     recalculate_card_rects();
+    dbg;
+    std::cout << "card span size now is " << m_cards.size() << std::endl;
 }
 
 void GuiCardSpan::remove_card(std::list<GuiCard>::iterator card_iter) {
