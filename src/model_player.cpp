@@ -21,7 +21,6 @@ void Player::add_card_to_hand(std::unique_ptr<Card> card) {
     if (hand.size() < max_cards_in_hand) {
         hand.emplace_back(std::move(card));
         for (auto &observer : VirtualMachine::get_instance().get_observers()) {
-            std::cout << __FILE__ << __LINE__ << std::endl;
             observer->on_card_receive(user_id, hand.back()->obj_id);
         }
     }
