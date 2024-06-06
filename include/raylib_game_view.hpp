@@ -102,7 +102,7 @@ public:
     void on_card_receive(std::size_t user_id, std::size_t card_id) override;
     void on_card_loss(std::size_t user_id, std::size_t card_id) override;
     void on_monster_elimination(std::size_t user_id) override;  // which player killed monster
-    void on_dice_roll(unsined res) override;
+    void on_dice_roll(unsigned res) override;
 
     static std::shared_ptr<Scene> make_raylib_gameview() {
         return std::make_shared<RaylibGameView>();

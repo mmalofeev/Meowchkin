@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <boost/dll/alias.hpp>
 #include <chrono>
+#include <cstddef>
 #include <iostream>
 #include <memory>
 #include <string_view>
@@ -9,6 +10,7 @@
 #include "gui_card_loader.hpp"
 #include "gui_card_span_dropdown_menu.hpp"
 #include "gui_dice_roller.hpp"
+#include "message_types.hpp"
 #include "paths_to_binaries.hpp"
 #include "raylib.h"
 #define RAYGUI_IMPLEMENTATION
@@ -53,7 +55,8 @@ meow::RaylibGameView::RaylibGameView()
             m_card_image_paths.emplace_back(entry);
         }
     }
-    m_gameplay_objects.player_hand = std::make_unique<PlayerHandDDM>(&m_gameplay_objects.player_hand);
+    m_gameplay_objects.player_hand =
+        std::make_unique<PlayerHandDDM>(&m_gameplay_objects.player_hand);
 }
 
 void meow::RaylibGameView::on_instances_attach() {
@@ -79,6 +82,7 @@ void meow::RaylibGameView::on_instances_attach() {
     m_player_id = game_session->get_player_id_by_user_id(m_client->get_id_of_client());
 
     for (const auto &info : m_client->get_players_info()) {
+        // const std::size_t id = m_
         m_gameplay_objects.usernames_box.add_username({info.id, info.name});
         m_gameplay_objects.stats.elements[info.id] = {
             {GuiPlayerStatisticsMenu::StatisticKind::LEVEL, {"Level", 0}},
@@ -87,6 +91,11 @@ void meow::RaylibGameView::on_instances_attach() {
             {GuiPlayerStatisticsMenu::StatisticKind::MONSTER_STRENGTH, {"Monster\nstrength", 0}}
         };
     }
+
+    std::cout << __LINE__ << std::endl;
+    m_client->send_action(
+        network::Action(network::Action::ActionType::RollDice, -1, -1, m_client->get_id_of_client())
+    );
 }
 
 void meow::RaylibGameView::setup_background() {
@@ -204,7 +213,7 @@ void meow::RaylibGameView::draw() {
     using namespace meow::network;
     using ActionType = Action::ActionType;
 
-    const bool my_turn = m_active_turn[m_client->get_id_of_client()];
+    const bool my_turn = m_active_turn[m_player_id];
     static const Overload active_display_visitor = {
         [this, my_turn](GameplayObjs *objs) {
             std::size_t id = objs->usernames_box.active_user;
@@ -235,9 +244,9 @@ void meow::RaylibGameView::draw() {
                 // const auto random_index =
                 //     random_integer<std::size_t>(0, m_card_image_paths.size() - 1);
                 // objs->player_hand.add_card(m_card_image_paths[random_index].c_str());
-                m_client->send_action(Action(
-                    ActionType::DrawedCard, random_integer(0, 1), m_player_id, -1
-                ));
+                m_client->send_action(
+                    Action(ActionType::DrawedCard, random_integer(0, 1), m_player_id, -1)
+                );
             }
             if (objs->player_hand.somethind_inspected()) {
                 m_blur.Draw();
@@ -342,7 +351,9 @@ void meow::RaylibGameView::on_bonus_change(std::size_t user_id, int delta) {
 
 void meow::RaylibGameView::on_card_receive(std::size_t user_id, size_t card_id) {
     if (user_id == m_client->get_id_of_client()) {
+        std::cout << __LINE__ << std::endl;
         m_gameplay_objects.player_hand.add_card(card_id);
+        std::cout << __LINE__ << std::endl;
     }
 }
 
