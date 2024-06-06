@@ -89,7 +89,7 @@ void Client::disconnect() {
         }
     }
     throw std::runtime_error("name not found");
-    return "<idi  nahui plz>";
+    return "<not found>";
 }
 
 void Client::set_name_of_client(const std::string &name) {
