@@ -1,5 +1,6 @@
 #include "game_state.hpp"
 #include <cassert>
+#include <iostream>
 #include <vector>
 #include "model_card.hpp"
 #include "model_card_manager.hpp"
@@ -275,8 +276,10 @@ InitState::InitState(SharedGameState *shared_state_)
 }
 
 std::unique_ptr<GameState> InitState::roll_dice(std::size_t user_id) {
+    std::cout << __LINE__ << std::endl;
     std::size_t position = shared_state->get_player_position_by_user_id(user_id);
 
+    std::cout << __LINE__ << std::endl;
     if (results[position] != 0) {
         return nullptr;
     }
@@ -291,6 +294,7 @@ std::unique_ptr<GameState> InitState::roll_dice(std::size_t user_id) {
     }
     */
 
+    std::cout << __LINE__ << std::endl;
     if (static_cast<std::size_t>(move_count) < results.size()) {
         return std::unique_ptr<InitState>(this);
     }
@@ -302,6 +306,7 @@ std::unique_ptr<GameState> InitState::roll_dice(std::size_t user_id) {
         }
     }
     
+    std::cout << __LINE__ << std::endl;
     shared_state->set_first_player_by_position(position_of_first_best_result);
     for (auto &player : shared_state->get_all_players()) {
         for (size_t i = 0; i < init_hand_size; i++) {
@@ -311,6 +316,7 @@ std::unique_ptr<GameState> InitState::roll_dice(std::size_t user_id) {
         }
     }
     
+    std::cout << __LINE__ << std::endl;
     for (auto &observer : VirtualMachine::get_instance().get_observers()) {
         observer->on_turn_begin(shared_state->get_current_user_id());
     }

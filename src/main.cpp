@@ -103,7 +103,8 @@ private:
         server.start_listening(network::players_count);
         for (std::optional<network::Action> action;; action = server.receive_action()) {
             if (action) {
-                server.send_action(action->target_player, *action);
+                for (const std::size_t id : server.get_clients_id())
+                server.send_action(id, *action);
             }
         }
     }
