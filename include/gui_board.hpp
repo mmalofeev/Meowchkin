@@ -4,6 +4,7 @@
 #include <memory>
 #include <unordered_map>
 #include "client.hpp"
+#include "game_session.hpp"
 #include "gui_card_span.hpp"
 #include "gui_card_span_dropdown_menu.hpp"
 #include "raylib-cpp.hpp"
@@ -17,6 +18,7 @@ private:
     GuiCardSpan *m_player_hand = nullptr;
     raylib::Window *m_window = nullptr;
     network::Client *m_client = nullptr;
+    model::GameSession *m_game_session = nullptr;
 
     raylib::Rectangle m_rect;
     raylib::Texture m_texture;
@@ -32,9 +34,14 @@ public:
     GuiBoard() : m_opponent_cards(std::make_unique<BrawlCardsDDM>(&m_opponent_cards)) {
     }
 
-    void setup(raylib::Window *window, GuiCardSpan *hand, network::Client *client);
+    void setup(
+        raylib::Window *window,
+        GuiCardSpan *hand,
+        network::Client *client,
+        model::GameSession *game_session
+    );
     void draw(std::size_t observed_player, float frame_time);
-    void add_card(std::size_t card_id);
+    void add_card(std::size_t card_id, std::size_t target_id);
 
     void remove_card(std::size_t card_id) {
         m_opponent_cards.remove_card(card_id);

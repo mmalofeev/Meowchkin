@@ -1,10 +1,13 @@
 #include "raylib_game_view.hpp"
+#include <algorithm>
 #include <boost/dll/alias.hpp>
 #include <chrono>
 #include <iostream>
+#include <memory>
 #include <string_view>
 #include <variant>
 #include "gui_card_loader.hpp"
+#include "gui_card_span_dropdown_menu.hpp"
 #include "gui_dice_roller.hpp"
 #include "paths_to_binaries.hpp"
 #include "raylib.h"
@@ -50,18 +53,30 @@ meow::RaylibGameView::RaylibGameView()
             m_card_image_paths.emplace_back(entry);
         }
     }
+    m_gameplay_objects.player_hand = std::make_unique<PlayerHandDDM>(&m_gameplay_objects.player_hand);
 }
 
 void meow::RaylibGameView::on_instances_attach() {
     setup_background();
+
     setup_pause_menu();
+
     setup_hand();
+
     setup_active_display_selector();
-    GuiCardSpan::card_manager = card_manager_ptr;
-    m_gameplay_objects.board.setup(m_window, &m_gameplay_objects.player_hand, m_client);
+
+    GuiCardSpan::card_manager = card_manager;
+
+    m_gameplay_objects.board.setup(
+        m_window, &m_gameplay_objects.player_hand, m_client, game_session
+    );
+
     m_gameplay_objects.text_chat.set_window(m_window);
+
     m_gameplay_objects.usernames_box.set_window(m_window);
+
     m_gameplay_objects.usernames_box.active_user = m_client->get_id_of_client();
+    m_player_id = game_session->get_player_id_by_user_id(m_client->get_id_of_client());
 
     for (const auto &info : m_client->get_players_info()) {
         m_gameplay_objects.usernames_box.add_username({info.id, info.name});
@@ -195,26 +210,33 @@ void meow::RaylibGameView::draw() {
             std::size_t id = objs->usernames_box.active_user;
 
             objs->board.draw(m_client->get_id_of_client(), m_window->GetFrameTime());
-            objs->player_hand.draw_cards(m_window->GetFrameTime());
+
+            objs->player_hand.draw_cards(m_window->GetFrameTime(), true);
+
             objs->usernames_box.draw(m_client->get_id_of_client());
+
             if (m_show_chat) {
                 objs->text_chat.draw(*m_client);
             }
+
             objs->stats.draw(id);
+
             draw_active_display_selector();
+
             GuiCardSpan::draw_inspected_card(m_window->GetWidth(), m_window->GetHeight());
 
             if (GuiButton({0, m_window->GetHeight() - 40.0f, 40, 40}, "-") &&
                 objs->player_hand.card_count() > 0) {
                 objs->player_hand.remove_card();
             }
+
             if (GuiButton({40, m_window->GetHeight() - 40.0f, 40, 40}, "+") &&
                 objs->player_hand.card_count() < 10) {
                 // const auto random_index =
                 //     random_integer<std::size_t>(0, m_card_image_paths.size() - 1);
                 // objs->player_hand.add_card(m_card_image_paths[random_index].c_str());
                 m_client->send_action(Action(
-                    ActionType::DrawedCard, random_integer(0, 1), m_client->get_id_of_client(), -1
+                    ActionType::DrawedCard, random_integer(0, 1), m_player_id, -1
                 ));
             }
             if (objs->player_hand.somethind_inspected()) {
@@ -254,10 +276,13 @@ void meow::RaylibGameView::draw() {
     }
 
     m_background.Draw();
+
     std::visit(active_display_visitor, m_active_display);
 
     if (IsKeyPressed(KEY_SPACE)) {
-        on_level_change(m_client->get_id_of_client(), 1);
+        // on_level_change(m_client->get_id_of_client(), 1);
+        on_card_receive(m_client->get_id_of_client(), 0);
+        on_card_add_on_board(0, random_integer(0, 1), m_client->get_id_of_client());
     }
 
     if (IsKeyPressed(KEY_ESCAPE)) {
@@ -268,7 +293,6 @@ void meow::RaylibGameView::draw() {
         }
     }
     m_levelup_blink_call(std::chrono::milliseconds(1000), m_levelup_blink);
-    m_levelup_blink = false;
 }
 
 void meow::RaylibGameView::on_card_add_on_board(
@@ -276,22 +300,11 @@ void meow::RaylibGameView::on_card_add_on_board(
     bool protogonist_sided,
     std::size_t user_id
 ) {
-    //TODO
-    /*
     if (protogonist_sided) {
         m_gameplay_objects.board.m_kitten_cards[user_id].add_card(card_id);
-        m_gameplay_objects.stats.elements[user_id][GuiPlayerStatisticsMenu::StatisticKind::BONUS]
-            .value += bonus;
-        m_gameplay_objects.stats.elements[user_id][GuiPlayerStatisticsMenu::StatisticKind::STRENGTH]
-            .value += bonus;
     } else {
         m_gameplay_objects.board.m_opponent_cards.add_card(card_id);
-        for (auto &e : m_gameplay_objects.stats.elements) {
-            e.second[GuiPlayerStatisticsMenu::StatisticKind::BONUS].value += bonus;
-            e.second[GuiPlayerStatisticsMenu::StatisticKind::STRENGTH].value += bonus;
-        }
     }
-    */
 }
 
 void meow::RaylibGameView::on_card_remove_from_board(std::size_t card_id) {
@@ -316,6 +329,17 @@ void meow::RaylibGameView::on_level_change(std::size_t user_id, int delta) {
     }
 }
 
+void meow::RaylibGameView::on_bonus_change(std::size_t user_id, int delta) {
+    m_gameplay_objects.stats.elements[user_id][GuiPlayerStatisticsMenu::StatisticKind::BONUS]
+        .value += delta;
+    m_gameplay_objects.stats.elements[user_id][GuiPlayerStatisticsMenu::StatisticKind::STRENGTH]
+        .value += delta;
+    // for (auto &e : m_gameplay_objects.stats.elements) {
+    //     e.second[GuiPlayerStatisticsMenu::StatisticKind::BONUS].value += delta;
+    //     e.second[GuiPlayerStatisticsMenu::StatisticKind::STRENGTH].value += delta;
+    // }
+}
+
 void meow::RaylibGameView::on_card_receive(std::size_t user_id, size_t card_id) {
     if (user_id == m_client->get_id_of_client()) {
         m_gameplay_objects.player_hand.add_card(card_id);
@@ -323,7 +347,7 @@ void meow::RaylibGameView::on_card_receive(std::size_t user_id, size_t card_id) 
 }
 
 // TODO
-void meow::RaylibGameView::on_item_loss(std::size_t user_id, std::size_t card_id) {
+void meow::RaylibGameView::on_card_loss(std::size_t user_id, std::size_t card_id) {
     if (user_id == m_client->get_id_of_client()) {
     }
 }
@@ -334,13 +358,7 @@ void meow::RaylibGameView::on_monster_elimination(std::size_t user_id) {
     }
 }
 
-// TODO
-void meow::RaylibGameView::on_being_cursed(std::size_t user_id) {
-    if (user_id == m_client->get_id_of_client()) {
-    }
-}
-
-void meow::RaylibGameView::on_dice_roll() {
+void meow::RaylibGameView::on_dice_roll(unsigned res) {
     m_client->send_action(network::Action(
         network::Action::ActionType::RollDice, 0, m_client->get_id_of_client(),
         m_client->get_id_of_client()

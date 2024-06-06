@@ -19,7 +19,7 @@ namespace meow {
 
 namespace network {
 constexpr const char *port_file = "port.txt";
-constexpr std::size_t players_count = 2;
+constexpr std::size_t players_count = 1;
 }  // namespace network
 
 class Application {
@@ -67,8 +67,9 @@ public:
           m_scene_manager(std::make_unique<SceneManager>()),
           m_game_session({std::dynamic_pointer_cast<GameView>(m_gameview)}),
           m_music("bin/music/witcher-gwent.mp3") {
-        std::dynamic_pointer_cast<GameView>(m_gameview)->card_manager_ptr =
+        std::dynamic_pointer_cast<GameView>(m_gameview)->card_manager =
             &CardManager::get_instance();
+        std::dynamic_pointer_cast<GameView>(m_gameview)->game_session = &m_game_session;
         m_scene_manager->set_scene(SceneType::MAIN_MENU, m_mainmenu.get());
         m_scene_manager->set_scene(SceneType::GAME, m_gameview.get());
 
@@ -124,7 +125,6 @@ private:
         for (const auto &info : players) {
             std::cout << '\t' << info.name << '\n';
         }
-        m_gameview->attach_instances(&m_client, &m_window);
 
         std::vector<std::size_t> users(players.size());
         std::transform(
@@ -132,6 +132,9 @@ private:
             [](const network::PlayerInfo &player) { return player.id; }
         );
         m_game_session.init(users);
+
+        std::dynamic_pointer_cast<GameView>(m_gameview)->game_session = &m_game_session;
+        m_gameview->attach_instances(&m_client, &m_window);
     }
 
     void response() {

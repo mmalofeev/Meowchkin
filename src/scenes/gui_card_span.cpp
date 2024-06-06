@@ -2,6 +2,7 @@
 #include <chrono>
 #include <cstdlib>
 #include <iostream>
+#include "Rectangle.hpp"
 #include "gui_card_loader.hpp"
 #include "gui_card_span_dropdown_menu.hpp"
 #include "raylib.h"
@@ -82,7 +83,8 @@ void GuiCardSpan::remove_card() {
     recalculate_card_rects();
 }
 
-void GuiCardSpan::draw_cards(float frame_time) {
+void GuiCardSpan::draw_cards(float frame_time, bool is_player_hand) {
+    if (!m_window) return;
     const bool can_be_dragged = !something_dragged;
     if (!can_be_dragged || raylib::Mouse::IsButtonReleased(MOUSE_BUTTON_LEFT)) {
         m_selected = m_cards.end();
@@ -145,20 +147,32 @@ void GuiCardSpan::draw_cards(float frame_time) {
         auto &card = *card_it;
         raylib::Color c(
             255, 255, 255,
-            (unsigned char
-            )((card.card.border.GetPosition() - card.card.target_position).LengthSqr() /
-              card.fading_coeff * 255)
+            (unsigned char)((card.card.border.GetPosition() - card.card.target_position)
+                                .LengthSqr() /
+                            card.fading_coeff * 255)
         );
         card.card.border.SetPosition(
             Vector2Lerp(card.card.border.GetPosition(), card.card.target_position, frame_time * 4)
         );
         card.card.texture.Draw(card.card.border.GetPosition(), c);
-        if (c.a == 0) {
+        if (c.a <= 5) {
             card_it = m_removed_cards.erase(card_it);
         }
     }
     m_dropdown_menu->draw();
+
     something_dragged = m_selected != m_cards.end();
+
+    // if something dragged in player hand, draw targets outside
+    static bool bebra = false;
+    if (is_player_hand) {
+        bebra = something_dragged;
+    }
+    if (bebra && !is_player_hand) {
+        draw_targets();
+    } else {
+        // target_rects.clear();
+    }
 }
 
 void GuiCardSpan::draw_inspected_card(int window_width, int window_height) {
@@ -173,11 +187,24 @@ void GuiCardSpan::draw_inspected_card(int window_width, int window_height) {
     raylib::Color col{255, 255, 255, 255};
     const raylib::Vector2 pos{
         (window_width - inspected_card->orig_img.width) / 2.0f,
-        (window_height - inspected_card->orig_img.height) / 2.0f};
+        (window_height - inspected_card->orig_img.height) / 2.0f
+    };
     inspected_card_texture->Draw(pos, col);
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         reset_inspected_card_texture = true;
         inspected_card = nullptr;
+    }
+}
+
+void GuiCardSpan::draw_targets() {
+    for (GuiCard &c : m_cards) {
+        const float rect_side = 100.0f;
+        const auto &b = c.border;
+        auto rec = raylib::Rectangle(
+            b.GetPosition() + raylib::Vector2{0, b.GetSize().y - rect_side}, {rect_side, rect_side}
+        );
+        rec.DrawLines(raylib::Color::Green());
+        target_rects.insert({rec, c.card_id});
     }
 }
 

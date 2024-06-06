@@ -21,11 +21,11 @@ private:
     inline static const raylib::Color background_color = raylib::Color(77, 120, 204, 255);
 
     struct GameplayObjs {
-        GuiBoard board{};
-        GuiCardSpan player_hand{std::make_unique<PlayerHandDDM>(&player_hand)};
-        GuiUsernamesBox usernames_box{};
-        GuiTextChat text_chat{};
-        GuiPlayerStatisticsMenu stats{};
+        GuiBoard board;
+        GuiCardSpan player_hand;
+        GuiUsernamesBox usernames_box;
+        GuiTextChat text_chat;
+        GuiPlayerStatisticsMenu stats;
     } m_gameplay_objects;
 
     struct PauseMenuObjs {
@@ -38,8 +38,8 @@ private:
             {Button::BACK_TO_LOBBY, "Back to lobby"},
             {Button::QUIT, "Quit"},
         };
-        EnumArray<Button, raylib::Rectangle> button_rects{};
-        EnumArray<Button, bool> button_pressed{};
+        EnumArray<Button, raylib::Rectangle> button_rects;
+        EnumArray<Button, bool> button_pressed;
     } m_pause_menu_objects;
 
     std::variant<GameplayObjs *, PauseMenuObjs *> m_active_display;
@@ -55,9 +55,9 @@ private:
             {Button::CHAT, "bin/imgs/chat_button_texture.png"},
             {Button::PAUSE, "bin/imgs/pause_button_texture.png"},
         };
-        EnumArray<Button, raylib::Texture> button_texs{};
-        EnumArray<Button, raylib::Rectangle> button_rects{};
-        EnumArray<Button, bool> button_pressed{};
+        EnumArray<Button, raylib::Texture> button_texs;
+        EnumArray<Button, raylib::Rectangle> button_rects;
+        EnumArray<Button, bool> button_pressed;
     } m_active_display_selector;
 
     /* background */
@@ -79,6 +79,7 @@ private:
     });
     bool m_levelup_blink = false;
     std::unordered_map<std::size_t, bool> m_active_turn;
+    std::size_t m_player_id = -1;
 
 protected:
     void on_instances_attach() override;
@@ -96,14 +97,14 @@ public:
     void on_card_remove_from_board(std::size_t card_id) override;
     void on_turn_begin(std::size_t user_id) override;
     void on_turn_end(std::size_t user_id) override;
+    void on_bonus_change(std::size_t user_id, int delta) override;
     void on_level_change(std::size_t user_id, int delta) override;
     void on_card_receive(std::size_t user_id, std::size_t card_id) override;
-    void on_item_loss(std::size_t user_id, std::size_t card_id) override;
+    void on_card_loss(std::size_t user_id, std::size_t card_id) override;
     void on_monster_elimination(std::size_t user_id) override;  // which player killed monster
-    void on_being_cursed(std::size_t user_id) override;         // which player is cursed
-    void on_dice_roll() override;
+    void on_dice_roll(unsined res) override;
 
-    static std::shared_ptr<RaylibGameView> make_raylib_gameview() {
+    static std::shared_ptr<Scene> make_raylib_gameview() {
         return std::make_shared<RaylibGameView>();
     }
 

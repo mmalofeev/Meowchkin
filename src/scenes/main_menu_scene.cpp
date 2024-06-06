@@ -136,7 +136,7 @@ public:
         GuiStatusBar(Rectangle{w - 300.0f, h - 40.0f, 300, 40}, status_bar_text.c_str());
     }
 
-    static std::shared_ptr<MainMenu> make_mainmenu() {
+    static std::shared_ptr<Scene> make_mainmenu() {
         return std::make_shared<MainMenu>();
     }
 };
