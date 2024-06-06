@@ -48,8 +48,10 @@ void GuiBoard::setup(
 
     for (auto &kc : m_kitten_cards) {
         kc.second.set_span_borders(m_rect, {m_rect.x, 0});
+        kc.second.set_window(m_window);
     }
     m_opponent_cards.set_span_borders(m_rect, {m_rect.x, m_rect.height / 2 + 30});
+    m_opponent_cards.set_window(m_window);
 }
 
 void GuiBoard::draw(std::size_t observed_player, float frame_time) {
@@ -80,7 +82,6 @@ void GuiBoard::draw(std::size_t observed_player, float frame_time) {
         for (const GuiCardInfo &c : GuiCardSpan::target_rects) {
             // std::cout << __LINE__ << ' ' << m_player_hand << std::endl;
             if (c.intersect.CheckCollision(m_player_hand->selected().value()->border)) {
-                std::cout << __LINE__ << std::endl;
                 add_card(m_player_hand->pop_selected().card_id, c.card_id);
             }
             // std::cout << __LINE__ << std::endl;
@@ -97,6 +98,7 @@ void GuiBoard::draw(std::size_t observed_player, float frame_time) {
 
     m_kitten_cards.at(observed_player).draw_cards(frame_time);
 
+    // std::cout << m_opponent_cards.m_cards.size() << std::endl;
     m_opponent_cards.draw_cards(frame_time);
 }
 

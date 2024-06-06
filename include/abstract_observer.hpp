@@ -39,8 +39,7 @@ public:
     virtual void on_monster_elimination(std::size_t user_id) {  // which player killed monster
     }
 
-    // result??? TODO
-    virtual void on_dice_roll(unsigned res) {
+    virtual void on_dice_roll(std::size_t user_id, unsigned res) {
     }
 
     virtual ~Observer() = default;

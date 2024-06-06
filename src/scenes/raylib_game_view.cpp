@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <iostream>
 #include <memory>
+#include <ratio>
 #include <string_view>
 #include <variant>
 #include "gui_card_loader.hpp"
@@ -88,7 +89,8 @@ void meow::RaylibGameView::on_instances_attach() {
             {GuiPlayerStatisticsMenu::StatisticKind::LEVEL, {"Level", 0}},
             {GuiPlayerStatisticsMenu::StatisticKind::STRENGTH, {"Strength", 0}},
             {GuiPlayerStatisticsMenu::StatisticKind::BONUS, {"Bonus", 0}},
-            {GuiPlayerStatisticsMenu::StatisticKind::MONSTER_STRENGTH, {"Monster\nstrength", 0}}
+            {GuiPlayerStatisticsMenu::StatisticKind::MONSTER_STRENGTH, {"Monster\nstrength", 0}},
+            {GuiPlayerStatisticsMenu::StatisticKind::LAST_DICE_ROLL, {"Your last dice\nroll", 0}},
         };
     }
 
@@ -245,7 +247,7 @@ void meow::RaylibGameView::draw() {
                 //     random_integer<std::size_t>(0, m_card_image_paths.size() - 1);
                 // objs->player_hand.add_card(m_card_image_paths[random_index].c_str());
                 m_client->send_action(
-                    Action(ActionType::DrawedCard, random_integer(0, 1), m_player_id, -1)
+                    Action(ActionType::DrawedCard, random_integer(0, 1), -1, m_client->get_id_of_client())
                 );
             }
             if (objs->player_hand.somethind_inspected()) {
@@ -290,8 +292,9 @@ void meow::RaylibGameView::draw() {
 
     if (IsKeyPressed(KEY_SPACE)) {
         // on_level_change(m_client->get_id_of_client(), 1);
-        on_card_receive(m_client->get_id_of_client(), 0);
-        on_card_add_on_board(0, random_integer(0, 1), m_client->get_id_of_client());
+        // on_card_receive(m_client->get_id_of_client(), 0);
+        // on_card_add_on_board(0, random_integer(0, 1), m_client->get_id_of_client());
+        // on_level_change(m_client->get_id_of_client(), 1);
     }
 
     if (IsKeyPressed(KEY_ESCAPE)) {
@@ -301,7 +304,7 @@ void meow::RaylibGameView::draw() {
             m_active_display = &m_gameplay_objects;
         }
     }
-    m_levelup_blink_call(std::chrono::milliseconds(1000), m_levelup_blink);
+    m_levelup_blink_call(std::chrono::milliseconds(1000), m_levelup_blink, m_levelup_tint_color);
 }
 
 void meow::RaylibGameView::on_card_add_on_board(
@@ -309,10 +312,13 @@ void meow::RaylibGameView::on_card_add_on_board(
     bool protogonist_sided,
     std::size_t user_id
 ) {
+    dbg;
     if (protogonist_sided) {
         m_gameplay_objects.board.m_kitten_cards[user_id].add_card(card_id);
     } else {
+        dbg;
         m_gameplay_objects.board.m_opponent_cards.add_card(card_id);
+        dbg;
     }
 }
 
@@ -335,6 +341,7 @@ void meow::RaylibGameView::on_level_change(std::size_t user_id, int delta) {
         .value += delta;
     if (user_id == m_client->get_id_of_client() && delta > 0) {
         m_levelup_blink = true;
+        m_levelup_tint_color = raylib::Color::White();
     }
 }
 
@@ -351,15 +358,13 @@ void meow::RaylibGameView::on_bonus_change(std::size_t user_id, int delta) {
 
 void meow::RaylibGameView::on_card_receive(std::size_t user_id, size_t card_id) {
     if (user_id == m_client->get_id_of_client()) {
-        std::cout << __LINE__ << std::endl;
         m_gameplay_objects.player_hand.add_card(card_id);
-        std::cout << __LINE__ << std::endl;
     }
 }
 
-// TODO
 void meow::RaylibGameView::on_card_loss(std::size_t user_id, std::size_t card_id) {
     if (user_id == m_client->get_id_of_client()) {
+        m_gameplay_objects.player_hand.remove_card(card_id);
     }
 }
 
@@ -369,11 +374,16 @@ void meow::RaylibGameView::on_monster_elimination(std::size_t user_id) {
     }
 }
 
-void meow::RaylibGameView::on_dice_roll(unsigned res) {
+void meow::RaylibGameView::on_dice_roll(std::size_t user_id, unsigned res) {
     m_client->send_action(network::Action(
         network::Action::ActionType::RollDice, 0, m_client->get_id_of_client(),
         m_client->get_id_of_client()
     ));
+    if (m_client->get_id_of_client() == user_id) {
+        m_gameplay_objects.stats
+            .elements[user_id][GuiPlayerStatisticsMenu::StatisticKind::LAST_DICE_ROLL]
+            .value = (int)res;
+    }
 }
 
 BOOST_DLL_ALIAS(meow::RaylibGameView::make_raylib_gameview, make_gameview)
