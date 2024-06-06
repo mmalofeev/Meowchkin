@@ -74,16 +74,12 @@ void GuiBoard::draw(std::size_t observed_player, float frame_time) {
 
     m_drop_card_rect.DrawLines(raylib::Color::Green());
 
-    // std::cout << __LINE__ << std::endl;
     if (m_player_hand->selected().has_value()) {
-        // std::cout << __LINE__ << std::endl;
         for (const GuiCardInfo &c : GuiCardSpan::target_rects) {
-            // std::cout << __LINE__ << ' ' << m_player_hand << std::endl;
             if (c.intersect.CheckCollision(m_player_hand->selected().value()->border)) {
                 std::cout << __LINE__ << std::endl;
                 add_card(m_player_hand->pop_selected().card_id, c.card_id);
             }
-            // std::cout << __LINE__ << std::endl;
         }
     }
 
@@ -101,9 +97,8 @@ void GuiBoard::add_card(std::size_t card_id, std::size_t target_id) {
     // for (const auto &info : m_client->get_players_info()) {
     // std::cout << "send to " << info.name << '\n';
     // TODO
-    std::size_t id = m_game_session->get_player_id_by_user_id(m_client->get_id_of_client());
     m_client->send_action(
-        network::Action(network::Action::ActionType::PlayedCard, card_id, target_id, id)
+        network::Action(network::Action::ActionType::PlayedCard, card_id, target_id, m_client->get_id_of_client())
     );
     // }
 }
