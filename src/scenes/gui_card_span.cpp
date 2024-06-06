@@ -170,7 +170,7 @@ void GuiCardSpan::draw_cards(float frame_time, bool is_player_hand) {
     }
     m_dropdown_menu->draw();
 
-    something_dragged = m_selected != m_cards.end();
+    // something_dragged = m_selected != m_cards.end();
 
     // if something dragged in player hand, draw targets outside
     // static bool bebra = false;

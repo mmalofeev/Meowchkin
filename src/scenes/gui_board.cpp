@@ -87,10 +87,13 @@ void GuiBoard::draw(std::size_t observed_player, float frame_time) {
         }
     }
 
-    // if (m_player_hand->selected().has_value() &&
-    //     m_drop_card_rect.CheckCollision(m_player_hand->selected().value()->border)) {
-    //     add_card(m_player_hand->pop_selected().card_id);
-    // }
+    if (m_player_hand->selected().has_value() &&
+        m_drop_card_rect.CheckCollision(m_player_hand->selected().value()->border)) {
+        add_card(
+            m_player_hand->pop_selected().card_id,
+            m_game_session->get_player_id_by_user_id(m_client->get_id_of_client())
+        );
+    }
 
     m_kitten_cards.at(observed_player).draw_cards(frame_time);
 
