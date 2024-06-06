@@ -109,10 +109,11 @@ PostManagementState::PostManagementState(SharedGameState *shared_state_)
 
 std::unique_ptr<GameState>
 BrawlState::play_card(std::size_t user_id, std::size_t target_id, std::size_t card_obj_id) {
+    dbg;
+    std::cout << user_id << std::endl;
     Player *player = shared_state->get_player_by_user_id(user_id);
     auto card = player->get_card_from_hand_by_id(card_obj_id);
     assert(card != nullptr);
-
     if (card->info->type == CardType::MONSTER) {
         if (card->verify(player->obj_id, target_id)) {
             auto card_instance = std::move(player->drop_card_from_hand_by_id(card_obj_id));
@@ -129,7 +130,8 @@ BrawlState::play_card(std::size_t user_id, std::size_t target_id, std::size_t ca
             auto card_instance = player->drop_card_from_hand_by_id(card_obj_id);
             card_instance->apply(player->obj_id, target_id);
             if (is_hero(target_id)) {
-                heroes_storage.emplace_back(std::move(card_instance));
+                if (card->info->storable)
+                    heroes_storage.emplace_back(std::move(card_instance));
             } else {
                 get_monster(target_id)->add_card_to_storage(std::move(card_instance));
             }
@@ -242,34 +244,29 @@ ManagementState::throw_card(std::size_t user_id, std::size_t card_obj_id) {
 }
 
 std::unique_ptr<GameState> ManagementState::draw_card(std::size_t user_id) {
-    std::cout << __FILE__ << " " << __LINE__ << std::endl;
     std::cout << shared_state->get_current_user_id() << " " << user_id << std::endl;
     if (shared_state->get_current_user_id() != user_id) {
         return nullptr;
     }
     Player *player = shared_state->get_player_by_user_id(user_id);
-    std::cout << __FILE__ << " " << __LINE__ << std::endl;
 
     auto card = CardManager::get_instance().create_card(shared_state->get_card_id_from_deck());
 
     if (card->info->type != CardType::MONSTER) {
         if (card->info->openable) {
             if (card->verify(player->obj_id, player->obj_id)) {
-                std::cout << __FILE__ << " " << __LINE__ << std::endl;
                 card->apply(player->obj_id, player->obj_id);
             } else {
                 assert(false);
                 return nullptr;
             }
         } else {
-            std::cout << __FILE__ << " " << __LINE__ << std::endl;
             player->add_card_to_hand(std::move(card));
         }
         // TODO
         return std::make_unique<PostManagementState>(shared_state);
     }
 
-    std::cout << __FILE__ << " " << __LINE__ << std::endl;
     card->apply(player->obj_id, player->obj_id);
     return std::make_unique<BrawlState>(
         shared_state, player->obj_id, dynamic_unique_cast<MonsterCard>(std::move(card))
@@ -283,10 +280,7 @@ InitState::InitState(SharedGameState *shared_state_)
 }
 
 std::unique_ptr<GameState> InitState::roll_dice(std::size_t user_id) {
-    std::cout << __LINE__ << std::endl;
     std::size_t position = shared_state->get_player_position_by_user_id(user_id);
-
-    std::cout << __LINE__ << std::endl;
     if (results[position] != 0) {
         return nullptr;
     }

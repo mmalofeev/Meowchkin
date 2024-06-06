@@ -1,7 +1,6 @@
 #include "model_card.hpp"
 #include "model_card_manager.hpp"
 #include "virtual_machine.hpp"
-#include <iostream>
 
 namespace meow::model {
 

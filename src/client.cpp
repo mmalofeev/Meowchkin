@@ -4,6 +4,8 @@
 #include <nlohmann/json.hpp>
 #include <stdexcept>
 
+#include "gui_card.hpp"
+
 using boost::asio::ip::tcp;
 
 namespace meow::network {
@@ -101,13 +103,13 @@ void Client::set_name_of_client(const std::string &name) {
 }
 
 void Client::send_action(const Action &action) {
-    std::cout << __LINE__ << std::endl;
+    dbg;
     auto json = action.to_json();
     std::string message_to_send;
     message_to_send = json.dump();
     message_to_send += "\n";
     connection << message_to_send << std::flush;
-    std::cout << __LINE__ << std::endl;
+    dbg;
 }
 
 std::optional<Action> Client::receive_action() {
