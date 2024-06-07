@@ -219,7 +219,9 @@ void meow::RaylibGameView::draw() {
 
             if (auto feedback = m_client->receive_action_result();
                 feedback && !feedback->validness) {
-                m_gameplay_objects.player_hand.add_card(feedback->card_id);
+                if (feedback->failed_action_type == ActionType::PlayedCard) {
+                    m_gameplay_objects.player_hand.add_card(feedback->card_id);
+                }
             }
 
             objs->board.draw(m_client->get_id_of_client(), m_window->GetFrameTime());

@@ -2,7 +2,7 @@
   "cards": [
     {
       "type": "SPELL",
-      "image": "bin/imgs/cards/ai_generated/card3.png",
+      "image": "bin/imgs/cards/spells/level_up.png",
       "openable": true,
       "storable": false,
       "cost": 0,
@@ -20,7 +20,7 @@
     },
     {
       "type": "ITEM",
-      "image": "",
+      "image": "bin/imgs/cards/equipment/box_helmet.png",
       "openable": false,
       "storable": true,
       "cost": 300,
@@ -45,7 +45,7 @@
     },
     {
       "type": "MONSTER",
-      "image": "",
+      "image": "bin/imgs/cards/monsters/decorative_dog.png",
       "openable": true,
       "storable": false,
       "verification": [

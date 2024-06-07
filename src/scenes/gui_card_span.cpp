@@ -31,7 +31,9 @@ void GuiCardSpan::recalculate_card_rects() noexcept {
 
 void GuiCardSpan::add_card(std::size_t card_id) {
     raylib::Image img, img2;
+    dbg;
     std::string path_to_texture = card_manager->get_card_info_by_obj_id(card_id)->image;
+    dbg;
     std::cout << path_to_texture << '\n' << __LINE__ << std::endl;
     try {
         img = meow::load_card_img(path_to_texture);
@@ -83,7 +85,9 @@ void GuiCardSpan::remove_card() {
 }
 
 void GuiCardSpan::draw_cards(float frame_time, bool is_player_hand) {
-    if (!m_window) return;
+    if (!m_window) {
+        return;
+    }
     const bool can_be_dragged = !something_dragged;
     if (!can_be_dragged || raylib::Mouse::IsButtonReleased(MOUSE_BUTTON_LEFT)) {
         m_selected = m_cards.end();
@@ -165,14 +169,12 @@ void GuiCardSpan::draw_cards(float frame_time, bool is_player_hand) {
     // if something dragged in player hand, draw targets outside
     static bool bebra = false;
     if (is_player_hand) {
-         bebra = something_dragged;
+        bebra = something_dragged;
     }
     if (bebra && !is_player_hand) {
-         draw_targets();
-    } else {
-    }
-
-    if (!something_dragged) {
+        draw_targets();
+    } else if (!something_dragged) {
+        // std::cout << "cleared possible targets" << std::endl;
         possible_targets.clear();
     }
 }
@@ -206,7 +208,10 @@ void GuiCardSpan::draw_targets() {
             b.GetPosition() + raylib::Vector2{0, b.GetSize().y - rect_side}, {rect_side, rect_side}
         );
         rec.DrawLines(raylib::Color::Green());
+        // std::cout << "pushed some rec to targets";
+        // std::cout << possible_targets.size() << std::endl;
         possible_targets.insert({rec, c.card_id});
+        // std::cout << possible_targets.size() << std::endl;
     }
 }
 
