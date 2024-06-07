@@ -2,13 +2,14 @@
 #define GUI_CARD_LOADER_HPP_
 
 #include <string_view>
+#include <string>
 #include <unordered_map>
 #include "raylib-cpp.hpp"
 
 namespace meow {
 
 inline raylib::Image &load_card_img(std::string_view path_to_image) {
-    static std::unordered_map<const char *, raylib::Image> cache;
+    static std::unordered_map<std::string, raylib::Image> cache;
     if (auto it = cache.find(path_to_image.data()); it != cache.end()) {
         return it->second;
     }
