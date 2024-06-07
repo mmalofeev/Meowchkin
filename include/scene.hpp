@@ -29,6 +29,7 @@ protected:
 public:
     Scene() = default;
     virtual void draw() = 0;
+    // virtual ~Scene() = default;
 
     // need to pass this to shared object
     void attach_instances(network::Client *client, raylib::Window *window) {

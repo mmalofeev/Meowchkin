@@ -2,6 +2,9 @@
 #include <boost/asio.hpp>
 #include <iostream>
 #include <nlohmann/json.hpp>
+#include <stdexcept>
+
+#include "gui_card.hpp"
 
 using boost::asio::ip::tcp;
 
@@ -87,6 +90,8 @@ void Client::disconnect() {
             return info.name;
         }
     }
+    throw std::runtime_error("name not found");
+    return "<not found>";
 }
 
 void Client::set_name_of_client(const std::string &name) {
@@ -98,11 +103,13 @@ void Client::set_name_of_client(const std::string &name) {
 }
 
 void Client::send_action(const Action &action) {
+    dbg;
     auto json = action.to_json();
     std::string message_to_send;
     message_to_send = json.dump();
     message_to_send += "\n";
     connection << message_to_send << std::flush;
+    dbg;
 }
 
 std::optional<Action> Client::receive_action() {

@@ -42,6 +42,8 @@ public:
 
     void acquire_item(size_t player_id, ItemType itype, int quantity);
 
+    std::size_t get_user_id_by_player_id(std::size_t player_id);
+
     std::optional<int> execute(const std::vector<Command> &code);
 
     void set_game_session_reference(GameSession *_game_session) {

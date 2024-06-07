@@ -7,7 +7,7 @@
 #include "shared_game_state.hpp"
 
 namespace meow::model {
-
+  
 bool VirtualMachine::check_player_item_eligiblity(size_t player_id, ItemType itype, int quantity) {
     auto player = game_session->shared_state.get_player_by_player_id(player_id);
     assert(player != nullptr);
@@ -64,7 +64,11 @@ void VirtualMachine::increase_power() {
     player->increase_power(delta);
 }
 
-void VirtualMachine::increase_level(bool force = false) {
+std::size_t VirtualMachine::get_user_id_by_player_id(std::size_t player_id) {
+    return game_session->shared_state.get_player_by_player_id(player_id)->user_id;
+}
+
+void VirtualMachine::increse_level(bool force = false) {
     int delta = st.top();
     st.pop();
     int player_id = st.top();

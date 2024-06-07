@@ -14,7 +14,7 @@ protected:
     raylib::Vector2 m_spawn_point = {-1, -1};
 
 public:
-    explicit DropDownMenu(auto *parental_span) : m_parental_span(parental_span) {
+    explicit DropDownMenu(GuiCardSpan *parental_span) : m_parental_span(parental_span) {
     }
 
     [[nodiscard]] virtual bool mouse_in_menu() const noexcept {

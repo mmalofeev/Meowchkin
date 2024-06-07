@@ -5,6 +5,7 @@
 #include <list>
 #include <memory>
 #include <optional>
+#include <set>
 #include "gui_card.hpp"
 #include "gui_window_dependable.hpp"
 #include "model_card_manager.hpp"
@@ -43,8 +44,16 @@ private:
     inline static bool reset_inspected_card_texture = true;
     inline static std::optional<raylib::Texture> inspected_card_texture;
 
+    struct CardRectComparator {
+        bool operator()(const GuiCardInfo &lhs, const GuiCardInfo &rhs) const {
+            return std::pair{lhs.intersect.GetPosition().x, lhs.intersect.GetPosition().y} <
+                   std::pair{rhs.intersect.GetPosition().x, rhs.intersect.GetPosition().y};
+        }
+    };
+
 public:
     inline static CardManager *card_manager = nullptr;
+    inline static std::set<GuiCardInfo, CardRectComparator> target_rects;
 
     GuiCardSpan() = default;
 
@@ -115,7 +124,8 @@ public:
         remove_card(it);
     }
 
-    void draw_cards(float frame_time);
+    void draw_cards(float frame_time, bool is_player_hand = false);
+    void draw_targets();
     static void draw_inspected_card(int window_width, int window_height);
 };
 

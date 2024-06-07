@@ -1,3 +1,4 @@
+#include <iostream>
 #include "model_player.hpp"
 #include "virtual_machine.hpp"
 

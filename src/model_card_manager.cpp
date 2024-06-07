@@ -116,8 +116,9 @@ void CardManager::delete_obj_id(std::size_t obj_id) {
 }
 
 const model::CardInfo *CardManager::get_card_info_by_obj_id(std::size_t obj_id) const {
-    assert(obj_id_to_card_id.find(obj_id) != obj_id_to_card_id.end());
-    return cards_instances[obj_id_to_card_id[obj_id]].get();
+    if (obj_id_to_card_id.find(obj_id) != obj_id_to_card_id.end())
+        return cards_instances[obj_id_to_card_id[obj_id]].get();
+    return nullptr;
 }
 
 std::size_t CardManager::get_number_of_cards() const {
