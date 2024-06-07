@@ -325,11 +325,9 @@ std::unique_ptr<GameState> InitState::roll_dice(std::size_t user_id) {
     move_count++;
     
     // TODO
-    /*
     for (auto &observer : VirtualMachine::get_instance().get_observers()) {
         observer->on_dice_roll(user_id, results[position]);
     }
-    */
 
     if (static_cast<std::size_t>(move_count) < results.size()) {
         return std::unique_ptr<InitState>(this);
@@ -352,6 +350,8 @@ std::unique_ptr<GameState> InitState::roll_dice(std::size_t user_id) {
     }
     
     for (auto &observer : VirtualMachine::get_instance().get_observers()) {
+        dbg;
+        std::cout << shared_state->get_current_user_id() << std::endl;
         observer->on_turn_begin(shared_state->get_current_user_id());
     }
     return std::make_unique<ManagementState>(shared_state);
