@@ -212,7 +212,7 @@ void meow::RaylibGameView::draw() {
     using namespace meow::network;
     using ActionType = Action::ActionType;
 
-    const bool my_turn = m_active_turn[m_player_id];
+    const bool my_turn = m_active_turn[m_client->get_id_of_client()];
     static const Overload active_display_visitor = {
         [this, my_turn](GameplayObjs *objs) {
             std::size_t id = objs->usernames_box.active_user;
@@ -240,20 +240,18 @@ void meow::RaylibGameView::draw() {
 
             if (GuiButton({40, m_window->GetHeight() - 40.0f, 40, 40}, "+") &&
                 objs->player_hand.card_count() < 10) {
-                // const auto random_index =
-                //     random_integer<std::size_t>(0, m_card_image_paths.size() - 1);
-                // objs->player_hand.add_card(m_card_image_paths[random_index].c_str());
-                m_client->send_action(
-                    Action(ActionType::DrawedCard, random_integer(0, 1), -1, m_client->get_id_of_client())
-                );
+                m_client->send_action(Action(
+                    ActionType::DrawedCard, random_integer(0, 1), -1, m_client->get_id_of_client()
+                ));
             }
             if (objs->player_hand.somethind_inspected()) {
                 m_blur.Draw();
             }
 
             if (my_turn) {
-                enum class turns { end_turn, COUNT };
-                EnumArray<turns, std::string> turn_opts{{turns::end_turn, "End turn"}};
+                enum class turns { PASS, END_TURN, COUNT };
+                EnumArray<turns, std::string> turn_opts{{turns::PASS, "Pass"}, {turns::END_TURN, "End turn"}};
+                EnumArray<turns, ActionType> turn_acts{{turns::PASS, ActionType::Pass}, {turns::END_TURN, ActionType::EndTurn}};
                 float was = guiAlpha;
                 GuiSetAlpha(0.85);
                 if (auto x = draw_opts_menu(
@@ -262,7 +260,7 @@ void meow::RaylibGameView::draw() {
                     );
                     x != turns::COUNT) {
                     m_client->send_action(
-                        Action(ActionType::EndTurn, -1, m_client->get_id_of_client(), -1)
+                        Action(turn_acts[x], -1, m_client->get_id_of_client(), -1)
                     );
                 }
                 GuiSetAlpha(was);
@@ -288,10 +286,6 @@ void meow::RaylibGameView::draw() {
     std::visit(active_display_visitor, m_active_display);
 
     if (IsKeyPressed(KEY_SPACE)) {
-        // on_level_change(m_client->get_id_of_client(), 1);
-        // on_card_receive(m_client->get_id_of_client(), 0);
-        // on_card_add_on_board(0, random_integer(0, 1), m_client->get_id_of_client());
-        // on_level_change(m_client->get_id_of_client(), 1);
     }
 
     if (IsKeyPressed(KEY_ESCAPE)) {
@@ -344,6 +338,12 @@ void meow::RaylibGameView::on_bonus_change(std::size_t user_id, int delta) {
         .value += delta;
     m_gameplay_objects.stats.elements[user_id][GuiPlayerStatisticsMenu::StatisticKind::STRENGTH]
         .value += delta;
+}
+
+void meow::RaylibGameView::on_monster_bonus_change(std::size_t monster_id, int delta) {
+    for (auto &element : m_gameplay_objects.stats.elements) {
+        element.second[GuiPlayerStatisticsMenu::StatisticKind::MONSTER_STRENGTH].value += delta;
+    }
 }
 
 void meow::RaylibGameView::on_card_receive(std::size_t user_id, size_t card_id) {
