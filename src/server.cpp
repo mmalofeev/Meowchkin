@@ -2,6 +2,7 @@
 #include <boost/asio.hpp>
 #include <nlohmann/json.hpp>
 #include <optional>
+#include <algorithm>
 
 using boost::asio::ip::tcp;
 
@@ -26,6 +27,7 @@ Server &Server::get_instance() {
     for (auto &info : players_info) {
         clients_id.push_back(info.id);
     }
+    std::sort(clients_id.begin(), clients_id.end());
     return clients_id;
 }
 

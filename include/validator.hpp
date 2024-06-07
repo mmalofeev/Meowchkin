@@ -18,6 +18,10 @@ public:
         auto &server = network::Server::get_instance();
 
         for (std::optional<network::Action> action;; action = server.receive_action()) {
+            if (!action) {
+                continue;
+            }
+
             bool validness = m_game_session.handle_action(action.value());
             if (validness) {
                 server.send_action_to_all_clients(action.value());
