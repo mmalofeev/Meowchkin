@@ -14,6 +14,7 @@
 #include "raylib.h"
 #include "scene.hpp"
 #include "server.hpp"
+#include "validator.hpp"
 
 namespace meow {
 
@@ -101,12 +102,8 @@ private:
         f.close();
 
         server.start_listening(network::players_count);
-        for (std::optional<network::Action> action;; action = server.receive_action()) {
-            if (action) {
-                for (const std::size_t id : server.get_clients_id())
-                server.send_action(id, *action);
-            }
-        }
+        Validator m_validator;
+        m_validator.start_validating();
     }
 
     void join_lobby() {
