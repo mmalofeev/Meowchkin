@@ -95,7 +95,11 @@ public:
         }
     }
 
-    void on_item_equip(std::size_t obj_id) final {
+    void on_card_add_on_board(std::size_t obj_id, bool protogonist_sided, std::size_t user_id)
+        final {
+        if (!protogonist_sided) {
+            return;
+        }
         std::size_t card_id = get_card_by_obj(obj_id);
         std::string sql =
             "UPDATE card_usage SET count_of_usage = count_of_usage + 1 WHERE card_id = " +
