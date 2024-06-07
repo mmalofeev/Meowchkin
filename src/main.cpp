@@ -19,7 +19,7 @@ namespace meow {
 
 namespace network {
 constexpr const char *port_file = "port.txt";
-constexpr std::size_t players_count = 2;
+constexpr std::size_t players_count = 1;
 }  // namespace network
 
 class Application {

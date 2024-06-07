@@ -163,7 +163,7 @@ std::unique_ptr<GameState> BrawlState::pass(std::size_t user_id) {
                     CardManager::get_instance().create_card(shared_state->get_card_id_from_deck())
                 );
             }
-            shared_state->get_player_by_player_id(hero_id)->increse_level(1, true);
+            shared_state->get_player_by_player_id(hero_id)->increase_level(1, true);
         }
         return std::make_unique<PostManagementState>(shared_state);
     } else if (heroes_passed && !heroes_win) {

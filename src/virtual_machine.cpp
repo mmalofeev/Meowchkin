@@ -8,7 +8,52 @@
 
 namespace meow::model {
 
-void VirtualMachine::increse_level(bool force = false) {
+bool VirtualMachine::check_player_item_eligiblity(size_t player_id, ItemType itype, int quantity) {
+    auto player = game_session->shared_state.get_player_by_player_id(player_id);
+    assert(player != nullptr);
+    switch (itype) {
+    case (ItemType::BOOTS): {
+        return player->unused_boots >= quantity;
+    } break;
+    case (ItemType::HELMET): {
+        return player->unused_helmet >= quantity;
+    } break;
+    case (ItemType::BREASTPLATE): {
+        return player->unused_breastplate >= quantity;
+    } break;
+    case (ItemType::WEAPON): {
+        return player->unused_arms >= quantity;
+    } break;
+    default: {
+        assert(false);
+    } break;
+    }
+    return false;
+}
+
+void VirtualMachine::acquire_item(size_t player_id, ItemType itype, int quantity) {
+    auto player = game_session->shared_state.get_player_by_player_id(player_id);
+    assert(player != nullptr);
+    switch (itype) {
+    case (ItemType::BOOTS): {
+        player->unused_boots -= quantity;
+    } break;
+    case (ItemType::HELMET): {
+        player->unused_helmet -= quantity;
+    } break;
+    case (ItemType::BREASTPLATE): {
+        player->unused_breastplate -= quantity;
+    } break;
+    case (ItemType::WEAPON): {
+        player->unused_arms -= quantity;
+    } break;
+    default: {
+        assert(false);
+    } break;
+    }
+}
+
+void VirtualMachine::increase_power() {
     int delta = st.top();
     st.pop();
     int player_id = st.top();
@@ -16,7 +61,18 @@ void VirtualMachine::increse_level(bool force = false) {
 
     Player *player =
         game_session->shared_state.get_player_by_player_id(static_cast<std::size_t>(player_id));
-    player->increse_level(delta, force);
+    player->increase_power(delta);
+}
+
+void VirtualMachine::increase_level(bool force = false) {
+    int delta = st.top();
+    st.pop();
+    int player_id = st.top();
+    st.pop();
+
+    Player *player =
+        game_session->shared_state.get_player_by_player_id(static_cast<std::size_t>(player_id));
+    player->increase_level(delta, force);
 }
 
 std::optional<int> VirtualMachine::execute(const std::vector<Command> &code) {
@@ -55,11 +111,14 @@ std::optional<int> VirtualMachine::execute(const std::vector<Command> &code) {
                 st.pop();
                 st.push(res);
             } break;
+            case CommandType::INCREASE_POWER: {
+                increase_power();
+            } break;
             case CommandType::INCREASE_LEVEL: {
-                increse_level();
+                increase_level();
             } break;
             case CommandType::INCREASE_LEVEL_FORCE: {
-                increse_level(true);
+                increase_level(true);
             } break;
             case CommandType::IS_DESK: {
                 int id = st.top();

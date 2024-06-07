@@ -3,7 +3,7 @@
 
 namespace meow::model {
 
-void Player::increse_level(int delta, bool force) {
+void Player::increase_level(int delta, bool force) {
     int last_value = level;
     level += delta;
 
@@ -14,6 +14,15 @@ void Player::increse_level(int delta, bool force) {
     for (auto &observer : VirtualMachine::get_instance().get_observers()) {
         observer->on_level_change(user_id, level - last_value);
     }
+}
+
+void Player::increase_power(int delta) {
+    power_buff += delta;
+    /*
+    for (auto &observer : VirtualMachine::get_instance().get_observers()) {
+        observer->on_level_change(user_id, level - last_value);
+    }
+    */
 }
 
 void Player::add_card_to_hand(std::unique_ptr<Card> card) {

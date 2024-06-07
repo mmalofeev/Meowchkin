@@ -11,12 +11,18 @@
 namespace meow {
 
 CardManager::CardManager() {
-    std::map<std::string, model::CardType> str_to_type{
+    static std::map<std::string, model::CardType> str_to_card_type{
         {"SPELL", model::CardType::SPELL},
         {"MONSTER", model::CardType::MONSTER},
         {"RACE", model::CardType::RACE},
         {"CLASS", model::CardType::CLASS},
         {"ITEM", model::CardType::ITEM}};
+
+    static std::map<std::string, model::ItemType> str_to_item_type{
+        {"BOOTS", model::ItemType::BOOTS},
+        {"BREASTPLATE", model::ItemType::BREASTPLATE},
+        {"HELMET", model::ItemType::HELMET},
+        {"WEAPON", model::ItemType::WEAPON}};
 
     std::ifstream f(json_info_path);
     ::nlohmann::json data = ::nlohmann::json::parse(f);
@@ -26,7 +32,7 @@ CardManager::CardManager() {
     for (auto &card : data["cards"]) {
         std::string image = card["image"].get<std::string>();
         std::size_t card_id = counter++;
-        model::CardType type = str_to_type[card["type"].get<std::string>()];
+        model::CardType type = str_to_card_type[card["type"].get<std::string>()];
         bool openable = card["openable"].get<bool>();
         bool storable = card["storable"].get<bool>();
         std::vector<model::Command> verification =
@@ -35,7 +41,19 @@ CardManager::CardManager() {
         model::CardInfo info(image, card_id, type, openable, storable, verification);
 
         switch (type) {
-            case model::CardType::ITEM:
+            case model::CardType::ITEM: {
+                 std::vector<model::Command> action =
+                    model::Command::parse(card["action"].get<std::vector<std::string>>());
+                std::vector<model::Command> unwind =
+                    model::Command::parse(card["unwind"].get<std::vector<std::string>>());
+                int cost = card["cost"].get<int>();
+                model::ItemType itype = str_to_item_type[card["item"].get<std::string>()];
+                int bound = card["bound"].get<int>();
+
+                cards_instances.emplace_back(
+                    std::make_unique<model::ItemCardInfo>(std::move(info), cost, action, unwind, itype, bound)
+                );
+            } break;
             case model::CardType::SPELL: {
                 std::vector<model::Command> action =
                     model::Command::parse(card["action"].get<std::vector<std::string>>());
@@ -70,7 +88,11 @@ CardManager::CardManager() {
 
 std::unique_ptr<model::Card> CardManager::create_card(std::size_t card_id) const {
     switch (cards_instances.at(card_id)->type) {
-        case model::CardType::ITEM:
+        case model::CardType::ITEM: {
+            auto result = std::make_unique<model::ItemCard>(cards_instances.at(card_id).get());
+            obj_id_to_card_id[result->obj_id] = card_id;
+            return result;
+        }
         case model::CardType::SPELL: {
             auto result = std::make_unique<model::SpellCard>(cards_instances.at(card_id).get());
             obj_id_to_card_id[result->obj_id] = card_id;
