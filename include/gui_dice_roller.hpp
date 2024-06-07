@@ -9,8 +9,6 @@
 
 namespace meow {
 
-using namespace std::chrono_literals;
-
 template <std::integral T = int>
 [[nodiscard]] T
 random_integer(T low = std::numeric_limits<T>::min(), T high = std::numeric_limits<T>::max()) {

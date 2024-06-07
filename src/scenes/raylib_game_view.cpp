@@ -84,15 +84,14 @@ void meow::RaylibGameView::on_instances_attach() {
         // const std::size_t id = m_
         m_gameplay_objects.usernames_box.add_username({info.id, info.name});
         m_gameplay_objects.stats.elements[info.id] = {
-            {GuiPlayerStatisticsMenu::StatisticKind::LEVEL, {"Level", 0}},
-            {GuiPlayerStatisticsMenu::StatisticKind::STRENGTH, {"Strength", 0}},
+            {GuiPlayerStatisticsMenu::StatisticKind::LEVEL, {"Level", 1}},
+            {GuiPlayerStatisticsMenu::StatisticKind::STRENGTH, {"Strength", 1}},
             {GuiPlayerStatisticsMenu::StatisticKind::BONUS, {"Bonus", 0}},
             {GuiPlayerStatisticsMenu::StatisticKind::MONSTER_STRENGTH, {"Monster\nstrength", 0}},
             {GuiPlayerStatisticsMenu::StatisticKind::LAST_DICE_ROLL, {"Your last dice\nroll", 0}},
         };
     }
 
-    dbg;
     m_client->send_action(
         network::Action(network::Action::ActionType::RollDice, -1, -1, m_client->get_id_of_client())
     );
@@ -218,6 +217,11 @@ void meow::RaylibGameView::draw() {
             const bool my_turn = m_active_turn[m_client->get_id_of_client()];
             std::size_t id = objs->usernames_box.active_user;
 
+            if (auto feedback = m_client->receive_action_result();
+                feedback && !feedback->validness) {
+                m_gameplay_objects.player_hand.add_card(feedback->card_id);
+            }
+
             objs->board.draw(m_client->get_id_of_client(), m_window->GetFrameTime());
 
             objs->player_hand.draw_cards(m_window->GetFrameTime(), true);
@@ -250,38 +254,47 @@ void meow::RaylibGameView::draw() {
             }
 
             if (my_turn) {
-                enum class turns { PASS, END_TURN, COUNT };
-                EnumArray<turns, std::string> turn_opts{{turns::PASS, "Pass"}, {turns::END_TURN, "End turn"}};
-                EnumArray<turns, ActionType> turn_acts{{turns::PASS, ActionType::Pass}, {turns::END_TURN, ActionType::EndTurn}};
+                enum class opts { ROLL_DICE, PASS, END_TURN, COUNT };
+                EnumArray<opts, std::string> turn_opts{
+                    {opts::ROLL_DICE, "Roll dice"},
+                    {opts::PASS, "Pass"},
+                    {opts::END_TURN, "End turn"}
+                };
+                EnumArray<opts, ActionType> turn_acts{
+                    {opts::ROLL_DICE, ActionType::RollDice},
+                    {opts::PASS, ActionType::Pass},
+                    {opts::END_TURN, ActionType::EndTurn}
+                };
                 float was = guiAlpha;
                 GuiSetAlpha(0.85);
                 if (auto x = draw_opts_menu(
                         turn_opts, {m_window->GetWidth() - opts_button_width,
                                     m_window->GetHeight() - opts_button_height * turn_opts.size()}
                     );
-                    x != turns::COUNT) {
-                    m_client->send_action(
-                        Action(turn_acts[x], -1, m_client->get_id_of_client(), -1)
+                    x != opts::COUNT) {
+                    m_client->send_action(Action(turn_acts[x], -1, m_client->get_id_of_client(), -1)
                     );
                 }
                 GuiSetAlpha(was);
             } else {
-                enum class turns { PASS, COUNT };
-                EnumArray<turns, std::string> turn_opts{{turns::PASS, "Pass"}};
-                EnumArray<turns, ActionType> turn_acts{{turns::PASS, ActionType::Pass}};
+                enum class opts { ROLL_DICE, PASS, COUNT };
+                EnumArray<opts, std::string> turn_opts{
+                    {opts::ROLL_DICE, "Roll dice"}, {opts::PASS, "Pass"}
+                };
+                EnumArray<opts, ActionType> turn_acts{
+                    {opts::ROLL_DICE, ActionType::RollDice}, {opts::PASS, ActionType::Pass}
+                };
                 float was = guiAlpha;
                 GuiSetAlpha(0.85);
                 if (auto x = draw_opts_menu(
                         turn_opts, {m_window->GetWidth() - opts_button_width,
                                     m_window->GetHeight() - opts_button_height * turn_opts.size()}
                     );
-                    x != turns::COUNT) {
-                    m_client->send_action(
-                        Action(turn_acts[x], -1, m_client->get_id_of_client(), -1)
+                    x != opts::COUNT) {
+                    m_client->send_action(Action(turn_acts[x], -1, m_client->get_id_of_client(), -1)
                     );
                 }
                 GuiSetAlpha(was);
-
             }
         },
 
