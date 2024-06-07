@@ -100,7 +100,7 @@ TEST(ModelTest, BaseBrowlTest) {
     ASSERT_TRUE(players[cur].get_hand().size() == 4);
     session.current_state = std::move(new_state);
 
-    if (session.current_state->type != meow::model::StateType::LOOKTROUBLE) {
+    if (session.current_state->type != meow::model::StateType::POSTMANAGEMENT) {
         ASSERT_TRUE(session.current_state->type == meow::model::StateType::BRAWL);
         bool flag = dynamic_cast<meow::model::BrawlState*>(session.current_state.get())->are_heroes_leading();
         
@@ -120,10 +120,6 @@ TEST(ModelTest, BaseBrowlTest) {
             ASSERT_TRUE(players[cur].get_hand().size() == 4);
             ASSERT_TRUE(players[cur].get_level() == 1);
         }
-    } else {
-        new_state = session.current_state->draw_card(players[cur].user_id);
-        session.current_state = std::move(new_state);
-        ASSERT_TRUE(players[cur].get_hand().size() == 6);
     }
 
     new_state = session.current_state->end_turn(players[cur].user_id);
@@ -166,13 +162,14 @@ TEST(ModelTest, PlaySpellsFromHandBrowlTest) {
         }
     }
     ASSERT_TRUE(session.current_state != nullptr);
+    int level = players[cur].get_level();
+    int hand_size = players[cur].get_hand().size();
 
     new_state = session.current_state->draw_card(players[cur].user_id);
     session.current_state = std::move(new_state);
 
-    auto f = [&]() {
-        int level = players[cur].get_level();
-        int hand_size = players[cur].get_hand().size();
+    if (session.current_state->type != meow::model::StateType::POSTMANAGEMENT) {
+        ASSERT_TRUE(session.current_state->type == meow::model::StateType::BRAWL);
         bool flag = dynamic_cast<meow::model::BrawlState*>(session.current_state.get())->are_heroes_leading();
         
         if (!flag) {
@@ -191,23 +188,5 @@ TEST(ModelTest, PlaySpellsFromHandBrowlTest) {
             ASSERT_TRUE(players[cur].get_hand().size() == hand_size);
             ASSERT_TRUE(players[cur].get_level() == std::max(level - 2, 1));
         }
-    };
-
-    if (session.current_state->type != meow::model::StateType::LOOKTROUBLE) {
-        ASSERT_TRUE(session.current_state->type == meow::model::StateType::BRAWL);
-        f();
-    } else {
-        bool flag = false;
-        for (const auto& card :players[cur].get_hand()) {
-            if (card->info->type == meow::model::CardType::MONSTER) {
-                new_state = session.current_state->play_card(players[cur].user_id, players[cur].obj_id, card->obj_id);
-                session.current_state = std::move(new_state);
-                ASSERT_TRUE(session.current_state->type == meow::model::StateType::BRAWL);
-                flag = true;
-                break;
-            }
-        }
-        if (flag)
-            f();
     }
 }
