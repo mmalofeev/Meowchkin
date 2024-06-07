@@ -53,7 +53,7 @@ private:
 
 public:
     inline static CardManager *card_manager = nullptr;
-    inline static std::set<GuiCardInfo, CardRectComparator> target_rects;
+    inline static std::set<GuiCardInfo, CardRectComparator> possible_targets;
 
     GuiCardSpan() = default;
 
