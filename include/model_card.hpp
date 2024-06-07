@@ -8,7 +8,6 @@
 namespace meow::model {
 
 enum class CardType { SPELL, MONSTER, RACE, CLASS, ITEM };
-enum class ItemType { BOOTS, HELMET, BREASTPLATE, WEAPON };
 
 struct CardInfo {
     const std::string image;
@@ -53,23 +52,6 @@ public:
     }
 };
 
-struct ItemCardInfo : SpellCardInfo {
-public:
-    const ItemType itype;
-    const int bound;
-
-    ItemCardInfo(
-        CardInfo base,
-        int cost,
-        const std::vector<Command> &action,
-        const std::vector<Command> &unwind,
-        ItemType itype,
-        int bound
-    )
-        : SpellCardInfo(std::move(base), cost, action, unwind), itype(itype), bound(bound) {
-    }
-};
-
 struct MonsterCardInfo : CardInfo {
 public:
     const std::vector<Command> buff_checker;
@@ -109,7 +91,7 @@ public:
     Card(CardInfo *info) : info(info) {
     }
 
-    virtual bool verify(std::size_t player_id, std::size_t target_id) const;
+    bool verify(std::size_t player_id, std::size_t target_id) const;
     //use when card is played on board
     virtual void apply(std::size_t player_id, std::size_t target_id);
 
@@ -117,7 +99,7 @@ public:
 };
 
 struct SpellCard : Card {
-protected:
+private:
     bool applied = false;
     std::size_t player_id{};
     std::size_t target_id{};
@@ -128,16 +110,6 @@ public:
 
     void apply(std::size_t player_id, std::size_t target_id) override;
     ~SpellCard();
-};
-
-struct ItemCard : SpellCard {
-public:
-    ItemCard(CardInfo *info) : SpellCard(info) {
-    }
-
-    bool verify(std::size_t player_id, std::size_t target_id) const override;
-    void apply(std::size_t player_id, std::size_t target_id) override;
-    ~ItemCard();
 };
 
 struct MonsterCard : Card {

@@ -4,10 +4,8 @@
 #include <optional>
 #include <stack>
 #include <vector>
-#include <cassert>
 #include "abstract_observer.hpp"
 #include "model_command.hpp"
-#include "model_card.hpp"
 
 namespace meow::model {
 
@@ -20,9 +18,7 @@ private:
     std::stack<int> st;
     VirtualMachine() = default;
 
-    void increase_level(bool force);
-
-    void increase_power();
+    void increse_level(bool force);
 
 public:
     template <typename... T>
@@ -37,10 +33,6 @@ public:
     void release_observers() {
         observers.clear();
     }
-
-    bool check_player_item_eligiblity(size_t player_id, ItemType itype, int quantity);
-
-    void acquire_item(size_t player_id, ItemType itype, int quantity);
 
     std::size_t get_user_id_by_player_id(std::size_t player_id);
 

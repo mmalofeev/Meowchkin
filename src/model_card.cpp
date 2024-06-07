@@ -45,24 +45,6 @@ SpellCard::~SpellCard() {
     }
 }
 
-bool ItemCard::verify(std::size_t player_id, std::size_t target_id) const {
-    auto item_info = dynamic_cast<const ItemCardInfo *>(info);
-    if (player_id != target_id && !VirtualMachine::get_instance().check_player_item_eligiblity(player_id,  item_info->itype, item_info->bound))
-        return false;
-    return SpellCard::verify(player_id, target_id);
-}
-
-void ItemCard::apply(std::size_t player_id, std::size_t target_id) {
-    auto item_info = dynamic_cast<const ItemCardInfo *>(info);
-    VirtualMachine::get_instance().acquire_item(player_id, item_info->itype, item_info->bound);
-    SpellCard::apply(player_id, target_id);
-}
-
-ItemCard::~ItemCard() {
-    auto item_info = dynamic_cast<const ItemCardInfo *>(info);
-    VirtualMachine::get_instance().acquire_item(player_id, item_info->itype, -item_info->bound);
-}
-
 bool MonsterCard::check_stalking(std::size_t target_id) const {
     const auto &checker = dynamic_cast<const MonsterCardInfo *>(info)->stalking_checker;
     if (checker.empty()) {
