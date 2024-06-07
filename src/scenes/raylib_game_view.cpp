@@ -274,8 +274,9 @@ void meow::RaylibGameView::draw() {
                                     m_window->GetHeight() - opts_button_height * turn_opts.size()}
                     );
                     x != opts::COUNT) {
-                    m_client->send_action(Action(turn_acts[x], -1, m_client->get_id_of_client(), -1)
-                    );
+                    m_client->send_action(Action(
+                        turn_acts[x], -1, m_client->get_id_of_client(), m_client->get_id_of_client()
+                    ));
                 }
                 GuiSetAlpha(was);
             } else {
@@ -293,8 +294,9 @@ void meow::RaylibGameView::draw() {
                                     m_window->GetHeight() - opts_button_height * turn_opts.size()}
                     );
                     x != opts::COUNT) {
-                    m_client->send_action(Action(turn_acts[x], -1, m_client->get_id_of_client(), -1)
-                    );
+                    m_client->send_action(Action(
+                        turn_acts[x], -1, m_client->get_id_of_client(), m_client->get_id_of_client()
+                    ));
                 }
                 GuiSetAlpha(was);
             }

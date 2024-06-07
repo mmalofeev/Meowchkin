@@ -18,7 +18,7 @@ bool operator<(const UsageItemInfo &a, const UsageItemInfo &b) {
     return a.frequency > b.frequency;
 }
 
-class StatisticObserver : Observer {
+class StatisticObserver : public Observer {
     sqlite3 *DB{nullptr};
 
     int count_existed_strings() {
