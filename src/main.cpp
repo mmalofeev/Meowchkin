@@ -4,6 +4,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include "bd_observer.hpp"
 #include "client.hpp"
 #include "enum_array.hpp"
 #include "game_session.hpp"
@@ -20,7 +21,7 @@ namespace meow {
 
 namespace network {
 constexpr const char *port_file = "port.txt";
-constexpr std::size_t players_count = 1;
+constexpr std::size_t players_count = 2;
 }  // namespace network
 
 class Application {
@@ -66,7 +67,10 @@ public:
           m_gameview_maker(plugin_names[SceneType::GAME]),
           m_gameview((*m_gameview_maker)()),
           m_scene_manager(std::make_unique<SceneManager>()),
-          m_game_session({std::dynamic_pointer_cast<GameView>(m_gameview)}),
+          m_game_session(
+              {std::dynamic_pointer_cast<GameView>(m_gameview)}
+               // std::make_shared<StatisticObserver>()}
+          ),
           m_music("bin/music/witcher-gwent.mp3") {
         std::dynamic_pointer_cast<GameView>(m_gameview)->card_manager =
             &CardManager::get_instance();
