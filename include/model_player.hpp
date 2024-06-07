@@ -45,7 +45,7 @@ public:
         return level;
     }
 
-    void increse_level(int delta, bool force = false);
+    void increase_level(int delta, bool force = false);
 
     void add_card_to_storage(std::unique_ptr<Card> card) {
         storage.emplace_back(std::move(card));

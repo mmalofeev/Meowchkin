@@ -12,7 +12,7 @@ std::size_t VirtualMachine::get_user_id_by_player_id(std::size_t player_id) {
     return game_session->shared_state.get_player_by_player_id(player_id)->user_id;
 }
 
-void VirtualMachine::increse_level(bool force = false) {
+void VirtualMachine::increase_level(bool force = false) {
     int delta = st.top();
     st.pop();
     int player_id = st.top();
@@ -20,7 +20,7 @@ void VirtualMachine::increse_level(bool force = false) {
 
     Player *player =
         game_session->shared_state.get_player_by_player_id(static_cast<std::size_t>(player_id));
-    player->increse_level(delta, force);
+    player->increase_level(delta, force);
 }
 
 std::optional<int> VirtualMachine::execute(const std::vector<Command> &code) {
@@ -60,10 +60,10 @@ std::optional<int> VirtualMachine::execute(const std::vector<Command> &code) {
                 st.push(res);
             } break;
             case CommandType::INCREASE_LEVEL: {
-                increse_level();
+                increase_level();
             } break;
             case CommandType::INCREASE_LEVEL_FORCE: {
-                increse_level(true);
+                increase_level(true);
             } break;
             case CommandType::IS_DESK: {
                 int id = st.top();

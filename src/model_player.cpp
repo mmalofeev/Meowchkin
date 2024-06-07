@@ -4,7 +4,7 @@
 
 namespace meow::model {
 
-void Player::increse_level(int delta, bool force) {
+void Player::increase_level(int delta, bool force) {
     int last_value = level;
     level += delta;
 
