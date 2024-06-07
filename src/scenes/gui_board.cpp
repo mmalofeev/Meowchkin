@@ -77,9 +77,10 @@ void GuiBoard::draw(std::size_t observed_player, float frame_time) {
     m_drop_card_rect.DrawLines(raylib::Color::Green());
 
     if (m_player_hand->selected().has_value()) {
-        for (const GuiCardInfo &c : GuiCardSpan::target_rects) {
+        for (const GuiCardInfo &c : GuiCardSpan::possible_targets) {
             if (c.intersect.CheckCollision(m_player_hand->selected().value()->border)) {
                 add_card(m_player_hand->pop_selected().card_id, c.card_id);
+                return;
             }
         }
     }
@@ -99,13 +100,9 @@ void GuiBoard::draw(std::size_t observed_player, float frame_time) {
 }
 
 void GuiBoard::add_card(std::size_t card_id, std::size_t target_id) {
-    // for (const auto &info : m_client->get_players_info()) {
-    // std::cout << "send to " << info.name << '\n';
-    // TODO
     m_client->send_action(
         network::Action(network::Action::ActionType::PlayedCard, card_id, target_id, m_client->get_id_of_client())
     );
-    // }
 }
 
 }  // namespace meow

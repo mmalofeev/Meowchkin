@@ -1,11 +1,8 @@
 #include "raylib_game_view.hpp"
-#include <algorithm>
 #include <boost/dll/alias.hpp>
 #include <chrono>
-#include <cstddef>
 #include <iostream>
 #include <memory>
-#include <ratio>
 #include <string_view>
 #include <variant>
 #include "gui_card_loader.hpp"
@@ -312,13 +309,10 @@ void meow::RaylibGameView::on_card_add_on_board(
     bool protogonist_sided,
     std::size_t user_id
 ) {
-    dbg;
     if (protogonist_sided) {
         m_gameplay_objects.board.m_kitten_cards[user_id].add_card(card_id);
     } else {
-        dbg;
         m_gameplay_objects.board.m_opponent_cards.add_card(card_id);
-        dbg;
     }
 }
 
@@ -350,10 +344,6 @@ void meow::RaylibGameView::on_bonus_change(std::size_t user_id, int delta) {
         .value += delta;
     m_gameplay_objects.stats.elements[user_id][GuiPlayerStatisticsMenu::StatisticKind::STRENGTH]
         .value += delta;
-    // for (auto &e : m_gameplay_objects.stats.elements) {
-    //     e.second[GuiPlayerStatisticsMenu::StatisticKind::BONUS].value += delta;
-    //     e.second[GuiPlayerStatisticsMenu::StatisticKind::STRENGTH].value += delta;
-    // }
 }
 
 void meow::RaylibGameView::on_card_receive(std::size_t user_id, size_t card_id) {
