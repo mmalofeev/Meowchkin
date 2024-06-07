@@ -31,7 +31,9 @@ void GuiCardSpan::recalculate_card_rects() noexcept {
 
 void GuiCardSpan::add_card(std::size_t card_id) {
     raylib::Image img, img2;
+    dbg;
     std::string path_to_texture = card_manager->get_card_info_by_obj_id(card_id)->image;
+    dbg;
     std::cout << path_to_texture << '\n' << __LINE__ << std::endl;
     try {
         img = meow::load_card_img(path_to_texture);

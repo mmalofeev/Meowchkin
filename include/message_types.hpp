@@ -1,6 +1,7 @@
 #ifndef MEOWCHKIN_MESSAGE_TYPES_HPP
 #define MEOWCHKIN_MESSAGE_TYPES_HPP
 
+#include <boost/mpl/assert.hpp>
 #include <nlohmann/json.hpp>
 
 using json = ::nlohmann::json;
@@ -50,8 +51,10 @@ class ActionResult {
 public:
     int card_id{};
     bool validness{};
+    Action::ActionType failed_action_type;
 
-    explicit ActionResult(int card_id, bool validness) : card_id(card_id), validness(validness) {
+    explicit ActionResult(int card_id, bool validness, Action::ActionType type)
+        : card_id(card_id), validness(validness), failed_action_type(type) {
     }
 
     explicit ActionResult(const json &json) {
@@ -61,10 +64,16 @@ public:
     void parse_from_json(const json &json) {
         json.at("card_id").get_to(card_id);
         json.at("validness").get_to(validness);
+        json.at("failed_action_type").get_to(failed_action_type);
     }
 
     [[nodiscard]] json to_json() const {
-        return json{{"type", "ActionResult"}, {"card_id", card_id}, {"validness", validness}};
+        return json{
+            {"type", "ActionResult"},
+            {"card_id", card_id},
+            {"validness", validness},
+            {"failed_action_type", failed_action_type}
+        };
     }
 };
 
@@ -125,7 +134,8 @@ public:
             {"message", message},
             {"sender_player", sender_player},
             {"general", general},
-            {"target_player", target_player}};
+            {"target_player", target_player}
+        };
     }
 };
 }  // namespace meow::network

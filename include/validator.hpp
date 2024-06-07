@@ -26,11 +26,11 @@ public:
             if (validness) {
                 server.send_action_to_all_clients(action.value());
                 server.send_action_result(
-                    action->sender_player, network::ActionResult(action->card_id, true)
+                    action->sender_player, network::ActionResult(action->card_id, true, action->type)
                 );
             } else {
                 server.send_action_result(
-                    action->sender_player, network::ActionResult(action->card_id, false)
+                    action->sender_player, network::ActionResult(action->card_id, false, action->type)
                 );
             }
         }
