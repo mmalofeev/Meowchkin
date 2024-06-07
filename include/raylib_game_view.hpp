@@ -109,6 +109,7 @@ public:
     void on_turn_begin(std::size_t user_id) override;
     void on_turn_end(std::size_t user_id) override;
     void on_bonus_change(std::size_t user_id, int delta) override;
+    void on_monster_bonus_change(std::size_t user_id, int delta) override;
     void on_level_change(std::size_t user_id, int delta) override;
     void on_card_receive(std::size_t user_id, std::size_t card_id) override;
     void on_card_loss(std::size_t user_id, std::size_t card_id) override;

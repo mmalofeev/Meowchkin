@@ -29,6 +29,9 @@ public:
     virtual void on_bonus_change(std::size_t user_id, int delta) {
     }
 
+    virtual void on_monster_bonus_change(std::size_t user_id, int delta) {
+    }
+
     virtual void on_card_receive(std::size_t user_id, std::size_t card_id) {
     }
 
