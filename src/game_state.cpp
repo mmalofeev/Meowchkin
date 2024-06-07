@@ -166,7 +166,7 @@ std::unique_ptr<GameState> BrawlState::pass(std::size_t user_id) {
                     CardManager::get_instance().create_card(shared_state->get_card_id_from_deck())
                 );
             }
-            shared_state->get_player_by_player_id(hero_id)->increse_level(1, true);
+            shared_state->get_player_by_player_id(hero_id)->increase_level(1, true);
         }
         return std::make_unique<PostManagementState>(shared_state);
     } else if (heroes_passed && !heroes_win) {
@@ -182,6 +182,42 @@ std::unique_ptr<GameState> BrawlState::pass(std::size_t user_id) {
     }
 
     return std::unique_ptr<BrawlState>(this);
+}
+
+LookForTroubleState::LookForTroubleState(SharedGameState *shared_state_)
+    : GameState(shared_state_, StateType::LOOKTROUBLE) {
+}
+
+std::unique_ptr<GameState> LookForTroubleState::play_card(std::size_t user_id, std::size_t target_id, std::size_t card_obj_id) {
+    if (shared_state->get_current_user_id() != user_id) {
+        return nullptr;
+    }
+
+    Player *player = shared_state->get_player_by_user_id(user_id);
+    auto card = player->get_card_from_hand_by_id(card_obj_id);
+    assert(card != nullptr);
+
+    if (card->info->type != CardType::MONSTER) {
+        return nullptr;
+    }
+
+    return std::make_unique<BrawlState>(
+        shared_state, player->obj_id, dynamic_unique_cast<MonsterCard>(player->drop_card_from_hand_by_id(card_obj_id))
+    );
+}
+
+std::unique_ptr<GameState> LookForTroubleState::draw_card(std::size_t user_id) {
+    if (shared_state->get_current_user_id() != user_id) {
+        return nullptr;
+    }
+
+    Player *player = shared_state->get_player_by_user_id(user_id);
+
+    for(size_t i = 0; i < cards_to_deal; i++) {
+        player->add_card_to_hand(CardManager::get_instance().create_card(shared_state->get_card_id_from_deck()));
+    }
+
+    return std::make_unique<PostManagementState>(shared_state);
 }
 
 std::unique_ptr<GameState> PostManagementState::end_turn(std::size_t user_id) {
@@ -264,7 +300,7 @@ std::unique_ptr<GameState> ManagementState::draw_card(std::size_t user_id) {
             player->add_card_to_hand(std::move(card));
         }
         // TODO
-        return std::make_unique<PostManagementState>(shared_state);
+        return std::make_unique<LookForTroubleState>(shared_state);
     }
 
     card->apply(player->obj_id, player->obj_id);

@@ -19,6 +19,31 @@
         "unwind": []
       },
       {
+        "type": "ITEM",
+        "image": "",
+        "openable": false,
+        "storable": true,
+        "cost": 300,
+        "item": "HELMET",
+        "bound": 1,
+        "verification": [
+          "IS_DESK",
+          "RETURN"
+        ],
+        "action": [
+          "STACK_POP",
+          "STACK_LOAD",
+          "2",
+          "INCREASE_POWER"
+        ],
+        "unwind": [
+          "STACK_POP",
+          "STACK_LOAD",
+          "-2",
+          "INCREASE_POWER"
+        ]
+      },
+      {
         "type": "MONSTER",
         "image": "",
         "openable": true,
