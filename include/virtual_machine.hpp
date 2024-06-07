@@ -18,7 +18,7 @@ private:
     std::stack<int> st;
     VirtualMachine() = default;
 
-    void increse_level(bool force);
+    void increase_level(bool force);
 
 public:
     template <typename... T>

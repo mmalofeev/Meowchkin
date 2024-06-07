@@ -119,6 +119,15 @@ public:
     std::unique_ptr<GameState> pass(std::size_t user_id) override;
 };
 
+struct LookForTroubleState : GameState {
+private:
+static constexpr std::size_t cards_to_deal = 2;
+public:
+    LookForTroubleState(SharedGameState *shared_state_);
+    std::unique_ptr<GameState> play_card(std::size_t user_id, std::size_t target_id, std::size_t card_obj_id) override;
+    std::unique_ptr<GameState> draw_card(std::size_t user_id) override;
+};
+
 }  // namespace meow::model
 
 #endif
