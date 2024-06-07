@@ -47,7 +47,7 @@ SpellCard::~SpellCard() {
 
 bool ItemCard::verify(std::size_t player_id, std::size_t target_id) const {
     auto item_info = dynamic_cast<const ItemCardInfo *>(info);
-    if (player_id != target_id && !VirtualMachine::get_instance().check_player_item_eligiblity(player_id,  item_info->itype, item_info->bound))
+    if (player_id != target_id || !VirtualMachine::get_instance().check_player_item_eligiblity(player_id,  item_info->itype, item_info->bound))
         return false;
     return SpellCard::verify(player_id, target_id);
 }

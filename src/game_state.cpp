@@ -116,12 +116,14 @@ std::unique_ptr<GameState> LookForTroubleState::play_card(std::size_t user_id, s
     auto card = player->get_card_from_hand_by_id(card_obj_id);
     assert(card != nullptr);
 
-    if (card->info->type != CardType::MONSTER) {
+    if (card->info->type != CardType::MONSTER || player->obj_id != target_id) {
         return nullptr;
     }
 
+    auto card_instance = player->drop_card_from_hand_by_id(card_obj_id);
+    card_instance->apply(player->obj_id, player->obj_id);
     return std::make_unique<BrawlState>(
-        shared_state, player->obj_id, dynamic_unique_cast<MonsterCard>(player->drop_card_from_hand_by_id(card_obj_id))
+        shared_state, player->obj_id, dynamic_unique_cast<MonsterCard>(std::move(card_instance))
     );
 }
 
@@ -146,8 +148,6 @@ PostManagementState::PostManagementState(SharedGameState *shared_state_)
 
 std::unique_ptr<GameState>
 BrawlState::play_card(std::size_t user_id, std::size_t target_id, std::size_t card_obj_id) {
-    dbg;
-    std::cout << user_id << std::endl;
     Player *player = shared_state->get_player_by_user_id(user_id);
     auto card = player->get_card_from_hand_by_id(card_obj_id);
     assert(card != nullptr);
@@ -158,9 +158,8 @@ BrawlState::play_card(std::size_t user_id, std::size_t target_id, std::size_t ca
             add_monster(
                 dynamic_unique_cast<MonsterCard>(std::move(card_instance))
             );
+            return std::unique_ptr<BrawlState>(this);
         }
-
-        return std::unique_ptr<BrawlState>(this);
     } else if (card->info->type == CardType::SPELL) {
         if ((is_hero(target_id) || is_monster(target_id)) &&
             card->verify(player->obj_id, target_id)) {
@@ -176,7 +175,6 @@ BrawlState::play_card(std::size_t user_id, std::size_t target_id, std::size_t ca
             return std::unique_ptr<BrawlState>(this);
         }
     }
-
     return nullptr;
 }
 
@@ -188,14 +186,12 @@ std::unique_ptr<GameState> BrawlState::pass(std::size_t user_id) {
             passed_heroes_count++;
         }
     }
-    
     bool heroes_passed = passed_heroes_count == heroes.size();
     bool enemies_passed =
         (passed_players.size() - passed_heroes_count ==
          shared_state->get_number_of_players() - heroes.size());
     int treasures_pool = get_treasures_pool();
     bool heroes_win = are_heroes_leading();
-
     if (enemies_passed && heroes_win) {
         for (auto hero_id : heroes) {
             for (size_t i = 0; i < treasures_pool; i++) {
@@ -217,7 +213,6 @@ std::unique_ptr<GameState> BrawlState::pass(std::size_t user_id) {
         }
         return std::make_unique<PostManagementState>(shared_state);
     }
-
     return std::unique_ptr<BrawlState>(this);
 }
 

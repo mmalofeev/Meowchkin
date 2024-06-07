@@ -56,7 +56,7 @@ public:
                 next_state = current_state->throw_card(action.sender_player, action.card_id);
             } break;
             case (Action::ActionType::Pass): {
-                next_state = current_state->end_turn(action.sender_player);
+                next_state = current_state->pass(action.sender_player);
             } break;
             default: {
                 assert(false);
