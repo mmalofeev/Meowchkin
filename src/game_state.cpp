@@ -188,7 +188,7 @@ std::unique_ptr<GameState> BrawlState::pass(std::size_t user_id) {
             passed_heroes_count++;
         }
     }
-
+    
     bool heroes_passed = passed_heroes_count == heroes.size();
     bool enemies_passed =
         (passed_players.size() - passed_heroes_count ==

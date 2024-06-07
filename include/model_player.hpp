@@ -19,8 +19,9 @@ private:
     int slip_away_buff = 0;
 
     int unused_arms = 2;
-    int unused_smut = 1;
+    int unused_helmet = 1;
     int unused_breastplate = 1;
+    int unused_boots = 1;
     int cards_after_turn_balance = 5;
     static constexpr std::size_t max_cards_in_hand = 10;
 
@@ -46,6 +47,7 @@ public:
     }
 
     void increase_level(int delta, bool force = false);
+    void increase_power(int delta);
 
     void add_card_to_storage(std::unique_ptr<Card> card) {
         storage.emplace_back(std::move(card));

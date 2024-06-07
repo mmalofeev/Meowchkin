@@ -1,44 +1,68 @@
 {
-    "cards": [
-      {
-        "type": "SPELL",
-        "image": "bin/imgs/cards/spells/level_up.png",
-        "openable": true,
-        "storable": false,
-        "cost": 0,
-        "verification": [
-          "IS_DESK",
-          "RETURN"
-        ],
-        "action": [
-          "STACK_POP",
-          "STACK_LOAD",
-          "1",
-          "INCREASE_LEVEL_FORCE"
-        ],
-        "unwind": []
-      },
-      {
-
-        "type": "MONSTER",
-        "image": "bin/imgs/cards/monsters/decorative_dog.png",
-        "openable": true,
-        "storable": false,
-        "verification": [
-          "STACK_LOAD",
-          "0",
-          "RETURN"
-        ],
-        "buff": [],
-        "stalking_checker": [],
-        "lewdness": [
-          "STACK_LOAD",
-          "-2",
-          "INCREASE_LEVEL"
-        ],
-        "power": 2, 
-        "treasures": 1,
-        "undead": false
-      }
-    ]
+  "cards": [
+    {
+      "type": "SPELL",
+      "image": "bin/imgs/cards/ai_generated/card3.png",
+      "openable": true,
+      "storable": false,
+      "cost": 0,
+      "verification": [
+        "IS_DESK",
+        "RETURN"
+      ],
+      "action": [
+        "STACK_POP",
+        "STACK_LOAD",
+        "1",
+        "INCREASE_LEVEL_FORCE"
+      ],
+      "unwind": []
+    },
+    {
+      "type": "ITEM",
+      "image": "",
+      "openable": false,
+      "storable": true,
+      "cost": 300,
+      "item": "HELMET",
+      "bound": 1,
+      "verification": [
+        "IS_DESK",
+        "RETURN"
+      ],
+      "action": [
+        "STACK_POP",
+        "STACK_LOAD",
+        "2",
+        "INCREASE_POWER"
+      ],
+      "unwind": [
+        "STACK_POP",
+        "STACK_LOAD",
+        "-2",
+        "INCREASE_POWER"
+      ]
+    },
+    {
+      "type": "MONSTER",
+      "image": "",
+      "openable": true,
+      "storable": false,
+      "verification": [
+        "STACK_LOAD",
+        "0",
+        "RETURN"
+      ],
+      "buff": [],
+      "stalking_checker": [],
+      "lewdness": [
+        "STACK_LOAD",
+        "-2",
+        "INCREASE_LEVEL"
+      ],
+      "power": 2, 
+      "treasures": 1,
+      "undead": false
+    }
+  ]
 }

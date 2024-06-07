@@ -6,6 +6,7 @@
 #include <vector>
 #include "abstract_observer.hpp"
 #include "model_command.hpp"
+#include "model_card.hpp"
 
 namespace meow::model {
 
@@ -19,6 +20,8 @@ private:
     VirtualMachine() = default;
 
     void increase_level(bool force);
+
+    void increase_power();
 
 public:
     template <typename... T>
@@ -41,6 +44,10 @@ public:
     void set_game_session_reference(GameSession *_game_session) {
         game_session = _game_session;
     }
+
+    bool check_player_item_eligiblity(size_t player_id, ItemType itype, int quantity);
+
+    void acquire_item(size_t player_id, ItemType itype, int quantity);
 
     static VirtualMachine &get_instance() {
         thread_local static VirtualMachine instance;
