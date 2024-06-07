@@ -1,6 +1,7 @@
 #include "raylib_game_view.hpp"
 #include <boost/dll/alias.hpp>
 #include <chrono>
+#include <ios>
 #include <iostream>
 #include <memory>
 #include <string_view>
@@ -212,9 +213,9 @@ void meow::RaylibGameView::draw() {
     using namespace meow::network;
     using ActionType = Action::ActionType;
 
-    const bool my_turn = m_active_turn[m_client->get_id_of_client()];
     static const Overload active_display_visitor = {
-        [this, my_turn](GameplayObjs *objs) {
+        [this](GameplayObjs *objs) {
+            const bool my_turn = m_active_turn[m_client->get_id_of_client()];
             std::size_t id = objs->usernames_box.active_user;
 
             objs->board.draw(m_client->get_id_of_client(), m_window->GetFrameTime());
@@ -264,6 +265,23 @@ void meow::RaylibGameView::draw() {
                     );
                 }
                 GuiSetAlpha(was);
+            } else {
+                enum class turns { PASS, COUNT };
+                EnumArray<turns, std::string> turn_opts{{turns::PASS, "Pass"}};
+                EnumArray<turns, ActionType> turn_acts{{turns::PASS, ActionType::Pass}};
+                float was = guiAlpha;
+                GuiSetAlpha(0.85);
+                if (auto x = draw_opts_menu(
+                        turn_opts, {m_window->GetWidth() - opts_button_width,
+                                    m_window->GetHeight() - opts_button_height * turn_opts.size()}
+                    );
+                    x != turns::COUNT) {
+                    m_client->send_action(
+                        Action(turn_acts[x], -1, m_client->get_id_of_client(), -1)
+                    );
+                }
+                GuiSetAlpha(was);
+
             }
         },
 
@@ -358,7 +376,6 @@ void meow::RaylibGameView::on_card_loss(std::size_t user_id, std::size_t card_id
     }
 }
 
-// TODO
 void meow::RaylibGameView::on_monster_elimination(std::size_t user_id) {
     if (user_id == m_client->get_id_of_client()) {
     }
