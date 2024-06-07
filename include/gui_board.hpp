@@ -45,6 +45,9 @@ public:
 
     void remove_card(std::size_t card_id) {
         m_opponent_cards.remove_card(card_id);
+        for (auto &kc : m_kitten_cards) {
+            kc.second.remove_card(card_id);
+        }
     }
 };
 

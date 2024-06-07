@@ -17,6 +17,15 @@ void Player::increase_level(int delta, bool force) {
     }
 }
 
+void Player::increase_power(int delta) {
+    power_buff += delta;
+    
+    for (auto &observer : VirtualMachine::get_instance().get_observers()) {
+        observer->on_bonus_change(user_id, delta);
+    }
+    
+}
+
 void Player::add_card_to_hand(std::unique_ptr<Card> card) {
     if (hand.size() < max_cards_in_hand) {
         hand.emplace_back(std::move(card));
@@ -34,10 +43,8 @@ bool Player::play_card_by_id(std::size_t card_obj_id, std::size_t target_id) {
     auto card = drop_card_from_hand_by_id(card_obj_id);
 
     card->apply(obj_id, target_id);
-    if (card->info->type == CardType::SPELL) {
-        if (dynamic_cast<const SpellCardInfo *>(card->info)->storable) {
-            add_card_to_storage(std::move(card));
-        }
+    if (dynamic_cast<const SpellCardInfo *>(card->info)->storable) {
+        add_card_to_storage(std::move(card));
     }
     return true;
 }
