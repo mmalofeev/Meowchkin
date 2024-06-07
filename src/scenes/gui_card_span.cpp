@@ -171,6 +171,10 @@ void GuiCardSpan::draw_cards(float frame_time, bool is_player_hand) {
          draw_targets();
     } else {
     }
+
+    if (!something_dragged) {
+        possible_targets.clear();
+    }
 }
 
 void GuiCardSpan::draw_inspected_card(int window_width, int window_height) {
