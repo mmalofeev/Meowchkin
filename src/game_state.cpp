@@ -8,6 +8,7 @@
 #include "model_random.hpp"
 #include "shared_game_state.hpp"
 #include "virtual_machine.hpp"
+#include "gui_card.hpp"
 
 namespace meow::model {
 

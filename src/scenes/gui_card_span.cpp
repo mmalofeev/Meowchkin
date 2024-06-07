@@ -1,12 +1,10 @@
 #include "gui_card_span.hpp"
-#include <chrono>
 #include <cstdlib>
 #include <iostream>
 #include "Rectangle.hpp"
 #include "gui_card_loader.hpp"
 #include "gui_card_span_dropdown_menu.hpp"
 #include "raylib.h"
-#include "timed_state_machine.hpp"
 
 namespace meow {
 
@@ -33,12 +31,7 @@ void GuiCardSpan::recalculate_card_rects() noexcept {
 
 void GuiCardSpan::add_card(std::size_t card_id) {
     raylib::Image img, img2;
-    dbg;
-    // auto card = card_manager->create_card(0);
-    dbg;
-    // std::string path_to_texture = card_manager->get_card_info_by_obj_id(card->obj_id)->image;
     std::string path_to_texture = card_manager->get_card_info_by_obj_id(card_id)->image;
-    dbg;
     std::cout << path_to_texture << '\n' << __LINE__ << std::endl;
     try {
         img = meow::load_card_img(path_to_texture);
@@ -49,8 +42,6 @@ void GuiCardSpan::add_card(std::size_t card_id) {
     img.Resize(GuiCard::width, GuiCard::height);
     raylib::Texture tex = raylib::Texture(img);
     tex.GenMipmaps();
-    dbg;
-    std::cout << "card span size was " << m_cards.size() << std::endl;
     add_card(
         {raylib::Rectangle(m_window->GetWidth(), 0, 0, 0), raylib::Vector2(0), std::move(tex), img2,
          path_to_texture, card_id}
@@ -61,8 +52,6 @@ void GuiCardSpan::add_card(GuiCard &&card) {
     m_cards.emplace_back(std::move(card));
     m_card_gap -= 10;
     recalculate_card_rects();
-    dbg;
-    std::cout << "card span size now is " << m_cards.size() << std::endl;
 }
 
 void GuiCardSpan::remove_card(std::list<GuiCard>::iterator card_iter) {
@@ -171,18 +160,21 @@ void GuiCardSpan::draw_cards(float frame_time, bool is_player_hand) {
     }
     m_dropdown_menu->draw();
 
-    // something_dragged = m_selected != m_cards.end();
+    something_dragged = m_selected != m_cards.end();
 
     // if something dragged in player hand, draw targets outside
-    // static bool bebra = false;
-    // if (is_player_hand) {
-    //     bebra = something_dragged;
-    // }
-    // if (bebra && !is_player_hand) {
-    //     draw_targets();
-    // } else {
-    //     // target_rects.clear();
-    // }
+    static bool bebra = false;
+    if (is_player_hand) {
+         bebra = something_dragged;
+    }
+    if (bebra && !is_player_hand) {
+         draw_targets();
+    } else {
+    }
+
+    if (!something_dragged) {
+        possible_targets.clear();
+    }
 }
 
 void GuiCardSpan::draw_inspected_card(int window_width, int window_height) {
@@ -214,7 +206,7 @@ void GuiCardSpan::draw_targets() {
             b.GetPosition() + raylib::Vector2{0, b.GetSize().y - rect_side}, {rect_side, rect_side}
         );
         rec.DrawLines(raylib::Color::Green());
-        target_rects.insert({rec, c.card_id});
+        possible_targets.insert({rec, c.card_id});
     }
 }
 
