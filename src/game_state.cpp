@@ -14,6 +14,42 @@ namespace meow::model {
 
 EndState::EndState(SharedGameState *shared_state_): GameState(shared_state_, StateType::END) {}
 
+SlipAwayState::SlipAwayState(SharedGameState *shared_state_, std::vector<std::size_t> heroes_, std::vector<std::unique_ptr<Card>> heroes_storage_, std::vector<std::unique_ptr<MonsterCard>> monsters_):
+GameState(shared_state_, StateType::SLIPAWAY), heroes(std::move(heroes_)), heroes_storage(std::move(heroes_storage_)), monsters(std::move(monsters_)), monster_iters(monsters.size(), monsters.begin()) {
+}
+    
+std::unique_ptr<GameState> SlipAwayState::roll_dice(std::size_t user_id) {
+    Player *player = shared_state->get_player_by_user_id(user_id);
+
+    auto it = std::find(heroes.begin(), heroes.end(), player->obj_id);
+
+    if (it == heroes.end())
+        return nullptr;
+
+    std::size_t position = it - heroes.begin();
+    
+    if (monster_iters[position] == monsters.end())
+        return nullptr;
+
+    int result = get_object_based_random_integer<int>(1, 6);
+
+    if ((*monster_iters[position])->check_stalking(player->obj_id) && result < 5) {
+        (*monster_iters[position])->apply_lewdness(player->obj_id);
+    }
+
+    for (auto &observer : VirtualMachine::get_instance().get_observers()) {
+        observer->on_dice_roll(player->user_id, result);
+    }
+
+    if (++monster_iters[position] == monsters.end())
+        count_of_finished++;
+    
+    if (count_of_finished == heroes.size())
+        return std::make_unique<PostManagementState>(shared_state);
+    
+    return std::unique_ptr<SlipAwayState>(this);
+}
+
 bool BrawlState::is_hero(std::size_t obj_id) const {
     return std::find(heroes.begin(), heroes.end(), obj_id) != heroes.end();
 }
@@ -211,15 +247,7 @@ std::unique_ptr<GameState> BrawlState::pass(std::size_t user_id) {
         }
         return std::make_unique<PostManagementState>(shared_state);
     } else if (heroes_passed && !heroes_win) {
-        for (auto hero_id : heroes) {
-            for (const auto &monster : monsters) {
-                // get_object_based_random_integer<int>(1, 6) < 5
-                if (monster->check_stalking(hero_id)) {
-                    monster->apply_lewdness(hero_id);
-                }
-            }
-        }
-        return std::make_unique<PostManagementState>(shared_state);
+        return std::make_unique<SlipAwayState>(shared_state, std::move(heroes), std::move(heroes_storage), std::move(monsters));
     }
     return std::unique_ptr<BrawlState>(this);
 }
@@ -262,6 +290,7 @@ ManagementState::play_card(std::size_t user_id, std::size_t target_id, std::size
     if (card->info->type == CardType::MONSTER) {
         return nullptr;
     }
+    
     if (!player->play_card_by_id(card_obj_id, target_id)) {
         return nullptr;
     }
@@ -284,7 +313,6 @@ ManagementState::throw_card(std::size_t user_id, std::size_t card_obj_id) {
 }
 
 std::unique_ptr<GameState> ManagementState::draw_card(std::size_t user_id) {
-    std::cout << shared_state->get_current_user_id() << " " << user_id << std::endl;
     if (shared_state->get_current_user_id() != user_id) {
         return nullptr;
     }

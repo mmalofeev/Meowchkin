@@ -98,7 +98,7 @@ void GuiBoard::draw(
         m_drop_card_rect.CheckCollision(m_player_hand->selected().value()->border)) {
         add_card(
             m_player_hand->pop_selected().card_id,
-            forced_target ? *forced_target
+            forced_target ? m_game_session->get_player_id_by_user_id(*forced_target)
                           : m_game_session->get_player_id_by_user_id(m_client->get_id_of_client())
         );
     }
