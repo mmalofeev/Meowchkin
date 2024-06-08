@@ -5,6 +5,10 @@
 #include "model_command.hpp"
 #include "model_player.hpp"
 #include "shared_game_state.hpp"
+#include "model_random.hpp"
+
+#include <iostream>
+#include "gui_card.hpp"
 
 namespace meow::model {
 
@@ -68,6 +72,29 @@ std::size_t VirtualMachine::get_user_id_by_player_id(std::size_t player_id) {
     return game_session->shared_state.get_player_by_player_id(player_id)->user_id;
 }
 
+void VirtualMachine::lose_random_card_from_hand() {
+    int player_id = st.top();
+    st.pop();
+
+    Player *player =
+        game_session->shared_state.get_player_by_player_id(static_cast<std::size_t>(player_id));
+    
+    if (player->get_hand().empty())
+        return;
+    
+    std::size_t position = get_object_based_random_integer<std::size_t>(0, player->get_hand().size() - 1);
+    player->drop_card_from_hand_by_id(player->get_hand()[position]->obj_id);
+}
+
+bool VirtualMachine::is_hand_empty() {
+    int player_id = st.top();
+    st.pop();
+
+    Player *player =
+        game_session->shared_state.get_player_by_player_id(static_cast<std::size_t>(player_id));
+    return player->get_hand().empty();
+}
+
 void VirtualMachine::increase_level(bool force = false) {
     int delta = st.top();
     st.pop();
@@ -93,7 +120,7 @@ std::optional<int> VirtualMachine::execute(const std::vector<Command> &code) {
                     st.pop();
                 }
             } break;
-            case CommandType::STACK_DOUBL: {
+            case CommandType::STACK_DOUBLE: {
                 st.push(st.top());
             } break;
             case CommandType::IF: {
@@ -124,6 +151,9 @@ std::optional<int> VirtualMachine::execute(const std::vector<Command> &code) {
             case CommandType::INCREASE_LEVEL_FORCE: {
                 increase_level(true);
             } break;
+            case CommandType::LOSE_RANDOM_CARD_FROM_HAND: {
+                lose_random_card_from_hand();
+            } break;
             case CommandType::IS_DESK: {
                 int id = st.top();
                 st.pop();
@@ -139,6 +169,9 @@ std::optional<int> VirtualMachine::execute(const std::vector<Command> &code) {
                     }
                 }
                 st.push(static_cast<int>(false));
+            } break;
+            case CommandType::IS_HAND_EMPTY: {
+                st.push(static_cast<int>(is_hand_empty()));
             } break;
             case CommandType::RETURN: {
                 res = st.top();

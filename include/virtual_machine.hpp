@@ -23,6 +23,10 @@ private:
 
     void increase_power();
 
+    void lose_random_card_from_hand();
+
+    bool is_hand_empty();
+
 public:
     template <typename... T>
     void set_args(const T &...args) {

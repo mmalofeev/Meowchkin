@@ -12,6 +12,8 @@
 
 namespace meow::model {
 
+EndState::EndState(SharedGameState *shared_state_): GameState(shared_state_, StateType::END) {}
+
 bool BrawlState::is_hero(std::size_t obj_id) const {
     return std::find(heroes.begin(), heroes.end(), obj_id) != heroes.end();
 }
@@ -199,7 +201,13 @@ std::unique_ptr<GameState> BrawlState::pass(std::size_t user_id) {
                     CardManager::get_instance().create_card(shared_state->get_card_id_from_deck())
                 );
             }
-            shared_state->get_player_by_player_id(hero_id)->increase_level(1, true);
+        }
+        shared_state->get_player_by_user_id(shared_state->get_current_user_id())->increase_level(1, true);
+        if (shared_state->is_end()) {
+            for (auto &observer : VirtualMachine::get_instance().get_observers()) {
+                observer->on_game_end(shared_state->get_current_user_id());
+            }
+            return std::make_unique<EndState>(shared_state);
         }
         return std::make_unique<PostManagementState>(shared_state);
     } else if (heroes_passed && !heroes_win) {
@@ -319,7 +327,6 @@ std::unique_ptr<GameState> InitState::roll_dice(std::size_t user_id) {
     results[position] = get_object_based_random_integer<int>(1, 6);
     move_count++;
     
-    // TODO
     for (auto &observer : VirtualMachine::get_instance().get_observers()) {
         observer->on_dice_roll(user_id, results[position]);
     }
@@ -345,8 +352,6 @@ std::unique_ptr<GameState> InitState::roll_dice(std::size_t user_id) {
     }
     
     for (auto &observer : VirtualMachine::get_instance().get_observers()) {
-        dbg;
-        std::cout << shared_state->get_current_user_id() << std::endl;
         observer->on_turn_begin(shared_state->get_current_user_id());
     }
     return std::make_unique<ManagementState>(shared_state);

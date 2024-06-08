@@ -1,6 +1,8 @@
 #include <iostream>
 #include "model_player.hpp"
+#include "shared_game_state.hpp"
 #include "virtual_machine.hpp"
+#include "gui_card.hpp"
 
 namespace meow::model {
 
@@ -9,9 +11,9 @@ void Player::increase_level(int delta, bool force) {
     level += delta;
 
     if (!force) {
-        level = std::max(1, std::min(9, level));
+        level = std::max(1, std::min(SharedGameState::win_score - 1, level));
     }
- 
+    
     for (auto &observer : VirtualMachine::get_instance().get_observers()) {
         observer->on_level_change(user_id, level - last_value);
     }
@@ -58,6 +60,10 @@ std::unique_ptr<Card> Player::drop_card_from_hand_by_id(std::size_t obj_id) {
             hand.erase(it);
             break;
         }
+    }
+
+    for (auto &observer : VirtualMachine::get_instance().get_observers()) {
+        observer->on_card_loss(user_id, obj_id);
     }
 
     return card;

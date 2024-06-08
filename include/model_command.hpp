@@ -8,7 +8,8 @@ namespace meow::model {
 enum class CommandType {
     STACK_LOAD,
     STACK_POP,
-    STACK_DOUBL,
+    STACK_DOUBLE,
+    LOSE_RANDOM_CARD_FROM_HAND,
     INCREASE_POWER,
     INCREASE_LEVEL,
     INCREASE_LEVEL_FORCE,
@@ -17,6 +18,7 @@ enum class CommandType {
     IF,
     IS_DESK,
     IS_USER,
+    IS_HAND_EMPTY,
     RETURN,
     LABEL,
     GOTO
@@ -31,15 +33,17 @@ public:
         thread_local static std::map<std::string, CommandType> code_to_command{
             {"STACK_LOAD", CommandType::STACK_LOAD},
             {"STACK_POP", CommandType::STACK_POP},
-            {"STACK_DOUBL", CommandType::STACK_DOUBL},
+            {"STACK_DOUBLE", CommandType::STACK_DOUBLE},
             {"INCREASE_POWER", CommandType::INCREASE_POWER},
             {"INCREASE_LEVEL", CommandType::INCREASE_LEVEL},
             {"INCREASE_LEVEL_FORCE", CommandType::INCREASE_LEVEL_FORCE},
+            {"LOSE_RANDOM_CARD_FROM_HAND", CommandType::LOSE_RANDOM_CARD_FROM_HAND},
             {"EQ", CommandType::EQ},
             {"DENY", CommandType::DENY},
             {"IF", CommandType::IF},
             {"IS_DESK", CommandType::IS_DESK},
             {"IS_USER", CommandType::IS_USER},
+            {"IS_HAND_EMPTY", CommandType::IS_HAND_EMPTY},
             {"RETURN", CommandType::RETURN},
             {"GOTO", CommandType::GOTO},
             {"LABEL", CommandType::LABEL}};
@@ -65,6 +69,7 @@ public:
             } else if (command == CommandType::GOTO) {
                 res.push_back({command, label_to_line[arr.at(++i)]});
             } else if (command == CommandType::LABEL) {
+                res.push_back({command, 0});
                 i++;
             } else {
                 res.push_back({command, 0});

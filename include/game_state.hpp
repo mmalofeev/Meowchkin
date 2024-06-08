@@ -128,6 +128,10 @@ public:
     std::unique_ptr<GameState> draw_card(std::size_t user_id) override;
 };
 
+struct EndState : GameState {
+    EndState(SharedGameState *shared_state_);
+};
+
 }  // namespace meow::model
 
 #endif

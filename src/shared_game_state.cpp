@@ -75,7 +75,7 @@ void SharedGameState::end_turn() {
 
 bool SharedGameState::is_end() const {
     for (std::size_t i = 0; i < players.size(); i++) {
-        if (players[i].get_level() == 10) {
+        if (players[i].get_level() == win_score) {
             return true;
         }
     }
