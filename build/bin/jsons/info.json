@@ -14,7 +14,7 @@
         "STACK_POP",
         "STACK_LOAD",
         "1",
-        "INCREASE_LEVEL_FORCE"
+        "INCREASE_LEVEL"
       ],
       "unwind": []
     },
@@ -44,13 +44,88 @@
       ]
     },
     {
+      "type": "ITEM",
+      "image": "bin/imgs/cards/equipment/burning_armor.png",
+      "openable": false,
+      "storable": true,
+      "cost": 700,
+      "item": "BREASTPLATE",
+      "bound": 1,
+      "verification": [
+        "IS_DESK",
+        "RETURN"
+      ],
+      "action": [
+        "STACK_POP",
+        "STACK_LOAD",
+        "6",
+        "INCREASE_POWER"
+      ],
+      "unwind": [
+        "STACK_POP",
+        "STACK_LOAD",
+        "-6",
+        "INCREASE_POWER"
+      ]
+    },
+    {
+      "type": "ITEM",
+      "image": "bin/imgs/cards/equipment/elevenfoot_cue.png",
+      "openable": false,
+      "storable": true,
+      "cost": 250,
+      "item": "WEAPON",
+      "bound": 2,
+      "verification": [
+        "IS_DESK",
+        "RETURN"
+      ],
+      "action": [
+        "STACK_POP",
+        "STACK_LOAD",
+        "2",
+        "INCREASE_POWER"
+      ],
+      "unwind": [
+        "STACK_POP",
+        "STACK_LOAD",
+        "-2",
+        "INCREASE_POWER"
+      ]
+    },
+    {
+      "type": "ITEM",
+      "image": "bin/imgs/cards/equipment/huge_boots.png",
+      "openable": false,
+      "storable": true,
+      "cost": 500,
+      "item": "BOOTS",
+      "bound": 1,
+      "verification": [
+        "IS_DESK",
+        "RETURN"
+      ],
+      "action": [
+        "STACK_POP",
+        "STACK_LOAD",
+        "4",
+        "INCREASE_POWER"
+      ],
+      "unwind": [
+        "STACK_POP",
+        "STACK_LOAD",
+        "-4",
+        "INCREASE_POWER"
+      ]
+    },
+    {
       "type": "MONSTER",
       "image": "bin/imgs/cards/monsters/decorative_dog.png",
       "openable": true,
       "storable": false,
       "verification": [
         "STACK_LOAD",
-        "0",
+        "1",
         "RETURN"
       ],
       "buff": [],
@@ -62,6 +137,37 @@
       ],
       "power": 2, 
       "treasures": 1,
+      "undead": false
+    },
+    {
+      "type": "MONSTER",
+      "image": "bin/imgs/cards/monsters/ducky.png",
+      "openable": true,
+      "storable": false,
+      "verification": [
+        "STACK_LOAD",
+        "0",
+        "RETURN"
+      ],
+      "buff": [],
+      "stalking_checker": [],
+      "lewdness": [
+        "LABEL",
+        "START_LABEL",
+        "STACK_DOUBLE",
+        "IS_HAND_EMPTY",
+        "IF",
+        "GOTO",
+        "END_LABEL",
+        "STACK_DOUBLE",
+        "LOSE_RANDOM_CARD_FROM_HAND",
+        "GOTO",
+        "START_LABEL",
+        "LABEL",
+        "END_LABEL"
+      ],
+      "power": 7, 
+      "treasures": 3,
       "undead": false
     }
   ]

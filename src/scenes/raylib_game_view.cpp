@@ -450,7 +450,12 @@ void meow::RaylibGameView::on_dice_roll(std::size_t user_id, unsigned res) {
 }
 
 void meow::RaylibGameView::on_game_end(std::size_t winner_id) {
-
+    if (m_client->get_id_of_client() == winner_id) {
+        m_endgame_screen.result = EndGameScreen::GameResult::WIN;
+    } else {
+        m_endgame_screen.result = EndGameScreen::GameResult::LOOSE;
+    }
+    m_active_display = &m_endgame_screen;
 }
 
 BOOST_DLL_ALIAS(meow::RaylibGameView::make_raylib_gameview, make_gameview)
