@@ -16,12 +16,14 @@ private:
     static constexpr int button_width = 300;
     static constexpr int button_height = 40;
 
-    enum class Button { JOIN_LOBBY, CREATE_LOBBY, ENTER_NAME, QUIT, COUNT };
+    enum class Button { JOIN_LOBBY, CREATE_LOBBY, ENTER_NAME, QUIT, SCORE_BOARD, COUNT };
     static constexpr EnumArray<Button, const char *> m_button_labels = {
         {Button::JOIN_LOBBY, "Join lobby"},
         {Button::CREATE_LOBBY, "Create lobby"},
         {Button::ENTER_NAME, "Enter name"},
-        {Button::QUIT, "Quit"}};
+        {Button::QUIT, "Quit"},
+        {Button::SCORE_BOARD, "Score board"}
+    };
     EnumArray<Button, Rectangle> m_button_rects;
     EnumArray<Button, bool> m_button_pressed;
     raylib::Texture m_background;
@@ -64,8 +66,8 @@ public:
         m_loading_wheel_texture.Load(img);
 
         for (std::size_t i = 0; i < m_button_rects.size(); i++) {
-            m_button_rects[i].x = m_window->GetWidth() / 2 - button_width / 2;
-            m_button_rects[i].y = m_window->GetHeight() / 2 + i * button_height;
+            m_button_rects[i].x = m_window->GetWidth() / 2.0f - button_width / 2.0f;
+            m_button_rects[i].y = m_window->GetHeight() / 2.0f + i * button_height;
         }
     }
 
@@ -117,6 +119,8 @@ public:
             }
         } else if (m_button_pressed[Button::ENTER_NAME]) {
             draw_textbox = true;
+        } else if (m_button_pressed[Button::SCORE_BOARD]) {
+            m_scene_manager->switch_scene(SceneType::SCORE_BOARD);
         }
 
         const float t = m_window->GetTime();
@@ -141,11 +145,6 @@ public:
     }
 };
 
-BOOST_DLL_ALIAS(meow::MainMenu::make_mainmenu, make_mainmenu)
-
-// NOLINTBEGIN cppcoreguidelines-avoid-non-const-global-variables
-extern "C" BOOST_SYMBOL_EXPORT MainMenu main_menu;
-MainMenu main_menu;
-// NOLINTEND
-
 }  // namespace meow
+
+BOOST_DLL_ALIAS(meow::MainMenu::make_mainmenu, make_mainmenu)
