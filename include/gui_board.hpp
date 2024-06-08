@@ -1,6 +1,7 @@
 #ifndef GUI_BOARD_HPP
 #define GUI_BOARD_HPP
 
+#include <iostream>
 #include <memory>
 #include <unordered_map>
 #include "client.hpp"
@@ -48,8 +49,11 @@ public:
     void add_card(std::size_t card_id, std::size_t target_id);
 
     void remove_card(std::size_t card_id) {
+        dbg;
         m_opponent_cards.remove_card(card_id);
         for (auto &kc : m_kitten_cards) {
+            dbg;
+            std::cout << kc.first << std::endl;
             kc.second.remove_card(card_id);
         }
     }

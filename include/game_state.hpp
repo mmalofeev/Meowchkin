@@ -5,12 +5,13 @@
 #include <set>
 #include <vector>
 #include "model_card.hpp"
+#include<iterator>
 
 namespace meow::model {
 
 struct SharedGameState;
 
-enum class StateType { INIT, MANAGEMENT, BRAWL, LOOKTROUBLE, POSTMANAGEMENT, END };
+enum class StateType { INIT, MANAGEMENT, BRAWL, LOOKTROUBLE, SLIPAWAY, POSTMANAGEMENT, END };
 
 struct GameState {
 protected:
@@ -132,6 +133,24 @@ struct EndState : GameState {
     EndState(SharedGameState *shared_state_);
 };
 
+struct SlipAwayState : GameState {
+private:
+    template <typename T> 
+    struct Transformer {
+        using type = std::vector<T>::iterator;
+    };
+
+    std::vector<std::size_t> heroes;
+    std::vector<std::unique_ptr<Card>> heroes_storage;
+    std::vector<std::unique_ptr<MonsterCard>> monsters;
+    std::vector<std::vector<std::unique_ptr<MonsterCard>>::iterator> monster_iters;
+    int count_of_finished = 0;
+
+public:
+    SlipAwayState(SharedGameState *shared_state_, std::vector<std::size_t> heroes_, std::vector<std::unique_ptr<Card>> heroes_storage_, std::vector<std::unique_ptr<MonsterCard>> monsters_);
+    std::unique_ptr<GameState> roll_dice(std::size_t user_id) override;
+};
+
 }  // namespace meow::model
 
-#endif
+#endif // T -> std::vector<T>::iterator

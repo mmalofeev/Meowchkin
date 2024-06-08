@@ -422,6 +422,7 @@ void meow::RaylibGameView::on_card_add_on_board(
 }
 
 void meow::RaylibGameView::on_card_remove_from_board(std::size_t card_id) {
+    dbg;
     m_gameplay_objects.board.remove_card(card_id);
 }
 
@@ -481,10 +482,6 @@ void meow::RaylibGameView::on_monster_elimination(std::size_t user_id) {
 }
 
 void meow::RaylibGameView::on_dice_roll(std::size_t user_id, unsigned res) {
-    m_client->send_action(network::Action(
-        network::Action::ActionType::RollDice, 0, m_client->get_id_of_client(),
-        m_client->get_id_of_client()
-    ));
     if (m_client->get_id_of_client() == user_id) {
         m_gameplay_objects.stats
             .elements[user_id][GuiPlayerStatisticsMenu::StatisticKind::LAST_DICE_ROLL]

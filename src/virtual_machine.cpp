@@ -7,9 +7,6 @@
 #include "shared_game_state.hpp"
 #include "model_random.hpp"
 
-#include <iostream>
-#include "gui_card.hpp"
-
 namespace meow::model {
 
 bool VirtualMachine::check_player_item_eligiblity(size_t player_id, ItemType itype, int quantity) {
@@ -86,6 +83,24 @@ void VirtualMachine::lose_random_card_from_hand() {
     player->drop_card_from_hand_by_id(player->get_hand()[position]->obj_id);
 }
 
+void VirtualMachine::lose_helmet() {
+    int player_id = st.top();
+    st.pop();
+
+    Player *player =
+        game_session->shared_state.get_player_by_player_id(static_cast<std::size_t>(player_id));
+    
+    for (const auto& card : player->get_storage()) {
+        if (card->info->type == CardType::ITEM) {
+            auto* item = dynamic_cast<const ItemCardInfo*>(card->info);
+            if (item->itype == ItemType::HELMET) {
+                player->drop_card_from_storage_by_id(card->obj_id);
+                break;
+            }
+        }
+    }
+}
+
 bool VirtualMachine::is_hand_empty() {
     int player_id = st.top();
     st.pop();
@@ -154,6 +169,9 @@ std::optional<int> VirtualMachine::execute(const std::vector<Command> &code) {
             case CommandType::LOSE_RANDOM_CARD_FROM_HAND: {
                 lose_random_card_from_hand();
             } break;
+            case CommandType::LOSE_HALMET: {
+                lose_helmet();
+            } break;
             case CommandType::IS_DESK: {
                 int id = st.top();
                 st.pop();
@@ -162,13 +180,16 @@ std::optional<int> VirtualMachine::execute(const std::vector<Command> &code) {
             case CommandType::IS_USER: {
                 size_t id = st.top();
                 st.pop();
+                bool flag = false;
                 for (const auto &player : game_session->shared_state.get_all_players()) {
                     if (player.obj_id == id) {
                         st.push(static_cast<int>(true));
-                        continue;
+                        flag = true;
+                        break;
                     }
                 }
-                st.push(static_cast<int>(false));
+                if (!flag)
+                    st.push(static_cast<int>(false));
             } break;
             case CommandType::IS_HAND_EMPTY: {
                 st.push(static_cast<int>(is_hand_empty()));

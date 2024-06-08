@@ -65,6 +65,10 @@ public:
         return hand;
     }
 
+    const std::vector<std::unique_ptr<Card>> &get_storage() const {
+        return storage;
+    }
+
     bool play_card_by_id(std::size_t card_obj_id, std::size_t target_id);
 };
 

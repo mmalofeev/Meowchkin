@@ -27,6 +27,8 @@ private:
 
     bool is_hand_empty();
 
+    void lose_helmet();
+
 public:
     template <typename... T>
     void set_args(const T &...args) {

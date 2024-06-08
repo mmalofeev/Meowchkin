@@ -13,7 +13,7 @@ private:
     std::vector<Player> players;
     std::size_t cur_turn = std::numeric_limits<std::size_t>::max();
 public:
-    static constexpr int win_score = 3;
+    static constexpr int win_score = 10;
 
     void set_player_list(const std::vector<std::size_t> &users);
 

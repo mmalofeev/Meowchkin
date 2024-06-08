@@ -1,8 +1,6 @@
-#include <iostream>
 #include "model_player.hpp"
 #include "shared_game_state.hpp"
 #include "virtual_machine.hpp"
-#include "gui_card.hpp"
 
 namespace meow::model {
 
@@ -42,12 +40,14 @@ bool Player::play_card_by_id(std::size_t card_obj_id, std::size_t target_id) {
     if (!(get_card_from_hand_by_id(card_obj_id)->verify(obj_id, target_id))) {
         return false;
     }
+
     auto card = drop_card_from_hand_by_id(card_obj_id);
 
     card->apply(obj_id, target_id);
     if (dynamic_cast<const SpellCardInfo *>(card->info)->storable) {
         add_card_to_storage(std::move(card));
     }
+
     return true;
 }
 
@@ -78,6 +78,10 @@ std::unique_ptr<Card> Player::drop_card_from_storage_by_id(std::size_t obj_id) {
             storage.erase(it);
             break;
         }
+    }
+
+    for (auto &observer : VirtualMachine::get_instance().get_observers()) {
+        observer->on_card_remove_from_board(obj_id);
     }
 
     return card;

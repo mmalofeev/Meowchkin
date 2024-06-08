@@ -19,6 +19,38 @@
       "unwind": []
     },
     {
+      "type": "SPELL",
+      "image": "bin/imgs/cards/curses/sudden_lightning.png",
+      "openable": true,
+      "storable": false,
+      "cost": 0,
+      "verification": [
+        "IS_USER",
+        "RETURN"
+      ],
+      "action": [
+        "STACK_LOAD",
+        "-1",
+        "INCREASE_LEVEL"
+      ],
+      "unwind": []
+    },
+    {
+      "type": "SPELL",
+      "image": "bin/imgs/cards/curses/helmet_flew_away.png",
+      "openable": true,
+      "storable": false,
+      "cost": 0,
+      "verification": [
+        "IS_USER",
+        "RETURN"
+      ],
+      "action": [
+        "LOSE_HALMET"
+      ],
+      "unwind": []
+    },
+    {
       "type": "ITEM",
       "image": "bin/imgs/cards/equipment/box_helmet.png",
       "openable": false,
