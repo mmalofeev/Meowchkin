@@ -1,4 +1,5 @@
 #include "gui_card_span.hpp"
+#include <boost/date_time/date_generators.hpp>
 #include <cstdlib>
 #include <iostream>
 #include "Rectangle.hpp"
@@ -202,10 +203,11 @@ void GuiCardSpan::draw_inspected_card(int window_width, int window_height) {
 
 void GuiCardSpan::draw_targets() {
     for (GuiCard &c : m_cards) {
-        const float rect_side = 100.0f;
+        const float rect_side = 10.0f;
         const auto &b = c.border;
         auto rec = raylib::Rectangle(
-            b.GetPosition() + raylib::Vector2{0, b.GetSize().y - rect_side}, {rect_side, rect_side}
+            b.GetPosition() + b.GetSize() / 2 - raylib::Vector2{rect_side} / 2,
+            {rect_side, rect_side}
         );
         rec.DrawLines(raylib::Color::Green());
         // std::cout << "pushed some rec to targets";

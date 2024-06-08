@@ -77,7 +77,6 @@ void GuiBoard::draw(std::size_t observed_player, float frame_time) {
     m_drop_card_rect.DrawLines(raylib::Color::Green());
 
     if (m_player_hand->selected().has_value()) {
-        std::cout << GuiCardSpan::possible_targets.size() << '\n';
         for (const GuiCardInfo &c : GuiCardSpan::possible_targets) {
             if (c.intersect.CheckCollision(m_player_hand->selected().value()->border)) {
                 add_card(m_player_hand->pop_selected().card_id, c.card_id);

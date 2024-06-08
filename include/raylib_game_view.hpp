@@ -6,7 +6,9 @@
 #include <limits>
 #include <memory>
 #include <variant>
-#include "Functions.hpp"
+#include "Music.hpp"
+#include "Rectangle.hpp"
+#include "Sound.hpp"
 #include "enum_array.hpp"
 #include "game_view.hpp"
 #include "gui_board.hpp"
@@ -42,9 +44,22 @@ private:
         };
         EnumArray<Button, raylib::Rectangle> button_rects;
         EnumArray<Button, bool> button_pressed;
+
+        float music_volume = 1.0f;
+        raylib::Rectangle music_volume_rec;
     } m_pause_menu_objects;
 
-    std::variant<GameplayObjs *, PauseMenuObjs *> m_active_display;
+    struct EndGameScreen {
+        static constexpr int button_width = 300;
+        static constexpr int button_height = 40;
+        enum class GameResult {WIN, LOOSE, COUNT};
+
+        GameResult result;
+        EnumArray<GameResult, raylib::Texture> texture;
+        EnumArray<GameResult, raylib::Sound> sound;
+    } m_endgame_screen;
+
+    std::variant<GameplayObjs *, PauseMenuObjs *, EndGameScreen *> m_active_display;
 
     struct ActiveDisplaySelector {
         static constexpr int button_width = 80;
@@ -69,26 +84,32 @@ private:
     /* misc */
     std::vector<std::filesystem::path> m_card_image_paths;
     bool m_show_chat = false;
+    bool m_show_stats = true;
+    bool m_show_players = true;
     raylib::Texture m_on_levelup_texture;
     raylib::Texture m_on_levelup_blur_texture;
     raylib::Color m_levelup_tint_color = raylib::Color::White();
     state_machine_function_args_t<raylib::Color &> m_levelup_blink_call =
         make_timed_state_machine([this](auto st, auto end, raylib::Color &tint) {
             m_on_levelup_blur_texture.Draw(0, 0, tint);
-            tint.a = 255.0f -
-                     255.0f * (std::chrono::steady_clock::now() - st).count() / (end - st).count();
+            const int coeff =
+                255.0f * (std::chrono::steady_clock::now() - st).count() / (end - st).count();
+            if (coeff < 127) {
+                tint.a = 127 + coeff;
+            } else {
+                tint.a = 255 - coeff % 127 * 2;
+            }
             m_on_levelup_texture.Draw(
                 (m_window->GetWidth() - m_on_levelup_texture.width) / 2,
                 (m_window->GetHeight() - m_on_levelup_texture.height) / 2
             );
-            // m_blur.Draw(0, 0, raylib::Color::Green());
         });
     bool m_levelup_blink = false;
-    // state_machine_function_args_t<unsigned> m_dice_roll_blink_call =
-    // make_timed_state_machine([this](auto, auto, unsigned res) {
-    //     raylib::DrawText(std::to_string(res), 30, 400, 100, raylib::Color::Black());
-    // });
-    // bool m_dice_roll_blink = false;
+    raylib::Music m_background_music = raylib::Music("bin/music/game-background.mp3");
+    raylib::Sound m_levelup_sound = raylib::Sound("bin/music/sounds/levelup.wav");
+    raylib::Sound m_item_equip_sound = raylib::Sound("bin/music/sounds/item-equip.mp3");
+    raylib::Sound m_incorrect_beep_sound = raylib::Sound("bin/music/sounds/incorrect-beep.wav");
+    raylib::Sound m_card_draw_sound = raylib::Sound("bin/music/sounds/card-draw.mp3");
     std::unordered_map<std::size_t, bool> m_active_turn;
     std::size_t m_player_id = -1;
 
@@ -115,6 +136,7 @@ public:
     void on_card_loss(std::size_t user_id, std::size_t card_id) override;
     void on_monster_elimination(std::size_t user_id) override;  // which player killed monster
     void on_dice_roll(std::size_t user_id, unsigned res) override;
+    void on_game_end(std::size_t winner_id) override;
 
     static std::shared_ptr<Scene> make_raylib_gameview() {
         return std::make_shared<RaylibGameView>();

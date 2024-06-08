@@ -65,7 +65,7 @@ find_package (SQLite3 REQUIRED)
 include_directories(${SQLite3_INCLUDE_DIRS})
 
 add_executable(tests src/scenes/scene.cpp tests/test_model.cpp src/shared_game_state.cpp src/model_card.cpp src/model_card_manager.cpp src/model_player.cpp src/virtual_machine.cpp  src/game_state.cpp)
-target_link_libraries(tests gtest gtest_main ${Boost_LIBRARIES} ${CMAKE_DL_LIBS} raylib raylib_cpp ${SQLITE3_LIBRARIES})
+target_link_libraries(tests gtest gtest_main ${Boost_LIBRARIES} ${CMAKE_DL_LIBS} raylib raylib_cpp)
 
 
 add_library(mainmenu-scene SHARED src/scenes/main_menu_scene.cpp src/scenes/scene.cpp)
@@ -90,4 +90,4 @@ target_link_libraries(gameview-scene ${Boost_LIBRARIES} ${CMAKE_DL_LIBS} raylib 
 
 FILE(GLOB SRCFILES src/*.cpp src/scenes/scene.cpp)
 add_executable(meowchkin ${SRCFILES})
-target_link_libraries(meowchkin ${Boost_LIBRARIES} ${CMAKE_DL_LIBS} raylib raylib_cpp ${SQLITE3_LIBRARIES})
+target_link_libraries(meowchkin ${Boost_LIBRARIES} ${CMAKE_DL_LIBS} raylib raylib_cpp sqlite3)
