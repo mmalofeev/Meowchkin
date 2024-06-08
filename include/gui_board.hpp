@@ -40,7 +40,11 @@ public:
         network::Client *client,
         model::GameSession *game_session
     );
-    void draw(std::size_t observed_player, float frame_time);
+    void draw(
+        std::size_t observed_player,
+        float frame_time,
+        std::optional<std::size_t> forced_target = std::nullopt
+    );
     void add_card(std::size_t card_id, std::size_t target_id);
 
     void remove_card(std::size_t card_id) {

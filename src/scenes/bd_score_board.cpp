@@ -1,7 +1,5 @@
-#include <algorithm>
 #include <boost/dll/alias.hpp>
 #include <sstream>
-#include "Functions.hpp"
 #include "bd_observer.hpp"
 #include "bd_scoreboard_scene.hpp"
 #include "paths_to_binaries.hpp"
@@ -80,9 +78,6 @@ public:
             );
         }
         m_cards_iter = m_cards.begin();
-        std::sort(m_cards.begin(), m_cards.end(), [](const auto &lhs, const auto &rhs) {
-            return lhs.usage.frequency < rhs.usage.frequency;
-        });
     }
 
     void draw() override {

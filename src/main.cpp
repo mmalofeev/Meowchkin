@@ -1,3 +1,4 @@
+#include "gui_card.hpp"
 #include <cstdlib>
 #include <exception>
 #include <fstream>
@@ -22,7 +23,7 @@ namespace meow {
 
 namespace network {
 constexpr const char *port_file = "port.txt";
-constexpr std::size_t players_count = 1;
+constexpr std::size_t players_count = 2;
 }  // namespace network
 
 class Application {
@@ -124,9 +125,11 @@ private:
     }
 
     void join_lobby() {
+        dbg;
         m_client.set_name_of_client(m_client_name);
         std::cout << "your name is " << m_client_name << '\n';
 
+        dbg;
         std::ifstream f(network::port_file);
         std::string port;
         f >> port;
@@ -134,21 +137,27 @@ private:
         std::cout << "joining to port " << port << '\n';
         m_client.connect(std::string("localhost:") + port);
 
+        dbg;
         const auto &players = m_client.get_players_info();
 
+        dbg;
         std::cout << "lobby:\n";
         for (const auto &info : players) {
             std::cout << '\t' << info.name << '\n';
         }
 
+        dbg;
         std::vector<std::size_t> users(players.size());
         std::transform(
             players.cbegin(), players.cend(), users.begin(),
             [](const network::PlayerInfo &player) { return player.id; }
         );
+        dbg;
         m_game_session.init(users);
 
+        dbg;
         std::dynamic_pointer_cast<GameView>(m_gameview)->game_session = &m_game_session;
+        dbg;
         m_gameview->attach_instances(&m_client, &m_window);
     }
 

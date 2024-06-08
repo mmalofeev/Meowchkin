@@ -1,8 +1,11 @@
 #include "raylib_game_view.hpp"
 #include <boost/dll/alias.hpp>
 #include <chrono>
+#include <cstddef>
 #include <ios>
 #include <iostream>
+#include <iterator>
+#include <limits>
 #include <memory>
 #include <string_view>
 #include <variant>
@@ -60,8 +63,10 @@ meow::RaylibGameView::RaylibGameView()
     m_background_music.Play();
     m_background_music.SetLooping(true);
 
-    m_endgame_screen.texture[EndGameScreen::GameResult::WIN] = raylib::Texture("bin/imgs/win-screen.png");
-    m_endgame_screen.texture[EndGameScreen::GameResult::LOOSE] = raylib::Texture("bin/imgs/loose-screen.png");
+    m_endgame_screen.texture[EndGameScreen::GameResult::WIN] =
+        raylib::Texture("bin/imgs/win-screen.png");
+    m_endgame_screen.texture[EndGameScreen::GameResult::LOOSE] =
+        raylib::Texture("bin/imgs/loose-screen.png");
 }
 
 void meow::RaylibGameView::on_instances_attach() {
@@ -74,10 +79,15 @@ void meow::RaylibGameView::on_instances_attach() {
     setup_active_display_selector();
 
     GuiCardSpan::card_manager = card_manager;
+    GuiCardSpan::m_client = m_client;
 
     m_gameplay_objects.board.setup(
         m_window, &m_gameplay_objects.player_hand, m_client, game_session
     );
+
+    // const auto clients_info = m_client->get_players_info();
+
+    // m_gameplay_objects.opponent_checkbox.resize(clients_info.size());
 
     m_gameplay_objects.text_chat.set_window(m_window);
 
@@ -86,8 +96,10 @@ void meow::RaylibGameView::on_instances_attach() {
     m_gameplay_objects.usernames_box.active_user = m_client->get_id_of_client();
     m_player_id = game_session->get_player_id_by_user_id(m_client->get_id_of_client());
 
+    const float x0 = m_window->GetWidth() - (m_window->GetWidth() - GuiBoard::width) / 2.0f + 40.0f;
+    const float y0 = m_window->GetHeight() / 2.0f;
+    std::size_t i = 0;
     for (const auto &info : m_client->get_players_info()) {
-        // const std::size_t id = m_
         m_gameplay_objects.usernames_box.add_username({info.id, info.name});
         m_gameplay_objects.stats.elements[info.id] = {
             {GuiPlayerStatisticsMenu::StatisticKind::LEVEL, {"Level", 1}},
@@ -96,6 +108,8 @@ void meow::RaylibGameView::on_instances_attach() {
             {GuiPlayerStatisticsMenu::StatisticKind::MONSTER_STRENGTH, {"Monster\nstrength", 0}},
             {GuiPlayerStatisticsMenu::StatisticKind::LAST_DICE_ROLL, {"Your last dice\nroll", 0}},
         };
+        m_gameplay_objects.opponent_checkbox[info.id] = raylib::Rectangle{x0, y0 + i * 40, 40, 40};
+        ++i;
     }
 
     m_client->send_action(
@@ -193,8 +207,8 @@ void meow::RaylibGameView::draw_pause_menu() {
     }
 
     GuiSliderBar(
-        m_pause_menu_objects.music_volume_rec, "", "",
-        &m_pause_menu_objects.music_volume, 0.0f, 1.0f
+        m_pause_menu_objects.music_volume_rec, "", "", &m_pause_menu_objects.music_volume, 0.0f,
+        1.0f
     );
     GuiSetStyle(LABEL, TEXT_ALIGNMENT, TEXT_ALIGN_CENTER);
     GuiSetStyle(LABEL, TEXT_COLOR_NORMAL, raylib::Color::Gray().ToInt());
@@ -247,7 +261,12 @@ void meow::RaylibGameView::draw() {
                 }
             }
 
-            objs->board.draw(m_client->get_id_of_client(), m_window->GetFrameTime());
+            objs->board.draw(
+                id, m_window->GetFrameTime(),
+                m_gameplay_objects.selected_opponent != std::numeric_limits<std::size_t>::max()
+                    ? std::optional<std::size_t>(m_gameplay_objects.selected_opponent)
+                    : std::nullopt
+            );
 
             objs->player_hand.draw_cards(m_window->GetFrameTime(), true);
 
@@ -328,6 +347,29 @@ void meow::RaylibGameView::draw() {
                 }
                 GuiSetAlpha(was);
             }
+
+            for (const auto &info : m_client->get_players_info()) {
+                if (GuiCheckBox(
+                        m_gameplay_objects.opponent_checkbox[info.id], info.name.c_str(),
+                        &m_gameplay_objects.opponent_checkbox_flags[info.id]
+                    )) {
+                    if (m_gameplay_objects.selected_opponent !=
+                        std::numeric_limits<std::size_t>::max()) {
+                        m_gameplay_objects
+                            .opponent_checkbox_flags[m_gameplay_objects.selected_opponent] = false;
+                        if (m_gameplay_objects.selected_opponent != info.id) {
+                            m_gameplay_objects.opponent_checkbox_flags
+                                [m_gameplay_objects.selected_opponent = info.id] = true;
+                        } else {
+                            m_gameplay_objects.selected_opponent =
+                                std::numeric_limits<std::size_t>::max();
+                        }
+                    } else {
+                        m_gameplay_objects.selected_opponent = info.id;
+                        m_gameplay_objects.opponent_checkbox_flags[info.id] = true;
+                    }
+                }
+            }
         },
 
         [this](PauseMenuObjs *objs) {
@@ -372,7 +414,8 @@ void meow::RaylibGameView::on_card_add_on_board(
     std::size_t user_id
 ) {
     if (protogonist_sided) {
-        m_gameplay_objects.board.m_kitten_cards[user_id].add_card(card_id);
+        dbg;
+        m_gameplay_objects.board.m_kitten_cards.at(user_id).add_card(card_id);
     } else {
         m_gameplay_objects.board.m_opponent_cards.add_card(card_id);
     }

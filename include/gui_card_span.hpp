@@ -6,6 +6,7 @@
 #include <memory>
 #include <optional>
 #include <set>
+#include "client.hpp"
 #include "gui_card.hpp"
 #include "gui_window_dependable.hpp"
 #include "model_card_manager.hpp"
@@ -18,9 +19,11 @@ namespace meow {
 class DropDownMenu;
 
 class GuiCardSpan : Noncopyable, WindowDependable<GuiCardSpan> {
+    // drop down menus are free to change parental span
     friend class DropDownMenu;
     friend class PlayerHandDDM;
     friend class BrawlCardsDDM;
+    friend class KittenCardsDDM;
 
 private:
     struct RemovedGuiCard {
@@ -51,8 +54,18 @@ private:
         }
     };
 
+    void send_action_to_remove(std::size_t card_id) {
+        if (m_client != nullptr) {
+            m_client->send_action(network::Action(
+                network::Action::ActionType::ThrewCard, card_id, m_client->get_id_of_client(),
+                m_client->get_id_of_client()
+            ));
+        }
+    }
+
 public:
     inline static CardManager *card_manager = nullptr;
+    inline static network::Client *m_client = nullptr;
     inline static std::set<GuiCardInfo, CardRectComparator> possible_targets;
 
     GuiCardSpan() = default;
