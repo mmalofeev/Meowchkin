@@ -68,10 +68,10 @@ public:
           m_gameview((*m_gameview_maker)()),
           m_scene_manager(std::make_unique<SceneManager>()),
           m_game_session(
-              {std::dynamic_pointer_cast<GameView>(m_gameview)}
-               // std::make_shared<StatisticObserver>()}
+              {std::dynamic_pointer_cast<GameView>(m_gameview),
+               std::make_shared<StatisticObserver>()}
           ),
-          m_music("bin/music/witcher-gwent.mp3") {
+          m_music("bin/music/mainmenu-background.mp3") {
         std::dynamic_pointer_cast<GameView>(m_gameview)->card_manager =
             &CardManager::get_instance();
         std::dynamic_pointer_cast<GameView>(m_gameview)->game_session = &m_game_session;
@@ -81,8 +81,8 @@ public:
         SetExitKey(0);
         m_window.SetTargetFPS(60);
         m_mainmenu->attach_instances(&m_client, &m_window);
-        // m_music.SetLooping(true);
-        // m_music.Play();
+        m_music.SetLooping(true);
+        m_music.Play();
     }
 
     void run() {
@@ -92,6 +92,11 @@ public:
             }
             response();
             render();
+        }
+        StatisticObserver so;
+        auto v = so.get_frequency_of_usage_items();
+        for (const auto &e : v) {
+            std::cout << e.card_id << std::endl;
         }
     }
 
@@ -158,6 +163,7 @@ private:
         }
 
         if (!m_connected) {
+            m_music.Update();
             if (auto msg = m_scene_manager->read_message(); msg) {
                 if (msg->find("join lobby") != std::string::npos) {
                     m_client_name = msg->substr(msg->find(':') + 1);

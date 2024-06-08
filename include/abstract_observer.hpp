@@ -45,6 +45,9 @@ public:
     virtual void on_dice_roll(std::size_t user_id, unsigned res) {
     }
 
+    virtual void on_game_end(std::size_t winner_id) {
+    }
+
     virtual ~Observer() = default;
 };
 
