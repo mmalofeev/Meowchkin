@@ -4,8 +4,8 @@
 #include "game_session.hpp"
 #include "model_command.hpp"
 #include "model_player.hpp"
-#include "shared_game_state.hpp"
 #include "model_random.hpp"
+#include "shared_game_state.hpp"
 
 namespace meow::model {
 
@@ -13,21 +13,21 @@ bool VirtualMachine::check_player_item_eligiblity(size_t player_id, ItemType ity
     auto player = game_session->shared_state.get_player_by_player_id(player_id);
     assert(player != nullptr);
     switch (itype) {
-    case (ItemType::BOOTS): {
-        return player->unused_boots >= quantity;
-    } break;
-    case (ItemType::HELMET): {
-        return player->unused_helmet >= quantity;
-    } break;
-    case (ItemType::BREASTPLATE): {
-        return player->unused_breastplate >= quantity;
-    } break;
-    case (ItemType::WEAPON): {
-        return player->unused_arms >= quantity;
-    } break;
-    default: {
-        assert(false);
-    } break;
+        case (ItemType::BOOTS): {
+            return player->unused_boots >= quantity;
+        } break;
+        case (ItemType::HELMET): {
+            return player->unused_helmet >= quantity;
+        } break;
+        case (ItemType::BREASTPLATE): {
+            return player->unused_breastplate >= quantity;
+        } break;
+        case (ItemType::WEAPON): {
+            return player->unused_arms >= quantity;
+        } break;
+        default: {
+            assert(false);
+        } break;
     }
     return false;
 }
@@ -36,21 +36,21 @@ void VirtualMachine::acquire_item(size_t player_id, ItemType itype, int quantity
     auto player = game_session->shared_state.get_player_by_player_id(player_id);
     assert(player != nullptr);
     switch (itype) {
-    case (ItemType::BOOTS): {
-        player->unused_boots -= quantity;
-    } break;
-    case (ItemType::HELMET): {
-        player->unused_helmet -= quantity;
-    } break;
-    case (ItemType::BREASTPLATE): {
-        player->unused_breastplate -= quantity;
-    } break;
-    case (ItemType::WEAPON): {
-        player->unused_arms -= quantity;
-    } break;
-    default: {
-        assert(false);
-    } break;
+        case (ItemType::BOOTS): {
+            player->unused_boots -= quantity;
+        } break;
+        case (ItemType::HELMET): {
+            player->unused_helmet -= quantity;
+        } break;
+        case (ItemType::BREASTPLATE): {
+            player->unused_breastplate -= quantity;
+        } break;
+        case (ItemType::WEAPON): {
+            player->unused_arms -= quantity;
+        } break;
+        default: {
+            assert(false);
+        } break;
     }
 }
 
@@ -75,11 +75,13 @@ void VirtualMachine::lose_random_card_from_hand() {
 
     Player *player =
         game_session->shared_state.get_player_by_player_id(static_cast<std::size_t>(player_id));
-    
-    if (player->get_hand().empty())
+
+    if (player->get_hand().empty()) {
         return;
-    
-    std::size_t position = get_object_based_random_integer<std::size_t>(0, player->get_hand().size() - 1);
+    }
+
+    std::size_t position =
+        get_object_based_random_integer<std::size_t>(0, player->get_hand().size() - 1);
     player->drop_card_from_hand_by_id(player->get_hand()[position]->obj_id);
 }
 
@@ -89,10 +91,10 @@ void VirtualMachine::lose_helmet() {
 
     Player *player =
         game_session->shared_state.get_player_by_player_id(static_cast<std::size_t>(player_id));
-    
-    for (const auto& card : player->get_storage()) {
+
+    for (const auto &card : player->get_storage()) {
         if (card->info->type == CardType::ITEM) {
-            auto* item = dynamic_cast<const ItemCardInfo*>(card->info);
+            auto *item = dynamic_cast<const ItemCardInfo *>(card->info);
             if (item->itype == ItemType::HELMET) {
                 player->drop_card_from_storage_by_id(card->obj_id);
                 break;
@@ -188,8 +190,9 @@ std::optional<int> VirtualMachine::execute(const std::vector<Command> &code) {
                         break;
                     }
                 }
-                if (!flag)
+                if (!flag) {
                     st.push(static_cast<int>(false));
+                }
             } break;
             case CommandType::IS_HAND_EMPTY: {
                 st.push(static_cast<int>(is_hand_empty()));

@@ -5,8 +5,8 @@
 #include <stack>
 #include <vector>
 #include "abstract_observer.hpp"
-#include "model_command.hpp"
 #include "model_card.hpp"
+#include "model_command.hpp"
 
 namespace meow::model {
 

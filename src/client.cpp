@@ -1,10 +1,9 @@
 #include "client.hpp"
+#include <algorithm>
 #include <boost/asio.hpp>
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <stdexcept>
-#include <algorithm>
-
 #include "gui_card.hpp"
 
 using boost::asio::ip::tcp;
@@ -33,7 +32,7 @@ void Client::accept_info_about_players() {
         auto json = json::parse(input_msg);
         players_info.emplace_back(json);
     }
-    auto player_info_cmp = [](const PlayerInfo& a, const PlayerInfo& b) {return a.id < b.id;};
+    auto player_info_cmp = [](const PlayerInfo &a, const PlayerInfo &b) { return a.id < b.id; };
     std::sort(players_info.begin(), players_info.end(), player_info_cmp);
 }
 

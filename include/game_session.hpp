@@ -14,14 +14,15 @@ namespace meow::model {
 
 struct GameSession : Noncopyable {
     friend struct VirtualMachine;
+
 private:
 #ifdef TEST_MODEL
 public:
 #endif
     SharedGameState shared_state;
     std::unique_ptr<GameState> current_state;
-public:
 
+public:
     explicit GameSession(std::initializer_list<std::shared_ptr<Observer>> l) {
         Object::set_seed(0);
         VirtualMachine::get_instance().set_game_session_reference(this);

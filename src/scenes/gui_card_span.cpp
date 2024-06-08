@@ -154,9 +154,9 @@ void GuiCardSpan::draw_cards(float frame_time, bool is_player_hand) {
         auto &card = *card_it;
         raylib::Color c(
             255, 255, 255,
-            (unsigned char)((card.card.border.GetPosition() - card.card.target_position)
-                                .LengthSqr() /
-                            card.fading_coeff * 255)
+            (unsigned char
+            )((card.card.border.GetPosition() - card.card.target_position).LengthSqr() /
+              card.fading_coeff * 255)
         );
         card.card.border.SetPosition(
             Vector2Lerp(card.card.border.GetPosition(), card.card.target_position, frame_time * 4)
@@ -195,8 +195,7 @@ void GuiCardSpan::draw_inspected_card(int window_width, int window_height) {
     raylib::Color col{255, 255, 255, 255};
     const raylib::Vector2 pos{
         (window_width - inspected_card->orig_img.width) / 2.0f,
-        (window_height - inspected_card->orig_img.height) / 2.0f
-    };
+        (window_height - inspected_card->orig_img.height) / 2.0f};
     inspected_card_texture->Draw(pos, col);
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         reset_inspected_card_texture = true;

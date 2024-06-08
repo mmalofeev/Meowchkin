@@ -12,11 +12,10 @@ template <typename Callback>
 inline constexpr auto make_timed_state_machine(Callback &&callback) {
     enum State { start, event, finish };
 
-    return
-        [start_time = std::chrono::steady_clock::now(), end_time = std::chrono::steady_clock::now(),
-         state = finish, callback = std::forward<Callback>(callback)]<typename... Args>(
-            std::chrono::milliseconds duration, bool &invoke, Args &&...args
-        ) mutable
+    return [
+        start_time = std::chrono::steady_clock::now(), end_time = std::chrono::steady_clock::now(),
+        state = finish, callback = std::forward<Callback>(callback)
+    ]<typename... Args>(std::chrono::milliseconds duration, bool &invoke, Args &&...args) mutable
         requires std::invocable<
             Callback, std::chrono::steady_clock::time_point, std::chrono::steady_clock::time_point,
             Args...>
