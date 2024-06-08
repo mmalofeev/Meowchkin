@@ -46,10 +46,14 @@ class StatisticObserver : public Observer {
     }
 
     void init() {
-        if (count_existed_strings() != 0) {
+        if (count_existed_strings() == get_ids_of_all_cards().size()) {
             return;
         }
+        int was_inited_cnt = count_existed_strings();
         for (int id : get_ids_of_all_cards()) {
+            if (id < was_inited_cnt) {
+                continue;
+            }
             std::string sql =
                 "INSERT INTO card_usage (card_id, count_of_usage)\n"
                 "VALUES (" +
