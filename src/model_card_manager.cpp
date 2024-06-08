@@ -121,6 +121,10 @@ const model::CardInfo *CardManager::get_card_info_by_obj_id(std::size_t obj_id) 
     return nullptr;
 }
 
+const model::CardInfo *CardManager::get_card_info_by_сard_id(std::size_t card_id) const {
+    return cards_instances.at(card_id).get();
+}
+
 std::size_t CardManager::get_number_of_cards() const {
     return cards_instances.size();
 }

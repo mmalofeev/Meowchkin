@@ -55,9 +55,10 @@ class StatisticObserver : public Observer {
                 continue;
             }
             std::string sql =
-                "INSERT INTO card_usage (card_id, count_of_usage)\n"
+                "INSERT INTO card_usage (card_id, count_of_usage, file_path)\n"
                 "VALUES (" +
-                std::to_string(id) + ", 0);";
+                std::to_string(id) + ", 0, " +
+                CardManager::get_instance().get_card_info_by_сard_id(id)->image + ");";
             char *errmsg;
             int exit = sqlite3_exec(DB, sql.c_str(), nullptr, nullptr, &errmsg);
             if (exit) {
@@ -77,7 +78,9 @@ public:
         std::string sql =
             "CREATE TABLE card_usage("
             "card_id INT,"
-            "count_of_usage INT);";
+            "count_of_usage INT,"
+            "file_path VARCHAR(100)"
+            ");";
         sqlite3_open("meowchkin.db", &DB);
         sqlite3_exec(DB, sql.c_str(), nullptr, nullptr, nullptr);
         init();
@@ -134,6 +137,24 @@ public:
         }
         std::sort(frequency.begin(), frequency.end());
         return frequency;
+    }
+
+    std::vector<std::string> card_id_to_file_path() {
+        std::vector<std::string> paths;
+        std::string query = "SELECT * FROM card_usage;";
+        auto callback = [](void *data, int argc, char **argv, char **azColName) -> int {
+            auto *paths = static_cast<std::vector<std::string> *>(data);
+            (*paths).push_back(argv[2]);
+            return 0;
+        };
+        char *errmsg;
+        int exit = sqlite3_exec(DB, query.c_str(), callback, &paths, &errmsg);
+        if (exit) {
+            throw std::runtime_error(
+                "Failed get_frequency_of_usage: " + std::string(errmsg) + "\n"
+            );
+        }
+        return paths;
     }
 
     ~StatisticObserver() {
