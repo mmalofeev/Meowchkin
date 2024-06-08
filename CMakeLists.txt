@@ -88,6 +88,10 @@ add_library(gameview-scene SHARED
                 src/virtual_machine.cpp)
 target_link_libraries(gameview-scene ${Boost_LIBRARIES} ${CMAKE_DL_LIBS} raylib raylib_cpp)
 
+add_library(scoreboard-scene SHARED src/scenes/bd_score_board.cpp src/scenes/scene.cpp src/model_card_manager.cpp src/model_card.cpp src/virtual_machine.cpp)
+target_link_libraries(scoreboard-scene ${Boost_LIBRARIES} ${CMAKE_DL_LIBS} raylib raylib_cpp)
+
 FILE(GLOB SRCFILES src/*.cpp src/scenes/scene.cpp)
+
 add_executable(meowchkin ${SRCFILES})
 target_link_libraries(meowchkin ${Boost_LIBRARIES} ${CMAKE_DL_LIBS} raylib raylib_cpp sqlite3)

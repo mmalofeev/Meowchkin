@@ -43,7 +43,7 @@ public:
     }
 };
 
-enum class SceneType { MAIN_MENU, GAME, COUNT };
+enum class SceneType { MAIN_MENU, GAME, SCORE_BOARD, COUNT };
 
 class SceneManager : Noncopyable {
 private:

@@ -10,6 +10,7 @@
 #include "game_session.hpp"
 // #include "paths_to_binaries.hpp"
 #include "game_view.hpp"
+#include "bd_scoreboard_scene.hpp"
 #include "model_card_manager.hpp"
 #include "plugin.hpp"
 #include "raylib.h"
@@ -21,7 +22,7 @@ namespace meow {
 
 namespace network {
 constexpr const char *port_file = "port.txt";
-constexpr std::size_t players_count = 2;
+constexpr std::size_t players_count = 1;
 }  // namespace network
 
 class Application {
@@ -33,6 +34,7 @@ private:
     static constexpr EnumArray<SceneType, std::pair<const char *, const char *>> plugin_names{
         {SceneType::MAIN_MENU, {"mainmenu-scene", "make_mainmenu"}},
         {SceneType::GAME, {"gameview-scene", "make_gameview"}},
+        {SceneType::SCORE_BOARD, {"scoreboard-scene", "make_scoreboard"}},
     };
 
     raylib::Window m_window;
@@ -43,8 +45,10 @@ private:
     using maker_scene_t = std::shared_ptr<Scene> (*)();
     Plugin<maker_scene_t> m_gameview_maker;
     Plugin<maker_scene_t> m_mainmenu_maker;
+    Plugin<maker_scene_t> m_scoreboard_maker;
     std::shared_ptr<Scene> m_gameview;
     std::shared_ptr<Scene> m_mainmenu;
+    std::shared_ptr<Scene> m_scoreboard;
     std::unique_ptr<SceneManager> m_scene_manager;
 
     network::Client &m_client = network::Client::get_instance();
@@ -62,10 +66,12 @@ public:
               FLAG_MSAA_4X_HINT | FLAG_FULLSCREEN_MODE
           ),
           // m_loading_wheel_shader("", path_to_loading_wheel_shader),
-          m_mainmenu_maker(plugin_names[SceneType::MAIN_MENU]),
-          m_mainmenu((*m_mainmenu_maker)()),
           m_gameview_maker(plugin_names[SceneType::GAME]),
+          m_mainmenu_maker(plugin_names[SceneType::MAIN_MENU]),
+          m_scoreboard_maker(plugin_names[SceneType::SCORE_BOARD]),
           m_gameview((*m_gameview_maker)()),
+          m_mainmenu((*m_mainmenu_maker)()),
+          m_scoreboard((*m_scoreboard_maker)()),
           m_scene_manager(std::make_unique<SceneManager>()),
           m_game_session(
               {std::dynamic_pointer_cast<GameView>(m_gameview),
@@ -74,15 +80,20 @@ public:
           m_music("bin/music/mainmenu-background.mp3") {
         std::dynamic_pointer_cast<GameView>(m_gameview)->card_manager =
             &CardManager::get_instance();
+        std::dynamic_pointer_cast<ScoreBoardBase>(m_scoreboard)->card_manager =
+            &CardManager::get_instance();
+
         std::dynamic_pointer_cast<GameView>(m_gameview)->game_session = &m_game_session;
         m_scene_manager->set_scene(SceneType::MAIN_MENU, m_mainmenu.get());
         m_scene_manager->set_scene(SceneType::GAME, m_gameview.get());
+        m_scene_manager->set_scene(SceneType::SCORE_BOARD, m_scoreboard.get());
 
         SetExitKey(0);
         m_window.SetTargetFPS(60);
         m_mainmenu->attach_instances(&m_client, &m_window);
         m_music.SetLooping(true);
         m_music.Play();
+        m_scoreboard->attach_instances(&m_client, &m_window);
     }
 
     void run() {
@@ -94,10 +105,7 @@ public:
             render();
         }
         StatisticObserver so;
-        auto v = so.get_frequency_of_usage_items();
-        for (const auto &e : v) {
-            std::cout << e.card_id << std::endl;
-        }
+        so.display_table();
     }
 
 private:
