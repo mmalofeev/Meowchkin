@@ -38,15 +38,13 @@ class PlayerHandDDM : public DropDownMenu {
 private:
     static constexpr int button_width = 150;
     static constexpr int button_height = 33;
-    enum class Button { INSPECT, /*SELL,*/ DROP, COUNT };
+    enum class Button { INSPECT, DROP, COUNT };
     static constexpr EnumArray<Button, Vector2> m_button_origins{
         {Button::INSPECT, {0, 0}},
-        // {Button::SELL, {0, button_height}},
-        {Button::DROP, {0, button_height * 2}},
+        {Button::DROP, {0, button_height}},
     };
     static constexpr EnumArray<Button, const char *> m_button_labels{
         {Button::INSPECT, "Inspect"},
-        // {Button::SELL, "Sell"},
         {Button::DROP, "Drop"},
     };
 

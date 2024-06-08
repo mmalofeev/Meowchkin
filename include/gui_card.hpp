@@ -3,10 +3,14 @@
 
 #include "raylib-cpp.hpp"
 
+#ifndef NDEBUG
 #define dbg                                                     \
     do {                                                        \
         std::cout << __FILE__ << ": " << __LINE__ << std::endl; \
     } while (0)
+#else 
+#define dbg
+#endif
 
 namespace meow {
 

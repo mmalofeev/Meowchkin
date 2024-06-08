@@ -1,15 +1,16 @@
 #include <boost/dll/alias.hpp>
 #include <sstream>
 #include "bd_observer.hpp"
-#include "bd_scoreboard_scene.hpp"
+#include "enum_array.hpp"
 #include "paths_to_binaries.hpp"
-#include "raylib.h"
+#include "raylib-cpp.hpp"
+#include "scene.hpp"
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 
 namespace meow {
 
-class ScoreBoard : public ScoreBoardBase {
+class ScoreBoard : public Scene {
 private:
     static constexpr int button_width = 400;
     static constexpr int button_height = 80;
@@ -36,8 +37,6 @@ private:
     std::vector<Card> m_cards;
     std::vector<Card>::iterator m_cards_iter = m_cards.end();
 
-    using ScoreBoardBase::card_manager;
-
 public:
     explicit ScoreBoard() {
         GuiLoadStyle(gui_style_path);
@@ -59,7 +58,7 @@ public:
             );
         }
         background_image.Resize(m_window->GetWidth(), m_window->GetHeight());
-        m_background = raylib::Texture("bin/imgs/wooden-background.png");
+        m_background = raylib::Texture(board_image_path);
         m_button_rects[Button::BACK_TO_MAINMENU] = raylib::Rectangle{
             0, m_window->GetHeight() - (float)button_height, button_width, button_height
         };
@@ -113,7 +112,8 @@ public:
             (std::ostringstream{} << "Count of usage: " << m_cards_iter->usage.frequency).str();
         const int szx = raylib::MeasureText(text, 60);
         raylib::DrawText(
-            text, x0 + card_width / 2 - szx / 2.0f, y0 + card_height + 60, 60, raylib::Color::RayWhite()
+            text, x0 + card_width / 2 - szx / 2.0f, y0 + card_height + 60, 60,
+            raylib::Color::RayWhite()
         );
     }
 
