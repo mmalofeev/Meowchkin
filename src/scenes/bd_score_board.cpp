@@ -24,8 +24,7 @@ private:
     EnumArray<Button, raylib::Rectangle> m_button_rects;
     EnumArray<Button, bool> m_button_pressed;
     EnumArray<Button, const char *> m_button_labels = {
-        {Button::BACK_TO_MAINMENU, "Back to main menu"}
-    };
+        {Button::BACK_TO_MAINMENU, "Back to main menu"}};
 
     // StatisticObserver m_stats;
 
@@ -60,8 +59,7 @@ public:
         background_image.Resize(m_window->GetWidth(), m_window->GetHeight());
         m_background = raylib::Texture(board_image_path);
         m_button_rects[Button::BACK_TO_MAINMENU] = raylib::Rectangle{
-            0, m_window->GetHeight() - (float)button_height, button_width, button_height
-        };
+            0, m_window->GetHeight() - (float)button_height, button_width, button_height};
 
         // auto v = m_stats.get_frequency_of_usage_items();
         // std::vector<UsageItemInfo> v{{2, 3}, {1, 0}, {4, 4}};

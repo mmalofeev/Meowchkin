@@ -7,7 +7,6 @@
 #include <memory>
 #include <unordered_map>
 #include <variant>
-#include "paths_to_binaries.hpp"
 #include "enum_array.hpp"
 #include "game_view.hpp"
 #include "gui_board.hpp"
@@ -15,6 +14,7 @@
 #include "gui_player_statistics_menu.hpp"
 #include "gui_text_chat.hpp"
 #include "gui_usernames_box.hpp"
+#include "paths_to_binaries.hpp"
 #include "timed_state_machine.hpp"
 
 namespace meow {
@@ -55,7 +55,7 @@ private:
     struct EndGameScreen {
         static constexpr int button_width = 300;
         static constexpr int button_height = 40;
-        enum class GameResult {WIN, LOOSE, COUNT};
+        enum class GameResult { WIN, LOOSE, COUNT };
 
         GameResult result;
         EnumArray<GameResult, raylib::Texture> texture;

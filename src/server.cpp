@@ -1,8 +1,8 @@
 #include "server.hpp"
+#include <algorithm>
 #include <boost/asio.hpp>
 #include <nlohmann/json.hpp>
 #include <optional>
-#include <algorithm>
 
 using boost::asio::ip::tcp;
 

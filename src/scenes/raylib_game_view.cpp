@@ -36,8 +36,7 @@ EnumT draw_opts_menu(const meow::EnumArray<EnumT, std::string> &opts, raylib::Ve
     for (std::size_t i = 0; i < opts.size(); ++i) {
         if (GuiButton(
                 Rectangle{
-                    pos.x, pos.y + i * opts_button_height, opts_button_width, opts_button_height
-                },
+                    pos.x, pos.y + i * opts_button_height, opts_button_width, opts_button_height},
                 opts[i].c_str()
             )) {
             ret = static_cast<EnumT>(i);
@@ -115,9 +114,10 @@ void meow::RaylibGameView::on_instances_attach() {
         ++i;
     }
 
-    m_client->send_action(
-        network::Action(network::Action::ActionType::RollDice, -1, -1, m_client->get_id_of_client())
-    );
+    m_client->send_action(network::Action(
+        network::Action::ActionType::RollDice, -1, m_client->get_id_of_client(),
+        m_client->get_id_of_client()
+    ));
 }
 
 void meow::RaylibGameView::setup_background() {
@@ -310,13 +310,11 @@ void meow::RaylibGameView::draw() {
                 EnumArray<opts, std::string> turn_opts{
                     {opts::ROLL_DICE, "Roll dice"},
                     {opts::PASS, "Pass"},
-                    {opts::END_TURN, "End turn"}
-                };
+                    {opts::END_TURN, "End turn"}};
                 EnumArray<opts, ActionType> turn_acts{
                     {opts::ROLL_DICE, ActionType::RollDice},
                     {opts::PASS, ActionType::Pass},
-                    {opts::END_TURN, ActionType::EndTurn}
-                };
+                    {opts::END_TURN, ActionType::EndTurn}};
                 float was = guiAlpha;
                 GuiSetAlpha(0.85);
                 if (auto x = draw_opts_menu(
@@ -332,11 +330,9 @@ void meow::RaylibGameView::draw() {
             } else {
                 enum class opts { ROLL_DICE, PASS, COUNT };
                 EnumArray<opts, std::string> turn_opts{
-                    {opts::ROLL_DICE, "Roll dice"}, {opts::PASS, "Pass"}
-                };
+                    {opts::ROLL_DICE, "Roll dice"}, {opts::PASS, "Pass"}};
                 EnumArray<opts, ActionType> turn_acts{
-                    {opts::ROLL_DICE, ActionType::RollDice}, {opts::PASS, ActionType::Pass}
-                };
+                    {opts::ROLL_DICE, ActionType::RollDice}, {opts::PASS, ActionType::Pass}};
                 float was = guiAlpha;
                 GuiSetAlpha(0.85);
                 if (auto x = draw_opts_menu(
@@ -385,8 +381,7 @@ void meow::RaylibGameView::draw() {
             m_endgame_screen.sound[m_endgame_screen.result].Play();
         },
 
-        [](auto...) { throw std::runtime_error("unhandled type(s) in active display!"); }
-    };
+        [](auto...) { throw std::runtime_error("unhandled type(s) in active display!"); }};
 
     if (auto chat_message = m_client->receive_chat_message(); chat_message) {
         std::cout << "received from " << chat_message->sender_player << ": "
@@ -450,7 +445,7 @@ void meow::RaylibGameView::on_level_change(std::size_t user_id, int delta) {
 }
 
 void meow::RaylibGameView::on_bonus_change(std::size_t user_id, int delta) {
-    if (delta > 0) {
+    if (delta > 0 && user_id == m_client->get_id_of_client()) {
         m_item_equip_sound.Play();
     }
     m_gameplay_objects.stats.elements[user_id][GuiPlayerStatisticsMenu::StatisticKind::BONUS]
@@ -485,11 +480,9 @@ void meow::RaylibGameView::on_monster_elimination(std::size_t user_id) {
 }
 
 void meow::RaylibGameView::on_dice_roll(std::size_t user_id, unsigned res) {
-    if (m_client->get_id_of_client() == user_id) {
-        m_gameplay_objects.stats
-            .elements[user_id][GuiPlayerStatisticsMenu::StatisticKind::LAST_DICE_ROLL]
-            .value = (int)res;
-    }
+    m_gameplay_objects.stats
+        .elements[user_id][GuiPlayerStatisticsMenu::StatisticKind::LAST_DICE_ROLL]
+        .value = (int)res;
 }
 
 void meow::RaylibGameView::on_game_end(std::size_t winner_id) {

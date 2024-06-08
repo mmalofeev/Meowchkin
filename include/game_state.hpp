@@ -1,11 +1,11 @@
 #ifndef GAME_STATE_HPP_
 #define GAME_STATE_HPP_
 #include <cassert>
+#include <iterator>
 #include <memory>
 #include <set>
 #include <vector>
 #include "model_card.hpp"
-#include<iterator>
 
 namespace meow::model {
 
@@ -122,10 +122,12 @@ public:
 
 struct LookForTroubleState : GameState {
 private:
-static constexpr std::size_t cards_to_deal = 2;
+    static constexpr std::size_t cards_to_deal = 2;
+
 public:
     LookForTroubleState(SharedGameState *shared_state_);
-    std::unique_ptr<GameState> play_card(std::size_t user_id, std::size_t target_id, std::size_t card_obj_id) override;
+    std::unique_ptr<GameState>
+    play_card(std::size_t user_id, std::size_t target_id, std::size_t card_obj_id) override;
     std::unique_ptr<GameState> draw_card(std::size_t user_id) override;
 };
 
@@ -135,7 +137,7 @@ struct EndState : GameState {
 
 struct SlipAwayState : GameState {
 private:
-    template <typename T> 
+    template <typename T>
     struct Transformer {
         using type = std::vector<T>::iterator;
     };
@@ -147,10 +149,15 @@ private:
     int count_of_finished = 0;
 
 public:
-    SlipAwayState(SharedGameState *shared_state_, std::vector<std::size_t> heroes_, std::vector<std::unique_ptr<Card>> heroes_storage_, std::vector<std::unique_ptr<MonsterCard>> monsters_);
+    SlipAwayState(
+        SharedGameState *shared_state_,
+        std::vector<std::size_t> heroes_,
+        std::vector<std::unique_ptr<Card>> heroes_storage_,
+        std::vector<std::unique_ptr<MonsterCard>> monsters_
+    );
     std::unique_ptr<GameState> roll_dice(std::size_t user_id) override;
 };
 
 }  // namespace meow::model
 
-#endif // T -> std::vector<T>::iterator
+#endif  // T -> std::vector<T>::iterator

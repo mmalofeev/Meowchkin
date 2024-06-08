@@ -72,8 +72,7 @@ public:
             {"type", "ActionResult"},
             {"card_id", card_id},
             {"validness", validness},
-            {"failed_action_type", failed_action_type}
-        };
+            {"failed_action_type", failed_action_type}};
     }
 };
 
@@ -134,8 +133,7 @@ public:
             {"message", message},
             {"sender_player", sender_player},
             {"general", general},
-            {"target_player", target_player}
-        };
+            {"target_player", target_player}};
     }
 };
 }  // namespace meow::network
