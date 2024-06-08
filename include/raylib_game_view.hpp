@@ -90,11 +90,12 @@ private:
     bool m_show_stats = true;
     bool m_show_players = true;
     raylib::Texture m_on_levelup_texture;
+    raylib::Texture m_on_leveldown_texture;
     raylib::Texture m_on_levelup_blur_texture;
+    raylib::Texture m_on_leveldown_blur_texture;
     raylib::Color m_levelup_tint_color = raylib::Color::White();
-    state_machine_function_args_t<raylib::Color &> m_levelup_blink_call =
+    state_machine_function_args_t<raylib::Color &> m_level_change_blink_call =
         make_timed_state_machine([this](auto st, auto end, raylib::Color &tint) {
-            m_on_levelup_blur_texture.Draw(0, 0, tint);
             const int coeff =
                 255.0f * (std::chrono::steady_clock::now() - st).count() / (end - st).count();
             if (coeff < 127) {
@@ -102,12 +103,22 @@ private:
             } else {
                 tint.a = 255 - coeff % 127 * 2;
             }
-            m_on_levelup_texture.Draw(
-                (m_window->GetWidth() - m_on_levelup_texture.width) / 2,
-                (m_window->GetHeight() - m_on_levelup_texture.height) / 2
-            );
+            if (m_level_increased) {
+                m_on_levelup_blur_texture.Draw(0, 0, tint);
+                m_on_levelup_texture.Draw(
+                    (m_window->GetWidth() - m_on_levelup_texture.width) / 2,
+                    (m_window->GetHeight() - m_on_levelup_texture.height) / 2
+                );
+            } else {
+                m_on_leveldown_blur_texture.Draw(0, 0, tint);
+                m_on_leveldown_texture.Draw(
+                    (m_window->GetWidth() - m_on_leveldown_texture.width) / 2,
+                    (m_window->GetHeight() - m_on_leveldown_texture.height) / 2
+                );
+            }
         });
     bool m_levelup_blink = false;
+    bool m_level_increased = false;
     raylib::Music m_background_music = raylib::Music(path_to_game_background_music);
     raylib::Sound m_levelup_sound = raylib::Sound(path_to_levelup_sound);
     raylib::Sound m_item_equip_sound = raylib::Sound(path_to_item_equip_sound);

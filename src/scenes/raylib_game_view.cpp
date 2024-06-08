@@ -48,7 +48,9 @@ EnumT draw_opts_menu(const meow::EnumArray<EnumT, std::string> &opts, raylib::Ve
 }  // namespace
 
 meow::RaylibGameView::RaylibGameView()
-    : m_active_display(&m_gameplay_objects), m_on_levelup_texture("bin/imgs/levelup.png") {
+    : m_active_display(&m_gameplay_objects),
+      m_on_levelup_texture(path_to_levelup_texture),
+      m_on_leveldown_texture(path_to_leveldown_texture) {
     GuiLoadStyle(gui_style_path);
     GuiSetFont(LoadFont(gui_font_path));
     for (const auto &entry : std::filesystem::directory_iterator(cards_directory_path)) {
@@ -107,7 +109,7 @@ void meow::RaylibGameView::on_instances_attach() {
             {GuiPlayerStatisticsMenu::StatisticKind::LEVEL, {"Level", 1}},
             {GuiPlayerStatisticsMenu::StatisticKind::STRENGTH, {"Strength", 1}},
             {GuiPlayerStatisticsMenu::StatisticKind::BONUS, {"Bonus", 0}},
-            {GuiPlayerStatisticsMenu::StatisticKind::MONSTER_STRENGTH, {"Monster\nstrength", 0}},
+            // {GuiPlayerStatisticsMenu::StatisticKind::MONSTER_STRENGTH, {"Monster\nstrength", 0}},
             {GuiPlayerStatisticsMenu::StatisticKind::LAST_DICE_ROLL, {"Your last dice\nroll", 0}},
         };
         m_gameplay_objects.opponent_checkbox[info.id] = raylib::Rectangle{x0, y0 + i * 40, 40, 40};
@@ -140,6 +142,11 @@ void meow::RaylibGameView::setup_background() {
         m_window->GetWidth(), m_window->GetHeight(), 0, raylib::Color::Blank(), {0, 158, 47, 100}
     );
     m_on_levelup_blur_texture.Load(blur2);
+
+    raylib::Image blur3 = raylib::Image::GradientRadial(
+        m_window->GetWidth(), m_window->GetHeight(), 0, raylib::Color::Blank(), raylib::Color::Red()
+    );
+    m_on_leveldown_blur_texture.Load(blur3);
 }
 
 void meow::RaylibGameView::setup_pause_menu() {
@@ -403,7 +410,7 @@ void meow::RaylibGameView::draw() {
             m_active_display = &m_gameplay_objects;
         }
     }
-    m_levelup_blink_call(std::chrono::milliseconds(1000), m_levelup_blink, m_levelup_tint_color);
+    m_level_change_blink_call(std::chrono::milliseconds(1000), m_levelup_blink, m_levelup_tint_color);
 }
 
 void meow::RaylibGameView::on_card_add_on_board(
@@ -437,15 +444,21 @@ void meow::RaylibGameView::on_level_change(std::size_t user_id, int delta) {
         .value += delta;
     m_gameplay_objects.stats.elements[user_id][GuiPlayerStatisticsMenu::StatisticKind::STRENGTH]
         .value += delta;
-    if (user_id == m_client->get_id_of_client() && delta > 0) {
-        m_levelup_sound.Play();
+    if (user_id == m_client->get_id_of_client()) {
+        if (delta > 0) {
+            m_levelup_sound.Play();
+            m_level_increased = true;
+        } else {
+            m_incorrect_beep_sound.Play();
+            m_level_increased = false;
+        }
         m_levelup_blink = true;
         m_levelup_tint_color = raylib::Color::White();
     }
 }
 
 void meow::RaylibGameView::on_bonus_change(std::size_t user_id, int delta) {
-    if (delta > 0 && user_id == m_client->get_id_of_client()) {
+    if (delta > 0 && m_client->get_id_of_client() == user_id) {
         m_item_equip_sound.Play();
     }
     m_gameplay_objects.stats.elements[user_id][GuiPlayerStatisticsMenu::StatisticKind::BONUS]
@@ -456,7 +469,7 @@ void meow::RaylibGameView::on_bonus_change(std::size_t user_id, int delta) {
 
 void meow::RaylibGameView::on_monster_bonus_change(std::size_t monster_id, int delta) {
     for (auto &element : m_gameplay_objects.stats.elements) {
-        element.second[GuiPlayerStatisticsMenu::StatisticKind::MONSTER_STRENGTH].value += delta;
+        // element.second[GuiPlayerStatisticsMenu::StatisticKind::MONSTER_STRENGTH].value += delta;
     }
 }
 

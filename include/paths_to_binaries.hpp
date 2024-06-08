@@ -21,5 +21,7 @@ constexpr const char *path_to_card_draw_sound = "bin/music/sounds/card-draw.mp3"
 constexpr const char *path_to_mainmenu_background_music = "bin/music/mainmenu-background.mp3";
 constexpr const char *path_to_win_screen = "bin/imgs/winscreen.png";
 constexpr const char *path_to_loose_screen = "bin/imgs/loosescreen.png";
+constexpr const char *path_to_levelup_texture = "bin/imgs/levelup.png";
+constexpr const char *path_to_leveldown_texture = "bin/imgs/leveldown.png";
 
 #endif  // PATHS_TO_BINARIES_HPP_

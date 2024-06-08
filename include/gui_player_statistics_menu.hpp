@@ -15,7 +15,7 @@ class GuiPlayerStatisticsMenu {
     static constexpr float height = 50.0f;
 
 public:
-    enum class StatisticKind { LEVEL, STRENGTH, BONUS, MONSTER_STRENGTH, LAST_DICE_ROLL, COUNT };
+    enum class StatisticKind { LEVEL, STRENGTH, BONUS, LAST_DICE_ROLL, COUNT };
 
     struct Statistic {
         std::string name;
