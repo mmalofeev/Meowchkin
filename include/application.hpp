@@ -41,7 +41,6 @@ private:
     raylib::Window m_window;
     raylib::AudioDevice m_audio_device;
     raylib::Music m_music;
-    // raylib::Shader m_loading_wheel_shader;
 
     using maker_scene_t = std::shared_ptr<Scene> (*)();
     Plugin<maker_scene_t> m_gameview_maker;
@@ -67,7 +66,6 @@ public:
               window_title,
               FLAG_MSAA_4X_HINT | FLAG_FULLSCREEN_MODE
           ),
-          // m_loading_wheel_shader("", path_to_loading_wheel_shader),
           m_gameview_maker(plugin_names[SceneType::GAME]),
           m_mainmenu_maker(plugin_names[SceneType::MAIN_MENU]),
           m_scoreboard_maker(plugin_names[SceneType::SCORE_BOARD]),
