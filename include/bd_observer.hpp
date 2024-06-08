@@ -57,8 +57,8 @@ class StatisticObserver : public Observer {
             std::string sql =
                 "INSERT INTO card_usage (card_id, count_of_usage, file_path)\n"
                 "VALUES (" +
-                std::to_string(id) + ", 0, " +
-                CardManager::get_instance().get_card_info_by_сard_id(id)->image + ");";
+                std::to_string(id) + ", 0, \"" +
+                CardManager::get_instance().get_card_info_by_сard_id(id)->image + "\");";
             char *errmsg;
             int exit = sqlite3_exec(DB, sql.c_str(), nullptr, nullptr, &errmsg);
             if (exit) {
