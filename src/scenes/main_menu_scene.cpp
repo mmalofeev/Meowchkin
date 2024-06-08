@@ -16,13 +16,22 @@ private:
     static constexpr int button_width = 300;
     static constexpr int button_height = 40;
 
-    enum class Button { JOIN_LOBBY, CREATE_LOBBY, ENTER_NAME, QUIT, SCORE_BOARD, COUNT };
+    enum class Button {
+        JOIN_LOBBY,
+        CREATE_LOBBY,
+        ENTER_NAME,
+        ENTER_PORT,
+        SCORE_BOARD,
+        QUIT,
+        COUNT
+    };
     static constexpr EnumArray<Button, const char *> m_button_labels = {
         {Button::JOIN_LOBBY, "Join lobby"},
         {Button::CREATE_LOBBY, "Create lobby"},
+        {Button::ENTER_PORT, "Enter connection port"},
         {Button::ENTER_NAME, "Enter name"},
+        {Button::SCORE_BOARD, "Score board"},
         {Button::QUIT, "Quit"},
-        {Button::SCORE_BOARD, "Score board"}
     };
     EnumArray<Button, Rectangle> m_button_rects;
     EnumArray<Button, bool> m_button_pressed;
@@ -41,6 +50,10 @@ public:
         }
         GuiLoadStyle(gui_style_path);
         GuiSetFont(LoadFont(gui_font_path));
+        GuiSetStyle(
+            GuiControl::TEXTBOX, GuiControlProperty::TEXT_ALIGNMENT,
+            GuiTextAlignment::TEXT_ALIGN_LEFT
+        );
         GuiSetStyle(DEFAULT, TEXT_SIZE, 16);
     }
 
@@ -75,7 +88,9 @@ public:
         static const std::string default_nickname =
             ("bebrik" + std::to_string(meow::random_integer(1, 1'000)));
         static char nickname[100];
+        static char port[100];
         static bool draw_textbox = false;
+        static bool draw_textbox2 = false;
         static bool first_call = true;
 
         if (first_call) {
@@ -99,8 +114,10 @@ public:
             m_running = false;
         }
         if (m_button_pressed[Button::JOIN_LOBBY]) {
+            m_scene_manager->set_message(
+                "join lobby:" + std::string(nickname) + ":" + std::string(port)
+            );
             m_scene_manager->switch_scene(SceneType::GAME);
-            m_scene_manager->set_message("join lobby:" + std::string(nickname));
         } else if (m_button_pressed[Button::CREATE_LOBBY]) {
             // } else
             // draw_textbox = true;
@@ -108,17 +125,19 @@ public:
             m_scene_manager->set_message("create lobby:" + std::string(nickname));
         }
         if (draw_textbox) {
-            GuiSetStyle(
-                GuiControl::TEXTBOX, GuiControlProperty::TEXT_ALIGNMENT,
-                GuiTextAlignment::TEXT_ALIGN_LEFT
-            );
             if (GuiTextBox(m_button_rects[Button::ENTER_NAME], nickname, 100, draw_textbox)) {
                 status_bar_text = nickname;
-                // nickname[0] = 0;
                 draw_textbox = false;
             }
         } else if (m_button_pressed[Button::ENTER_NAME]) {
             draw_textbox = true;
+        } else if (draw_textbox2) {
+            if (GuiTextBox(m_button_rects[Button::ENTER_PORT], port, 100, draw_textbox2)) {
+                status_bar_text = port;
+                draw_textbox2 = false;
+            }
+        } else if (m_button_pressed[Button::ENTER_PORT]) {
+            draw_textbox2 = true;
         } else if (m_button_pressed[Button::SCORE_BOARD]) {
             m_scene_manager->switch_scene(SceneType::SCORE_BOARD);
         }

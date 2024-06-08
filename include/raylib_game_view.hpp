@@ -7,9 +7,7 @@
 #include <memory>
 #include <unordered_map>
 #include <variant>
-#include "Music.hpp"
-#include "Rectangle.hpp"
-#include "Sound.hpp"
+#include "paths_to_binaries.hpp"
 #include "enum_array.hpp"
 #include "game_view.hpp"
 #include "gui_board.hpp"
@@ -72,10 +70,10 @@ private:
 
         enum class Button { BRAWL, STATS, CHAT, PAUSE, COUNT };
         EnumArray<Button, const char *> button_texture_paths = {
-            {Button::BRAWL, "bin/imgs/brawl_button_texture.png"},
-            {Button::STATS, "bin/imgs/stats_button_texture.png"},
-            {Button::CHAT, "bin/imgs/chat_button_texture.png"},
-            {Button::PAUSE, "bin/imgs/pause_button_texture.png"},
+            {Button::BRAWL, path_to_brawl_icon},
+            {Button::STATS, path_to_stats_icon},
+            {Button::CHAT, path_to_chat_icon},
+            {Button::PAUSE, path_to_pause_icon},
         };
         EnumArray<Button, raylib::Texture> button_texs;
         EnumArray<Button, raylib::Rectangle> button_rects;
@@ -110,11 +108,11 @@ private:
             );
         });
     bool m_levelup_blink = false;
-    raylib::Music m_background_music = raylib::Music("bin/music/game-background.mp3");
-    raylib::Sound m_levelup_sound = raylib::Sound("bin/music/sounds/levelup.wav");
-    raylib::Sound m_item_equip_sound = raylib::Sound("bin/music/sounds/item-equip.mp3");
-    raylib::Sound m_incorrect_beep_sound = raylib::Sound("bin/music/sounds/incorrect-beep.wav");
-    raylib::Sound m_card_draw_sound = raylib::Sound("bin/music/sounds/card-draw.mp3");
+    raylib::Music m_background_music = raylib::Music(path_to_game_background_music);
+    raylib::Sound m_levelup_sound = raylib::Sound(path_to_levelup_sound);
+    raylib::Sound m_item_equip_sound = raylib::Sound(path_to_item_equip_sound);
+    raylib::Sound m_incorrect_beep_sound = raylib::Sound(path_to_incorrect_beep_sound);
+    raylib::Sound m_card_draw_sound = raylib::Sound(path_to_card_draw_sound);
     std::unordered_map<std::size_t, bool> m_active_turn;
     std::size_t m_player_id = -1;
 

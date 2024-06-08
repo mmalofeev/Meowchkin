@@ -63,10 +63,12 @@ meow::RaylibGameView::RaylibGameView()
     m_background_music.Play();
     m_background_music.SetLooping(true);
 
-    m_endgame_screen.texture[EndGameScreen::GameResult::WIN] =
-        raylib::Texture("bin/imgs/win-screen.png");
-    m_endgame_screen.texture[EndGameScreen::GameResult::LOOSE] =
-        raylib::Texture("bin/imgs/loose-screen.png");
+    m_endgame_screen.texture[EndGameScreen::GameResult::WIN] = raylib::Texture(
+        raylib::Image(path_to_win_screen).Resize(m_window->GetWidth(), m_window->GetHeight())
+    );
+    m_endgame_screen.texture[EndGameScreen::GameResult::LOOSE] = raylib::Texture(
+        raylib::Image(path_to_loose_screen).Resize(m_window->GetWidth(), m_window->GetHeight())
+    );
 }
 
 void meow::RaylibGameView::on_instances_attach() {
@@ -96,8 +98,9 @@ void meow::RaylibGameView::on_instances_attach() {
     m_gameplay_objects.usernames_box.active_user = m_client->get_id_of_client();
     m_player_id = game_session->get_player_id_by_user_id(m_client->get_id_of_client());
 
-    const float x0 = m_window->GetWidth() - (m_window->GetWidth() - GuiBoard::width) / 2.0f + 40.0f;
-    const float y0 = m_window->GetHeight() / 2.0f;
+    const float x0 = m_window->GetWidth() - (m_window->GetWidth() - GuiBoard::width) / 2.0f + 5.0f;
+    const float y0 = GuiBoard::offset_top + GuiBoard::height / 2.0f -
+                     20.0f * m_client->get_players_info().size();
     std::size_t i = 0;
     for (const auto &info : m_client->get_players_info()) {
         m_gameplay_objects.usernames_box.add_username({info.id, info.name});
