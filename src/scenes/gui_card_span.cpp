@@ -45,10 +45,12 @@ void GuiCardSpan::add_card(std::size_t card_id) {
     img.Resize(GuiCard::width, GuiCard::height);
     raylib::Texture tex = raylib::Texture(img);
     tex.GenMipmaps();
+    std::cout << m_cards.size() << std::endl;
     add_card(
         {raylib::Rectangle(m_window->GetWidth(), 0, 0, 0), raylib::Vector2(0), std::move(tex), img2,
          path_to_texture, card_id}
     );
+    std::cout << m_cards.size() << std::endl;
 }
 
 void GuiCardSpan::add_card(GuiCard &&card) {

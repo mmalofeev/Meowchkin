@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <limits>
 #include <memory>
+#include <unordered_map>
 #include <variant>
 #include "Music.hpp"
 #include "Rectangle.hpp"
@@ -30,6 +31,10 @@ private:
         GuiUsernamesBox usernames_box;
         GuiTextChat text_chat;
         GuiPlayerStatisticsMenu stats;
+
+        std::unordered_map<std::size_t, raylib::Rectangle> opponent_checkbox;
+        std::unordered_map<std::size_t, bool> opponent_checkbox_flags;
+        std::size_t selected_opponent = std::numeric_limits<std::size_t>::max();
     } m_gameplay_objects;
 
     struct PauseMenuObjs {

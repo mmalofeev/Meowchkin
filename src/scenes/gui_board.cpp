@@ -25,7 +25,12 @@ void GuiBoard::setup(
     m_game_session = game_session;
 
     for (const auto &info : client->get_players_info()) {
-        m_kitten_cards[info.id] = std::make_unique<BrawlCardsDDM>(&m_kitten_cards[info.id]);
+        if (info.id == client->get_id_of_client()) {
+            m_kitten_cards[info.id] = std::make_unique<KittenCardsDDM>(&m_kitten_cards[info.id]);
+
+        } else {
+            m_kitten_cards[info.id] = std::make_unique<BrawlCardsDDM>(&m_kitten_cards[info.id]);
+        }
     }
 
     const raylib::Vector2 offset = {(m_window->GetWidth() - width) / 2.0f, offset_top};
@@ -54,7 +59,11 @@ void GuiBoard::setup(
     m_opponent_cards.set_window(m_window);
 }
 
-void GuiBoard::draw(std::size_t observed_player, float frame_time) {
+void GuiBoard::draw(
+    std::size_t observed_player,
+    float frame_time,
+    std::optional<std::size_t> forced_target
+) {
     static int color1 = 0xFFFFFFED;
     static int color2 = 0xFFFFFFFF;
     static auto bebra = make_timed_state_machine([this, frame_time](auto, auto) {
@@ -89,7 +98,8 @@ void GuiBoard::draw(std::size_t observed_player, float frame_time) {
         m_drop_card_rect.CheckCollision(m_player_hand->selected().value()->border)) {
         add_card(
             m_player_hand->pop_selected().card_id,
-            m_game_session->get_player_id_by_user_id(m_client->get_id_of_client())
+            forced_target ? *forced_target
+                          : m_game_session->get_player_id_by_user_id(m_client->get_id_of_client())
         );
     }
 
@@ -100,9 +110,9 @@ void GuiBoard::draw(std::size_t observed_player, float frame_time) {
 }
 
 void GuiBoard::add_card(std::size_t card_id, std::size_t target_id) {
-    m_client->send_action(
-        network::Action(network::Action::ActionType::PlayedCard, card_id, target_id, m_client->get_id_of_client())
-    );
+    m_client->send_action(network::Action(
+        network::Action::ActionType::PlayedCard, card_id, target_id, m_client->get_id_of_client()
+    ));
 }
 
 }  // namespace meow

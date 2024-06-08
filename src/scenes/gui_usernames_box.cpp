@@ -2,6 +2,7 @@
 #include "Mouse.hpp"
 #include "paths_to_binaries.hpp"
 #include "raylib.h"
+#include <iostream>
 
 void meow::GuiUsernamesBox::add_username(std::pair<std::size_t, std::string_view> user_info) {
     m_usernames.emplace(user_info);
@@ -24,8 +25,10 @@ void meow::GuiUsernamesBox::draw(std::size_t current_user_turn) {
         if (box.CheckCollision(raylib::Mouse::GetPosition()) &&
             raylib::Mouse::IsButtonPressed(MOUSE_BUTTON_LEFT)) {
             active_user = it->first;
+            std::cout << it->first << std::endl;
         }
-        raylib::DrawTextEx(font, it++->second, {box.x, box.y}, 16, 1, raylib::Color::RayWhite());
+        raylib::DrawTextEx(font, it->second, {box.x, box.y}, 16, 1, raylib::Color::RayWhite());
+        ++it;
     }
 
     raylib::Rectangle(
