@@ -59,8 +59,7 @@ public:
         const auto &arr = m_button_origins.data();
         raylib::Rectangle rec = {
             arr[0].x + m_spawn_point.x, arr[0].y + m_spawn_point.y, arr.back().x + button_width,
-            arr.back().y + button_height
-        };
+            arr.back().y + button_height};
         return rec.CheckCollision(raylib::Mouse::GetPosition());
     }
 
@@ -120,8 +119,7 @@ public:
         const auto &arr = m_button_origins.data();
         raylib::Rectangle rec = {
             arr[0].x + m_spawn_point.x, arr[0].y + m_spawn_point.y, arr.back().x + button_width,
-            arr.back().y + button_height
-        };
+            arr.back().y + button_height};
         return rec.CheckCollision(raylib::Mouse::GetPosition());
     }
 
@@ -161,8 +159,7 @@ private:
     enum class Button { INSPECT, DROP, COUNT };
     static constexpr EnumArray<Button, Vector2> m_button_origins{
         {Button::INSPECT, {0, 0}},
-        {{Button::DROP}, {0, button_height}}
-    };
+        {{Button::DROP}, {0, button_height}}};
     static constexpr EnumArray<Button, const char *> m_button_labels{
         {Button::INSPECT, "Inspect"},
         {Button::DROP, "Drop"},
@@ -179,8 +176,7 @@ public:
         const auto &arr = m_button_origins.data();
         raylib::Rectangle rec = {
             arr[0].x + m_spawn_point.x, arr[0].y + m_spawn_point.y, arr.back().x + button_width,
-            arr.back().y + button_height
-        };
+            arr.back().y + button_height};
         return rec.CheckCollision(raylib::Mouse::GetPosition());
     }
 

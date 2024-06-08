@@ -110,7 +110,7 @@ public:
     }
 
     virtual bool verify(std::size_t player_id, std::size_t target_id) const;
-    //use when card is played on board
+    // use when card is played on board
     virtual void apply(std::size_t player_id, std::size_t target_id);
 
     virtual ~Card();

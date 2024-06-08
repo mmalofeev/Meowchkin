@@ -1,8 +1,8 @@
 #include "gui_usernames_box.hpp"
+#include <iostream>
 #include "Mouse.hpp"
 #include "paths_to_binaries.hpp"
 #include "raylib.h"
-#include <iostream>
 
 void meow::GuiUsernamesBox::add_username(std::pair<std::size_t, std::string_view> user_info) {
     m_usernames.emplace(user_info);
@@ -19,9 +19,8 @@ void meow::GuiUsernamesBox::draw(std::size_t current_user_turn) {
     auto it = m_usernames.begin();
     for (const auto &box : m_boxes) {
         box.DrawGradientH(colors[0], colors[1]);
-        raylib::Color c =
-            active_user == it->first ? raylib::Color::Green() : raylib::Color::Red();
-        box.DrawLines(c, 1);
+        raylib::Color c = active_user == it->first ? raylib::Color::Green() : raylib::Color::Red();
+        box.DrawLines(c, 3);
         if (box.CheckCollision(raylib::Mouse::GetPosition()) &&
             raylib::Mouse::IsButtonPressed(MOUSE_BUTTON_LEFT)) {
             active_user = it->first;

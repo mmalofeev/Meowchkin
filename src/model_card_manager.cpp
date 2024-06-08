@@ -42,7 +42,7 @@ CardManager::CardManager() {
 
         switch (type) {
             case model::CardType::ITEM: {
-                 std::vector<model::Command> action =
+                std::vector<model::Command> action =
                     model::Command::parse(card["action"].get<std::vector<std::string>>());
                 std::vector<model::Command> unwind =
                     model::Command::parse(card["unwind"].get<std::vector<std::string>>());
@@ -50,9 +50,9 @@ CardManager::CardManager() {
                 model::ItemType itype = str_to_item_type[card["item"].get<std::string>()];
                 int bound = card["bound"].get<int>();
 
-                cards_instances.emplace_back(
-                    std::make_unique<model::ItemCardInfo>(std::move(info), cost, action, unwind, itype, bound)
-                );
+                cards_instances.emplace_back(std::make_unique<model::ItemCardInfo>(
+                    std::move(info), cost, action, unwind, itype, bound
+                ));
             } break;
             case model::CardType::SPELL: {
                 std::vector<model::Command> action =
@@ -92,7 +92,7 @@ std::unique_ptr<model::Card> CardManager::create_card(std::size_t card_id) const
             auto result = std::make_unique<model::ItemCard>(cards_instances.at(card_id).get());
             obj_id_to_card_id[result->obj_id] = card_id;
             return result;
-        } break;    
+        } break;
         case model::CardType::SPELL: {
             auto result = std::make_unique<model::SpellCard>(cards_instances.at(card_id).get());
             obj_id_to_card_id[result->obj_id] = card_id;
@@ -116,8 +116,9 @@ void CardManager::delete_obj_id(std::size_t obj_id) {
 }
 
 const model::CardInfo *CardManager::get_card_info_by_obj_id(std::size_t obj_id) const {
-    if (obj_id_to_card_id.find(obj_id) != obj_id_to_card_id.end())
+    if (obj_id_to_card_id.find(obj_id) != obj_id_to_card_id.end()) {
         return cards_instances[obj_id_to_card_id[obj_id]].get();
+    }
     return nullptr;
 }
 

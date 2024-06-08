@@ -2,34 +2,46 @@
 #include <cassert>
 #include <iostream>
 #include <vector>
+#include "gui_card.hpp"
 #include "model_card.hpp"
 #include "model_card_manager.hpp"
 #include "model_player.hpp"
 #include "model_random.hpp"
 #include "shared_game_state.hpp"
 #include "virtual_machine.hpp"
-#include "gui_card.hpp"
 
 namespace meow::model {
 
-EndState::EndState(SharedGameState *shared_state_): GameState(shared_state_, StateType::END) {}
-
-SlipAwayState::SlipAwayState(SharedGameState *shared_state_, std::vector<std::size_t> heroes_, std::vector<std::unique_ptr<Card>> heroes_storage_, std::vector<std::unique_ptr<MonsterCard>> monsters_):
-GameState(shared_state_, StateType::SLIPAWAY), heroes(std::move(heroes_)), heroes_storage(std::move(heroes_storage_)), monsters(std::move(monsters_)), monster_iters(monsters.size(), monsters.begin()) {
+EndState::EndState(SharedGameState *shared_state_) : GameState(shared_state_, StateType::END) {
 }
-    
+
+SlipAwayState::SlipAwayState(
+    SharedGameState *shared_state_,
+    std::vector<std::size_t> heroes_,
+    std::vector<std::unique_ptr<Card>> heroes_storage_,
+    std::vector<std::unique_ptr<MonsterCard>> monsters_
+)
+    : GameState(shared_state_, StateType::SLIPAWAY),
+      heroes(std::move(heroes_)),
+      heroes_storage(std::move(heroes_storage_)),
+      monsters(std::move(monsters_)),
+      monster_iters(monsters.size(), monsters.begin()) {
+}
+
 std::unique_ptr<GameState> SlipAwayState::roll_dice(std::size_t user_id) {
     Player *player = shared_state->get_player_by_user_id(user_id);
 
     auto it = std::find(heroes.begin(), heroes.end(), player->obj_id);
 
-    if (it == heroes.end())
+    if (it == heroes.end()) {
         return nullptr;
+    }
 
     std::size_t position = it - heroes.begin();
-    
-    if (monster_iters[position] == monsters.end())
+
+    if (monster_iters[position] == monsters.end()) {
         return nullptr;
+    }
 
     int result = get_object_based_random_integer<int>(1, 6);
 
@@ -41,12 +53,14 @@ std::unique_ptr<GameState> SlipAwayState::roll_dice(std::size_t user_id) {
         observer->on_dice_roll(player->user_id, result);
     }
 
-    if (++monster_iters[position] == monsters.end())
+    if (++monster_iters[position] == monsters.end()) {
         count_of_finished++;
-    
-    if (count_of_finished == heroes.size())
+    }
+
+    if (count_of_finished == heroes.size()) {
         return std::make_unique<PostManagementState>(shared_state);
-    
+    }
+
     return std::unique_ptr<SlipAwayState>(this);
 }
 
@@ -145,7 +159,11 @@ LookForTroubleState::LookForTroubleState(SharedGameState *shared_state_)
     : GameState(shared_state_, StateType::LOOKTROUBLE) {
 }
 
-std::unique_ptr<GameState> LookForTroubleState::play_card(std::size_t user_id, std::size_t target_id, std::size_t card_obj_id) {
+std::unique_ptr<GameState> LookForTroubleState::play_card(
+    std::size_t user_id,
+    std::size_t target_id,
+    std::size_t card_obj_id
+) {
     if (shared_state->get_current_user_id() != user_id) {
         return nullptr;
     }
@@ -172,8 +190,10 @@ std::unique_ptr<GameState> LookForTroubleState::draw_card(std::size_t user_id) {
 
     Player *player = shared_state->get_player_by_user_id(user_id);
 
-    for(size_t i = 0; i < cards_to_deal; i++) {
-        player->add_card_to_hand(CardManager::get_instance().create_card(shared_state->get_card_id_from_deck()));
+    for (size_t i = 0; i < cards_to_deal; i++) {
+        player->add_card_to_hand(
+            CardManager::get_instance().create_card(shared_state->get_card_id_from_deck())
+        );
     }
 
     return std::make_unique<PostManagementState>(shared_state);
@@ -193,9 +213,7 @@ BrawlState::play_card(std::size_t user_id, std::size_t target_id, std::size_t ca
         if (card->verify(player->obj_id, target_id)) {
             auto card_instance = std::move(player->drop_card_from_hand_by_id(card_obj_id));
             card_instance->apply(player->obj_id, player->obj_id);
-            add_monster(
-                dynamic_unique_cast<MonsterCard>(std::move(card_instance))
-            );
+            add_monster(dynamic_unique_cast<MonsterCard>(std::move(card_instance)));
             return std::unique_ptr<BrawlState>(this);
         }
     } else if (card->info->type == CardType::SPELL) {
@@ -204,8 +222,9 @@ BrawlState::play_card(std::size_t user_id, std::size_t target_id, std::size_t ca
             auto card_instance = player->drop_card_from_hand_by_id(card_obj_id);
             card_instance->apply(player->obj_id, target_id);
             if (is_hero(target_id)) {
-                if (card->info->storable)
+                if (card->info->storable) {
                     heroes_storage.emplace_back(std::move(card_instance));
+                }
             } else {
                 get_monster(target_id)->add_card_to_storage(std::move(card_instance));
             }
@@ -238,7 +257,8 @@ std::unique_ptr<GameState> BrawlState::pass(std::size_t user_id) {
                 );
             }
         }
-        shared_state->get_player_by_user_id(shared_state->get_current_user_id())->increase_level(1, true);
+        shared_state->get_player_by_user_id(shared_state->get_current_user_id())
+            ->increase_level(1, true);
         if (shared_state->is_end()) {
             for (auto &observer : VirtualMachine::get_instance().get_observers()) {
                 observer->on_game_end(shared_state->get_current_user_id());
@@ -247,7 +267,9 @@ std::unique_ptr<GameState> BrawlState::pass(std::size_t user_id) {
         }
         return std::make_unique<PostManagementState>(shared_state);
     } else if (heroes_passed && !heroes_win) {
-        return std::make_unique<SlipAwayState>(shared_state, std::move(heroes), std::move(heroes_storage), std::move(monsters));
+        return std::make_unique<SlipAwayState>(
+            shared_state, std::move(heroes), std::move(heroes_storage), std::move(monsters)
+        );
     }
     return std::unique_ptr<BrawlState>(this);
 }
@@ -266,7 +288,7 @@ std::unique_ptr<GameState> PostManagementState::end_turn(std::size_t user_id) {
     for (auto &observer : VirtualMachine::get_instance().get_observers()) {
         observer->on_turn_begin(shared_state->get_current_user_id());
     }
-    
+
     return std::make_unique<ManagementState>(shared_state);
 }
 
@@ -290,7 +312,7 @@ ManagementState::play_card(std::size_t user_id, std::size_t target_id, std::size
     if (card->info->type == CardType::MONSTER) {
         return nullptr;
     }
-    
+
     if (!player->play_card_by_id(card_obj_id, target_id)) {
         return nullptr;
     }
@@ -354,7 +376,7 @@ std::unique_ptr<GameState> InitState::roll_dice(std::size_t user_id) {
 
     results[position] = get_object_based_random_integer<int>(1, 6);
     move_count++;
-    
+
     for (auto &observer : VirtualMachine::get_instance().get_observers()) {
         observer->on_dice_roll(user_id, results[position]);
     }
@@ -369,7 +391,7 @@ std::unique_ptr<GameState> InitState::roll_dice(std::size_t user_id) {
             position_of_first_best_result = i;
         }
     }
-    
+
     shared_state->set_first_player_by_position(position_of_first_best_result);
     for (auto &player : shared_state->get_all_players()) {
         for (size_t i = 0; i < init_hand_size; i++) {
@@ -378,7 +400,7 @@ std::unique_ptr<GameState> InitState::roll_dice(std::size_t user_id) {
             player.add_card_to_hand(std::move(card));
         }
     }
-    
+
     for (auto &observer : VirtualMachine::get_instance().get_observers()) {
         observer->on_turn_begin(shared_state->get_current_user_id());
     }

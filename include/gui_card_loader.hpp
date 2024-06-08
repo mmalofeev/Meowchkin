@@ -1,8 +1,8 @@
 #ifndef GUI_CARD_LOADER_HPP_
 #define GUI_CARD_LOADER_HPP_
 
-#include <string_view>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include "raylib-cpp.hpp"
 

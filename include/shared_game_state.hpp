@@ -12,6 +12,7 @@ struct SharedGameState {
 private:
     std::vector<Player> players;
     std::size_t cur_turn = std::numeric_limits<std::size_t>::max();
+
 public:
     static constexpr int win_score = 10;
 

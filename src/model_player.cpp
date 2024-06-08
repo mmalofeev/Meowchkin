@@ -11,7 +11,7 @@ void Player::increase_level(int delta, bool force) {
     if (!force) {
         level = std::max(1, std::min(SharedGameState::win_score - 1, level));
     }
-    
+
     for (auto &observer : VirtualMachine::get_instance().get_observers()) {
         observer->on_level_change(user_id, level - last_value);
     }
@@ -19,11 +19,10 @@ void Player::increase_level(int delta, bool force) {
 
 void Player::increase_power(int delta) {
     power_buff += delta;
-    
+
     for (auto &observer : VirtualMachine::get_instance().get_observers()) {
         observer->on_bonus_change(user_id, delta);
     }
-    
 }
 
 void Player::add_card_to_hand(std::unique_ptr<Card> card) {

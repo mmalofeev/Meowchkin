@@ -7,9 +7,14 @@ namespace meow::model {
 void Card::apply(std::size_t player_id, std::size_t target_id) {
     on_board = true;
     auto target_info = CardManager::get_instance().get_card_info_by_obj_id(target_id);
-    bool protogonist_sided = !(info->type == CardType::MONSTER || (target_info != nullptr && target_info->type == CardType::MONSTER));
+    bool protogonist_sided =
+        !(info->type == CardType::MONSTER ||
+          (target_info != nullptr && target_info->type == CardType::MONSTER));
     for (auto &observer : VirtualMachine::get_instance().get_observers()) {
-        observer->on_card_add_on_board(obj_id, protogonist_sided, VirtualMachine::get_instance().get_user_id_by_player_id(player_id));
+        observer->on_card_add_on_board(
+            obj_id, protogonist_sided,
+            VirtualMachine::get_instance().get_user_id_by_player_id(player_id)
+        );
     }
 };
 
@@ -35,6 +40,8 @@ void SpellCard::apply(std::size_t player_id, std::size_t target_id) {
     VirtualMachine::get_instance().set_args(player_id, target_id);
     VirtualMachine::get_instance().execute(dynamic_cast<const SpellCardInfo *>(info)->action);
     applied = true;
+    SpellCard::player_id = player_id;
+    SpellCard::target_id = target_id;
     Card::apply(player_id, target_id);
 }
 
@@ -47,8 +54,11 @@ SpellCard::~SpellCard() {
 
 bool ItemCard::verify(std::size_t player_id, std::size_t target_id) const {
     auto item_info = dynamic_cast<const ItemCardInfo *>(info);
-    if (player_id != target_id || !VirtualMachine::get_instance().check_player_item_eligiblity(player_id,  item_info->itype, item_info->bound))
+    if (player_id != target_id || !VirtualMachine::get_instance().check_player_item_eligiblity(
+                                      player_id, item_info->itype, item_info->bound
+                                  )) {
         return false;
+    }
     return SpellCard::verify(player_id, target_id);
 }
 

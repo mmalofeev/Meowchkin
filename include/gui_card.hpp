@@ -6,9 +6,9 @@
 #ifndef NDEBUG
 #define dbg                                                     \
     do {                                                        \
-        std::cout << __FILE__ << ": " << __LINE__  << std::endl; \
+        std::cout << __FILE__ << ": " << __LINE__ << std::endl; \
     } while (0)
-#else 
+#else
 #define dbg
 #endif
 
