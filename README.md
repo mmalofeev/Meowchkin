@@ -51,7 +51,7 @@ sudo apt install git build-essential libboost-all-dev sqlite libsqlite3-dev
 
 Clone repo & run build system:
 ```bash
-git clone git@github.com:mmalofeev/Meowchkin.git
+git clone https://github.com/mmalofeev/Meowchkin.git
 cd Meowchkin/build/
 cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON
 make
