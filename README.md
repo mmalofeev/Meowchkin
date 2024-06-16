@@ -34,6 +34,7 @@ Meowchkin uses a number of open source projects to work properly:
 - [raygui](https://github.com/raysan5/raygui) - For easier UI development.
 - [sqlite3](https://github.com/sqlite/sqlite) - To track your statistics.
 - [nlohman](https://github.com/nlohmann/json) - For convinient work with JSON's.
+- [gtest](https://github.com/google/googletest) - For backend testing.
 
 ## Installation
 
@@ -69,7 +70,7 @@ _TODO_
 
 
 ## Game rules
-[Here!](RULES.MD)
+[Here!](RULES.md)
 
 ## Card creation
 You can add card without changing source code and recompliling whole project. To make it, describe card in it's JSON file.
