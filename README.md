@@ -1,15 +1,29 @@
+# Meowchkin
+
 <p align="center">
   <img src="https://i.imgur.com/h88hI8y.png" />
 </p>
 
-*Meowchkin is an open-sourced, written in C++ free online munchkin-inspired game for your linux/windows desktop.*
+*Free open-sourced online munchkin-inspired game for your linux/windows desktop, written in C++.*
 
 ## Features
 
 - Multiplayer game by LAN for 2-4 players
-- Statistics of card usage is saved locally
+- Munchkin-like gameplay
+- Statistics of card is tracked and saved locally
 - Text chat
-- Creation of your own cards
+- Creation of your own cards (not user-friendly)
+
+## Screenshots
+<p align="center">
+  <img src="https://i.imgur.com/6bLDO42.png" width=80% />
+</p>
+<p align="center">
+  <img src="https://i.imgur.com/1cAZJLj.png" width=80% />
+</p>
+<p align="center">
+  <img src="https://i.imgur.com/Mhyy9nv.png" width=80% />
+</p>
 
 ## Dependencies
 
@@ -28,27 +42,27 @@ _TODO_
 
 ### Building from source
 
-#### Ubuntu
-Install dependencies:
-```sh
+#### Linux
+Install dependencies (ubuntu commands):
+```bash
 sudo apt update && sudo apt upgrade
 sudo apt install git build-essential libboost-all-dev sqlite libsqlite3-dev
 ```
 
-Clone our repo & run build system:
-```sh
+Clone repo & run build system:
+```bash
 git clone git@github.com:mmalofeev/Meowchkin.git
 cd Meowchkin/build/
 cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON
 make
 ```
+
 And wait. It can take a few minutes
+
 Launch:
-```sh
+```bash
 ./meowchkin
 ```
-#### Arch linux
-_TODO_
 
 #### Windows
 _TODO_
@@ -93,7 +107,12 @@ Example of card description:
 
 <img src=https://i.imgur.com/JCreylI.png width=600px/>
 
-## Contributors
+## Team
+ - [Gusarov Artyom](https://github.com/Artyom-Gusarov)
+ - [Dorosev Anton](https://github.com/mrprizmo)
+ - [Kort Pavel](https://github.com/pppppptttttt)
+
+Under the guidance of [Malofeev Mikhail](https://github.com/mmalofeev)
 
 ## License
 
