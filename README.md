@@ -12,7 +12,7 @@
 - Munchkin-like gameplay
 - Statistics of card is tracked and saved locally
 - Text chat
-- Creation of your own cards ([not user-friendly](##card-creation))
+- Creation of your own cards ([not user-friendly](#card-creation))
 
 ## Screenshots
 <p align="center">
